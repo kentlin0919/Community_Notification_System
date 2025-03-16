@@ -1,0 +1,12 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -gcflags='all=-N' -o tmp/main ."
+  bin = "tmp/main"
+  include_ext = ["go"] # 監控的文件擴展名
+  exclude_dir = ["assets", "vendor"] # 排除的目錄
+  full_bin = "dlv dap --listen=:40000 --log --continue --accept-multiclient --headless --api-version=2 --check-go-version=false --log-output=dap,tmp/main"
+
+
+

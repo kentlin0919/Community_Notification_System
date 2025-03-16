@@ -1,0 +1,25 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "go",
+			"label": "go: build package",
+			"command": "build",
+			"args": [
+				"${fileDirname}"
+			],
+			"problemMatcher": [
+				"$go"
+			],
+			"group": "build",
+			"detail": "cd /Users/kent/progarm/goProject/Community_Notification_System; go build ${fileDirname}"
+		}
+
+		, {
+            "label": "Run Air",
+            "type": "shell",
+            "command": "air",
+            "problemMatcher": []
+        }
+	]
+}
