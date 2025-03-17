@@ -4,13 +4,14 @@ import (
 	accountModel "Community_Notification_System/app/models/account"
 	database "Community_Notification_System/database"
 	user_db "Community_Notification_System/database/User_DB"
+
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func (u *UserController) Register(ctx *gin.Context) {
+func (u *UserController) UserRegister(ctx *gin.Context) {
 	var registerModel accountModel.Register
 
 	// 綁定 JSON 資料
