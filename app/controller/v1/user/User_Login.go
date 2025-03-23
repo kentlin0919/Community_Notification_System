@@ -13,6 +13,15 @@ import (
 	accountModel "Community_Notification_System/app/models/account"
 )
 
+// / 處理登入請求
+// PingHandler 登入
+// @Summary  Login
+// @Description  進行登入取得token認證
+// @Tags     Health
+// @Accept   json
+// @Produce  json
+// @Success 200 {string} string "pong"
+// @Router  /login [post]
 func (u *UserController) UserLogin(ctx *gin.Context) {
 	var loginData accountModel.Userlogin
 

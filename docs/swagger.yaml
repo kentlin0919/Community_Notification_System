@@ -1,4 +1,31 @@
+basePath: /api/v1
+host: localhost:9080
 info:
-  contact: {}
-paths: {}
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: 這是一個範例服務，示範如何建立 Swagger 文件。
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: My Swagger Demo
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: 進行登入取得token認證
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: pong
+          schema:
+            type: string
+      summary: Login
+      tags:
+      - Health
 swagger: "2.0"

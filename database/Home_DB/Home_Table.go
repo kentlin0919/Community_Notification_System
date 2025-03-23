@@ -1,4 +1,4 @@
-package homedb
+package Home_db
 
 import (
 	"Community_Notification_System/pkg/common"
