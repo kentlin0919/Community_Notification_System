@@ -2,26 +2,28 @@ package user
 
 import (
 	// "log"
+
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
-	database "Community_Notification_System/database"
-	user_db "Community_Notification_System/database/User_DB"
-
 	accountModel "Community_Notification_System/app/models/account"
+	repository "Community_Notification_System/app/repositories/user"
 )
 
-// / 處理登入請求
-// PingHandler 登入
-// @Summary  Login
-// @Description  進行登入取得token認證
-// @Tags     Health
-// @Accept   json
-// @Produce  json
-// @Success 200 {string} string "pong"
-// @Router  /login [post]
+// UserLogin 處理使用者登入
+// @Summary 使用者登入
+// @Description 使用者提供帳號與密碼後登入系統，並取得 JWT Token。
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param login body account.Userlogin true "登入資料（Email & Password）"
+// @Success 200 {object} map[string]interface{} "登入成功訊息與 JWT Token"
+// @Failure 400 {object} map[string]string "輸入格式錯誤"
+// @Failure 401 {object} map[string]string "帳號或密碼錯誤"
+// @Failure 500 {object} map[string]string "伺服器錯誤"
+// @Router /login [post]
 func (u *UserController) UserLogin(ctx *gin.Context) {
 	var loginData accountModel.Userlogin
 
@@ -31,20 +33,14 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 		return
 	}
 
-	var user_info user_db.UserInfo
+	result := repository.LoginRepository(&loginData)
 
-	result := database.DB.Where("email = ?", loginData.Email).First(&user_info)
-
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
-		} else {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		}
+	if result.Statue.Error == gorm.ErrRecordNotFound {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
 		return
 	}
 
-	if user_info.Password == loginData.Password {
+	if result.Result.Password == loginData.Password {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "Login successful",
 			"token":   "example-jwt-token",

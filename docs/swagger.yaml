@@ -1,31 +1,116 @@
 basePath: /api/v1
+definitions:
+  account.Register:
+    properties:
+      Bethday:
+        example: "2025-03-23T15:04:05-00:00"
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      name:
+        example: kent
+        type: string
+      password:
+        example: yourpassword
+        type: string
+    type: object
+  account.Userlogin:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: yourpassword
+        type: string
+    type: object
 host: localhost:9080
 info:
-  contact:
-    email: support@example.com
-    name: API Support
-    url: http://www.example.com/support
-  description: 這是一個範例服務，示範如何建立 Swagger 文件。
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
-  title: My Swagger Demo
+  contact: {}
+  description: Community_Notification_System
+  title: Community_Notification_System
   version: "1.0"
 paths:
-  /login:
+  /Register:
     post:
       consumes:
       - application/json
-      description: 進行登入取得token認證
+      description: 使用註冊
+      parameters:
+      - description: 註冊
+        in: body
+        name: Register
+        required: true
+        schema:
+          $ref: '#/definitions/account.Register'
       produces:
       - application/json
       responses:
         "200":
-          description: pong
+          description: 註冊成功訊息與 JWT Token
           schema:
-            type: string
-      summary: Login
+            additionalProperties: true
+            type: object
+        "400":
+          description: 輸入格式錯誤
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: 帳號或密碼錯誤
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 伺服器錯誤
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 使用者註冊
       tags:
-      - Health
+      - User
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: 使用者提供帳號與密碼後登入系統，並取得 JWT Token。
+      parameters:
+      - description: 登入資料（Email & Password）
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/account.Userlogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登入成功訊息與 JWT Token
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 輸入格式錯誤
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: 帳號或密碼錯誤
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 伺服器錯誤
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 使用者登入
+      tags:
+      - User
 swagger: "2.0"

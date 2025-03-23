@@ -20,17 +20,9 @@ import (
 	_ "Community_Notification_System/docs" // swagger 產生的 docs package
 )
 
-// @title           My Swagger Demo
+// @title           Community_Notification_System
 // @version         1.0
-// @description     這是一個範例服務，示範如何建立 Swagger 文件。
-// @termsOfService  http://swagger.io/terms/
-
-// @contact.name   API Support
-// @contact.url    http://www.example.com/support
-// @contact.email  support@example.com
-
-// @license.name   Apache 2.0
-// @license.url    http://www.apache.org/licenses/LICENSE-2.0.html
+// @description     Community_Notification_System
 
 // @host      localhost:9080
 // @BasePath  /api/v1

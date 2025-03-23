@@ -9,24 +9,15 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "url": "http://www.example.com/support",
-            "email": "support@example.com"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
+        "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/login": {
+        "/Register": {
             "post": {
-                "description": "進行登入取得token認證",
+                "description": "使用註冊",
                 "consumes": [
                     "application/json"
                 ],
@@ -34,16 +25,153 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Health"
+                    "User"
                 ],
-                "summary": "Login",
-                "responses": {
-                    "200": {
-                        "description": "pong",
+                "summary": "使用者註冊",
+                "parameters": [
+                    {
+                        "description": "註冊",
+                        "name": "Register",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/account.Register"
                         }
                     }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "註冊成功訊息與 JWT Token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "輸入格式錯誤",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "帳號或密碼錯誤",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "伺服器錯誤",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "使用者提供帳號與密碼後登入系統，並取得 JWT Token。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "使用者登入",
+                "parameters": [
+                    {
+                        "description": "登入資料（Email \u0026 Password）",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/account.Userlogin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登入成功訊息與 JWT Token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "輸入格式錯誤",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "帳號或密碼錯誤",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "伺服器錯誤",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "account.Register": {
+            "type": "object",
+            "properties": {
+                "Bethday": {
+                    "type": "string",
+                    "example": "2025-03-23T15:04:05-00:00"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "kent"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "yourpassword"
+                }
+            }
+        },
+        "account.Userlogin": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "yourpassword"
                 }
             }
         }
@@ -56,8 +184,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:9080",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "My Swagger Demo",
-	Description:      "這是一個範例服務，示範如何建立 Swagger 文件。",
+	Title:            "Community_Notification_System",
+	Description:      "Community_Notification_System",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
