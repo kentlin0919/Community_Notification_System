@@ -2,11 +2,11 @@ basePath: /api/v1
 definitions:
   account.Register:
     properties:
-      Bethday:
-        example: "2025-03-23T15:04:05-00:00"
-        type: string
-      email:
+      Email:
         example: user@example.com
+        type: string
+      bethday:
+        example: "2025-03-23T15:04:05-00:00"
         type: string
       name:
         example: kent
@@ -24,6 +24,15 @@ definitions:
         example: yourpassword
         type: string
     type: object
+  account.UserloginRequest:
+    properties:
+      message:
+        example: Login successful
+        type: string
+      token:
+        example: example-jwt-token
+        type: string
+    type: object
 host: localhost:9080
 info:
   contact: {}
@@ -31,7 +40,29 @@ info:
   title: Community_Notification_System
   version: "1.0"
 paths:
-  /Register:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: 使用者提供帳號與密碼後登入系統，並取得 JWT Token。
+      parameters:
+      - description: 登入資料（Email & Password）
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/account.Userlogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登入成功訊息與 JWT Token
+          schema:
+            $ref: '#/definitions/account.UserloginRequest'
+      summary: 使用者登入
+      tags:
+      - User
+  /register:
     post:
       consumes:
       - application/json
@@ -51,66 +82,7 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "400":
-          description: 輸入格式錯誤
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: 帳號或密碼錯誤
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: 伺服器錯誤
-          schema:
-            additionalProperties:
-              type: string
-            type: object
       summary: 使用者註冊
-      tags:
-      - User
-  /login:
-    post:
-      consumes:
-      - application/json
-      description: 使用者提供帳號與密碼後登入系統，並取得 JWT Token。
-      parameters:
-      - description: 登入資料（Email & Password）
-        in: body
-        name: login
-        required: true
-        schema:
-          $ref: '#/definitions/account.Userlogin'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 登入成功訊息與 JWT Token
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: 輸入格式錯誤
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: 帳號或密碼錯誤
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: 伺服器錯誤
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: 使用者登入
       tags:
       - User
 swagger: "2.0"

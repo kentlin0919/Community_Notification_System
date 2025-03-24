@@ -10,6 +10,6 @@ func V1Routes(rg *gin.RouterGroup) {
 
 	rg.POST("/login", v1.User().UserLogin)
 	/// 處理註冊請求
-	rg.POST("/Register", v1.User().UserRegister)
+	rg.POST("/register", v1.User().UserRegister)
 
 }

@@ -24,10 +24,7 @@ import (
 // @Produce json
 // @Param Register body account.Register true "註冊"
 // @Success 200 {object} map[string]interface{} "註冊成功訊息與 JWT Token"
-// @Failure 400 {object} map[string]string "輸入格式錯誤"
-// @Failure 401 {object} map[string]string "帳號或密碼錯誤"
-// @Failure 500 {object} map[string]string "伺服器錯誤"
-// @Router /Register [post]
+// @Router /register [post]
 func (u *UserController) UserRegister(ctx *gin.Context) {
 	var registerModel accountModel.Register
 

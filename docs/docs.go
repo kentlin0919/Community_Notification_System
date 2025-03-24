@@ -15,7 +15,41 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/Register": {
+        "/login": {
+            "post": {
+                "description": "使用者提供帳號與密碼後登入系統，並取得 JWT Token。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "使用者登入",
+                "parameters": [
+                    {
+                        "description": "登入資料（Email \u0026 Password）",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/account.Userlogin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登入成功訊息與 JWT Token",
+                        "schema": {
+                            "$ref": "#/definitions/account.UserloginRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/register": {
             "post": {
                 "description": "使用註冊",
                 "consumes": [
@@ -46,95 +80,6 @@ const docTemplate = `{
                             "type": "object",
                             "additionalProperties": true
                         }
-                    },
-                    "400": {
-                        "description": "輸入格式錯誤",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "帳號或密碼錯誤",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "伺服器錯誤",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/login": {
-            "post": {
-                "description": "使用者提供帳號與密碼後登入系統，並取得 JWT Token。",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "使用者登入",
-                "parameters": [
-                    {
-                        "description": "登入資料（Email \u0026 Password）",
-                        "name": "login",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/account.Userlogin"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "登入成功訊息與 JWT Token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "輸入格式錯誤",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "帳號或密碼錯誤",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "伺服器錯誤",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
                     }
                 }
             }
@@ -144,13 +89,13 @@ const docTemplate = `{
         "account.Register": {
             "type": "object",
             "properties": {
-                "Bethday": {
-                    "type": "string",
-                    "example": "2025-03-23T15:04:05-00:00"
-                },
-                "email": {
+                "Email": {
                     "type": "string",
                     "example": "user@example.com"
+                },
+                "bethday": {
+                    "type": "string",
+                    "example": "2025-03-23T15:04:05-00:00"
                 },
                 "name": {
                     "type": "string",
@@ -172,6 +117,19 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "yourpassword"
+                }
+            }
+        },
+        "account.UserloginRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Login successful"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "example-jwt-token"
                 }
             }
         }

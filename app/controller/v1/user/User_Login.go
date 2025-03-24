@@ -19,10 +19,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param login body account.Userlogin true "登入資料（Email & Password）"
-// @Success 200 {object} map[string]interface{} "登入成功訊息與 JWT Token"
-// @Failure 400 {object} map[string]string "輸入格式錯誤"
-// @Failure 401 {object} map[string]string "帳號或密碼錯誤"
-// @Failure 500 {object} map[string]string "伺服器錯誤"
+// @Success 200 {object} account.UserloginRequest "登入成功訊息與 JWT Token"
 // @Router /login [post]
 func (u *UserController) UserLogin(ctx *gin.Context) {
 	var loginData accountModel.Userlogin
@@ -40,11 +37,12 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 		return
 	}
 
+	var request accountModel.UserloginRequest
+
 	if result.Result.Password == loginData.Password {
-		ctx.JSON(http.StatusOK, gin.H{
-			"message": "Login successful",
-			"token":   "example-jwt-token",
-		})
+		request.Message = "Login successful"
+		request.Token = "11111111"
+		ctx.JSON(http.StatusOK, request)
 	} else {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Invalid email or password",
