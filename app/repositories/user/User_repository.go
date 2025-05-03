@@ -4,8 +4,10 @@ import (
 	"Community_Notification_System/app/models/account"
 	repositoryModels "Community_Notification_System/app/models/repository"
 	"Community_Notification_System/database"
+	userlog_db "Community_Notification_System/database/UserLog_DB"
 	user_db "Community_Notification_System/database/User_DB"
 	"log"
+	"time"
 )
 
 func LoginRepository(loginData *account.Userlogin) repositoryModels.RepositoryModel[user_db.UserInfo] {
@@ -34,4 +36,23 @@ func RegisterRepository(user_info *user_db.UserInfo) repositoryModels.Repository
 	registerModel.Result = err.Error == nil
 
 	return registerModel
+}
+
+func UserLogRepository(user_info *user_db.UserInfo) repositoryModels.RepositoryModel[bool] {
+
+	var user_log userlog_db.UserLog
+
+	user_log.Email = user_info.Email
+	user_log.Action = "登入"
+	user_log.Timestamp = time.Now()
+
+	err := database.DB.Create(&user_log)
+
+	var repositoryModel repositoryModels.RepositoryModel[bool]
+
+	repositoryModel.Statue = *err
+
+	repositoryModel.Result = err.Error == nil
+
+	return repositoryModel
 }

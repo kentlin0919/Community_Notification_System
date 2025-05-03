@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/login": {
+        "/api/v1/login": {
             "post": {
-                "description": "使用者提供帳號與密碼後登入系統，並取得 JWT Token。",
+                "description": "使用者提供帳號與密碼後登入系統，並取得 JWT Token。登入成功後會設置 session cookie 並返回 JWT token。",
                 "consumes": [
                     "application/json"
                 ],
@@ -41,17 +41,35 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "登入成功訊息與 JWT Token",
+                        "description": "登入成功，返回 JWT Token 和成功訊息",
                         "schema": {
-                            "$ref": "#/definitions/account.UserloginRequest"
+                            "$ref": "#/definitions/account.UserRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的輸入資料",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "使用者不存在或密碼錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤或 JWT 簽發失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
                         }
                     }
                 }
             }
         },
-        "/register": {
+        "/api/v1/register": {
             "post": {
-                "description": "使用註冊",
+                "description": "新用戶註冊功能，包含基本資料驗證、密碼加密、JWT Token 生成和 Session 設置",
                 "consumes": [
                     "application/json"
                 ],
@@ -64,7 +82,7 @@ const docTemplate = `{
                 "summary": "使用者註冊",
                 "parameters": [
                     {
-                        "description": "註冊",
+                        "description": "註冊資料（Email、Password、Name、Birthday、Permission、Platform）",
                         "name": "Register",
                         "in": "body",
                         "required": true,
@@ -75,10 +93,21 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "註冊成功訊息與 JWT Token",
+                        "description": "註冊成功，返回 JWT Token 和成功訊息",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/account.UserRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的輸入資料或帳號已存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤或 JWT 簽發失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
                         }
                     }
                 }
@@ -104,6 +133,27 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "yourpassword"
+                },
+                "permission": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "platform": {
+                    "type": "string",
+                    "example": "App"
+                }
+            }
+        },
+        "account.UserRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Login successful"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "example-jwt-token"
                 }
             }
         },
@@ -117,21 +167,28 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "yourpassword"
+                },
+                "platform": {
+                    "type": "string",
+                    "example": "App"
                 }
             }
         },
-        "account.UserloginRequest": {
+        "model.ErrorRequest": {
             "type": "object",
             "properties": {
-                "message": {
+                "error": {
                     "type": "string",
-                    "example": "Login successful"
-                },
-                "token": {
-                    "type": "string",
-                    "example": "example-jwt-token"
+                    "example": "error"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
@@ -139,8 +196,8 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:9080",
-	BasePath:         "/api/v1",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Community_Notification_System",
 	Description:      "Community_Notification_System",

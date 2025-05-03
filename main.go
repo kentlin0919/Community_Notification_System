@@ -23,15 +23,19 @@ import (
 // @title           Community_Notification_System
 // @version         1.0
 // @description     Community_Notification_System
-
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 // @host      localhost:9080
 // @BasePath  /api/v1
 func main() {
 	// 初始化 Gin
 	router := gin.Default()
+
 	//跨域的 Middleware
 	router.Use(middlewares.CORSMiddleware())
-
+	router.Use(middlewares.JWTAuthMiddleware())
+	router.Use(middlewares.CookieMiddleware())
 	//env 初始化
 	configs.InitConfig()
 
