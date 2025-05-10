@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func LoginRepository(loginData *account.Userlogin) repositoryModels.RepositoryModel[user_db.UserInfo] {
+func LoginRepository(loginData *account.User) repositoryModels.RepositoryModel[user_db.UserInfo] {
 	var user_info user_db.UserInfo
 	var repositoryModel repositoryModels.RepositoryModel[user_db.UserInfo]
 
@@ -47,6 +47,19 @@ func UserLogRepository(user_info *user_db.UserInfo) repositoryModels.RepositoryM
 	user_log.Timestamp = time.Now()
 
 	err := database.DB.Create(&user_log)
+
+	var repositoryModel repositoryModels.RepositoryModel[bool]
+
+	repositoryModel.Statue = *err
+
+	repositoryModel.Result = err.Error == nil
+
+	return repositoryModel
+}
+
+func UserDeleteRepository(user_info *user_db.UserInfo) repositoryModels.RepositoryModel[bool] {
+
+	err := database.DB.Delete(&user_info)
 
 	var repositoryModel repositoryModels.RepositoryModel[bool]
 

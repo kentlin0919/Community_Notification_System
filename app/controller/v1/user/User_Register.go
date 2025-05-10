@@ -33,7 +33,7 @@ import (
 func (u *UserController) UserRegister(ctx *gin.Context) {
 	var registerModel accountModel.Register
 	var user_info = &user_db.UserInfo{}
-	var loginData accountModel.Userlogin
+	var loginData accountModel.User
 
 	// 綁定 JSON 資料
 	if err := ctx.ShouldBindJSON(&registerModel); err != nil {
@@ -111,7 +111,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 
 }
 
-func checkAccount(loginData *accountModel.Userlogin) bool {
+func checkAccount(loginData *accountModel.User) bool {
 	result := repository.LoginRepository(loginData)
 	return result.Statue.Error == gorm.ErrRecordNotFound
 }

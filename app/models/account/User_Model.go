@@ -2,7 +2,7 @@ package account
 
 import "time"
 
-type Userlogin struct {
+type User struct {
 	Email    string `json:"email" example:"user@example.com"`
 	Password string `json:"password" example:"yourpassword"`
 	Platform string `json:"platform" example:"App"`

@@ -15,6 +15,69 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/deleteUser": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "使用者提供帳號與密碼後刪除使用者",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "使用者刪除",
+                "parameters": [
+                    {
+                        "description": "使用者資料（Email \u0026 Password ＆ Platform）",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/account.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登入成功，返回 JWT Token 和成功訊息",
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的輸入資料",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "密碼錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "404": {
+                        "description": "使用者不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤或 JWT 簽發失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/login": {
             "post": {
                 "description": "使用者提供帳號與密碼後登入系統，並取得 JWT Token。登入成功後會設置 session cookie 並返回 JWT token。",
@@ -35,7 +98,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/account.Userlogin"
+                            "$ref": "#/definitions/account.User"
                         }
                     }
                 ],
@@ -53,7 +116,13 @@ const docTemplate = `{
                         }
                     },
                     "401": {
-                        "description": "使用者不存在或密碼錯誤",
+                        "description": "密碼錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "404": {
+                        "description": "使用者不存在",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorRequest"
                         }
@@ -112,6 +181,63 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/sendmessage": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "使用者傳送訊息，需要 JWT Token 驗證",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Message"
+                ],
+                "summary": "傳送訊息",
+                "parameters": [
+                    {
+                        "description": "訊息資料",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/message_model.MessageData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "訊息送出成功",
+                        "schema": {
+                            "$ref": "#/definitions/message_model.MessageRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "輸入資料格式錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "未授權，缺少或無效的 JWT Token",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "伺服器內部錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -144,20 +270,7 @@ const docTemplate = `{
                 }
             }
         },
-        "account.UserRequest": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "Login successful"
-                },
-                "token": {
-                    "type": "string",
-                    "example": "example-jwt-token"
-                }
-            }
-        },
-        "account.Userlogin": {
+        "account.User": {
             "type": "object",
             "properties": {
                 "email": {
@@ -174,12 +287,59 @@ const docTemplate = `{
                 }
             }
         },
+        "account.UserRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Login successful"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "example-jwt-token"
+                }
+            }
+        },
+        "message_model.MessageData": {
+            "type": "object",
+            "properties": {
+                "Detail": {
+                    "type": "string",
+                    "example": "Detail"
+                },
+                "Subtile": {
+                    "type": "string",
+                    "example": "Subtile"
+                },
+                "Title": {
+                    "type": "string",
+                    "example": "Test"
+                }
+            }
+        },
+        "message_model.MessageRequest": {
+            "type": "object",
+            "properties": {
+                "Message": {
+                    "type": "string",
+                    "example": "Sucessful send Message"
+                }
+            }
+        },
         "model.ErrorRequest": {
             "type": "object",
             "properties": {
                 "error": {
                     "type": "string",
                     "example": "error"
+                }
+            }
+        },
+        "model.RequestMessage": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         }

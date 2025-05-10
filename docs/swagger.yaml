@@ -20,16 +20,7 @@ definitions:
         example: App
         type: string
     type: object
-  account.UserRequest:
-    properties:
-      message:
-        example: Login successful
-        type: string
-      token:
-        example: example-jwt-token
-        type: string
-    type: object
-  account.Userlogin:
+  account.User:
     properties:
       email:
         example: user@example.com
@@ -41,10 +32,42 @@ definitions:
         example: App
         type: string
     type: object
+  account.UserRequest:
+    properties:
+      message:
+        example: Login successful
+        type: string
+      token:
+        example: example-jwt-token
+        type: string
+    type: object
+  message_model.MessageData:
+    properties:
+      Detail:
+        example: Detail
+        type: string
+      Subtile:
+        example: Subtile
+        type: string
+      Title:
+        example: Test
+        type: string
+    type: object
+  message_model.MessageRequest:
+    properties:
+      Message:
+        example: Sucessful send Message
+        type: string
+    type: object
   model.ErrorRequest:
     properties:
       error:
         example: error
+        type: string
+    type: object
+  model.RequestMessage:
+    properties:
+      message:
         type: string
     type: object
 info:
@@ -53,6 +76,46 @@ info:
   title: Community_Notification_System
   version: "1.0"
 paths:
+  /api/v1/deleteUser:
+    post:
+      consumes:
+      - application/json
+      description: 使用者提供帳號與密碼後刪除使用者
+      parameters:
+      - description: 使用者資料（Email & Password ＆ Platform）
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/account.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登入成功，返回 JWT Token 和成功訊息
+          schema:
+            $ref: '#/definitions/model.RequestMessage'
+        "400":
+          description: 無效的輸入資料
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+        "401":
+          description: 密碼錯誤
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+        "404":
+          description: 使用者不存在
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+        "500":
+          description: 系統錯誤或 JWT 簽發失敗
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+      security:
+      - BearerAuth: []
+      summary: 使用者刪除
+      tags:
+      - User
   /api/v1/login:
     post:
       consumes:
@@ -64,7 +127,7 @@ paths:
         name: login
         required: true
         schema:
-          $ref: '#/definitions/account.Userlogin'
+          $ref: '#/definitions/account.User'
       produces:
       - application/json
       responses:
@@ -77,7 +140,11 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorRequest'
         "401":
-          description: 使用者不存在或密碼錯誤
+          description: 密碼錯誤
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+        "404":
+          description: 使用者不存在
           schema:
             $ref: '#/definitions/model.ErrorRequest'
         "500":
@@ -117,6 +184,42 @@ paths:
       summary: 使用者註冊
       tags:
       - User
+  /api/v1/sendmessage:
+    post:
+      consumes:
+      - application/json
+      description: 使用者傳送訊息，需要 JWT Token 驗證
+      parameters:
+      - description: 訊息資料
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/message_model.MessageData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 訊息送出成功
+          schema:
+            $ref: '#/definitions/message_model.MessageRequest'
+        "400":
+          description: 輸入資料格式錯誤
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+        "401":
+          description: 未授權，缺少或無效的 JWT Token
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+        "500":
+          description: 伺服器內部錯誤
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+      security:
+      - BearerAuth: []
+      summary: 傳送訊息
+      tags:
+      - Message
 securityDefinitions:
   BearerAuth:
     in: header
