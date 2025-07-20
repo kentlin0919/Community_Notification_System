@@ -46,12 +46,22 @@ definitions:
       Detail:
         example: Detail
         type: string
+      IsAllUser:
+        example: false
+        type: boolean
       Subtile:
         example: Subtile
         type: string
       Title:
         example: Test
         type: string
+      Userselect:
+        example:
+        - user1@example.com
+        - user2@example.com
+        items:
+          type: string
+        type: array
     type: object
   message_model.MessageRequest:
     properties:
@@ -67,7 +77,8 @@ definitions:
     type: object
   model.RequestMessage:
     properties:
-      message:
+      Message:
+        example: message
         type: string
     type: object
 info:

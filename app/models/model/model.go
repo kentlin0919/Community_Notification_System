@@ -5,5 +5,5 @@ type ErrorRequest struct {
 }
 
 type RequestMessage struct {
-	Message string `json"message" example:"message"`
+	Message string `json:"Message" example:"message"`
 }

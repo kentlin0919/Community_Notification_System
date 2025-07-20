@@ -307,6 +307,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Detail"
                 },
+                "IsAllUser": {
+                    "type": "boolean",
+                    "example": false
+                },
                 "Subtile": {
                     "type": "string",
                     "example": "Subtile"
@@ -314,6 +318,16 @@ const docTemplate = `{
                 "Title": {
                     "type": "string",
                     "example": "Test"
+                },
+                "Userselect": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "user1@example.com",
+                        "user2@example.com"
+                    ]
                 }
             }
         },
@@ -338,8 +352,9 @@ const docTemplate = `{
         "model.RequestMessage": {
             "type": "object",
             "properties": {
-                "message": {
-                    "type": "string"
+                "Message": {
+                    "type": "string",
+                    "example": "message"
                 }
             }
         }

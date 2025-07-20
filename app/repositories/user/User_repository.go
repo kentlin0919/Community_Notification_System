@@ -8,13 +8,15 @@ import (
 	user_db "Community_Notification_System/database/User_DB"
 	"log"
 	"time"
+
+	"gorm.io/gorm"
 )
 
-func LoginRepository(loginData *account.User) repositoryModels.RepositoryModel[user_db.UserInfo] {
+func LoginRepository(user *account.User) repositoryModels.RepositoryModel[user_db.UserInfo] {
 	var user_info user_db.UserInfo
 	var repositoryModel repositoryModels.RepositoryModel[user_db.UserInfo]
 
-	result := database.DB.Where("email = ?", loginData.Email).First(&user_info)
+	result := database.DB.Where("email = ?", user.Email).First(&user_info)
 
 	repositoryModel.Statue = *result
 
@@ -59,13 +61,36 @@ func UserLogRepository(user_info *user_db.UserInfo) repositoryModels.RepositoryM
 
 func UserDeleteRepository(user_info *user_db.UserInfo) repositoryModels.RepositoryModel[bool] {
 
-	err := database.DB.Delete(&user_info)
-
 	var repositoryModel repositoryModels.RepositoryModel[bool]
+
+	err := database.DB.Delete(&user_info)
 
 	repositoryModel.Statue = *err
 
 	repositoryModel.Result = err.Error == nil
 
 	return repositoryModel
+}
+
+func UserInfoListRepository(userList []string) repositoryModels.RepositoryModel[[]*user_db.UserInfo] {
+	var repositoryModels repositoryModels.RepositoryModel[[]*user_db.UserInfo]
+
+	var user_infoList []*user_db.UserInfo
+
+	var lastErr *gorm.DB
+
+	for _, user := range userList {
+		var user_info *user_db.UserInfo
+		result := database.DB.Where("email = ?", user).First(&user_info)
+
+		if result.Error == nil {
+			lastErr = result
+			user_infoList = append(user_infoList, user_info)
+		}
+	}
+
+	repositoryModels.Statue = *lastErr
+	repositoryModels.Result = user_infoList
+
+	return repositoryModels
 }

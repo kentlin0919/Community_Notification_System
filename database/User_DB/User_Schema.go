@@ -13,6 +13,6 @@ type UserInfo struct {
 	Birthdaytime time.Time `json:"Birthdaytime" example:"2025-03-23T15:04:05Z"`
 	Token        string    `json:"Token"`
 	Platform     string    `json:"Platform"`
-	Permission   int       `json"Permission"`
+	Permission   int       `json:"Permission"`
 	Session_id   string    `json:"Session_id"`
 }
