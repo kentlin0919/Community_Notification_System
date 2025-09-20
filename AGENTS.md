@@ -26,6 +26,7 @@ Store secrets only in `.env`; never commit that file. Verify `JWTPASSWORD` and d
 - 詳細的檔案結構
 - 針對每個功能畫出時序圖
 - 針對每個系統的環境安裝的詳細流程以及指令
+- 每次執行時都對 README.md 進行更新確保符合現在專案
 
 
 ## 提交與 Pull Request 規範
@@ -43,3 +44,5 @@ Store secrets only in `.env`; never commit that file. Verify `JWTPASSWORD` and d
 - 請將所有commit 經過逐行分析後放進/docs中的commit_summary_2025_{當月月份}.md 的文件中
 - commit_summary_2025_{當月月份}.md 請以時間新到舊排序
 
+## 使用套件的版本
+- 確保環境安裝腳本有確認是否安裝必要套件
