@@ -18,6 +18,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		//需要跳過的路由
 		skipPaths := map[string]bool{
 
+			"/":                true,
 			"/api/v1/login":    true,
 			"/api/v1/register": true,
 			"/swagger/*any":    true,

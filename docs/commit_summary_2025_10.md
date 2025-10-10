@@ -3,6 +3,7 @@
 - 2025-10-10 `feat(router): 根路徑導向 Swagger UI`
   - `main.go`: 新增 `/` 路由自動重新導向至 Swagger 與引入 `net/http`。
   - `README.md`: 說明根路徑將自動開啟 Swagger 介面。
+  - `middlewares/jwt_middleware.go`: 放行根路徑讓未登入使用者可轉址至 Swagger。
 
 - 2025-10-10 `feat(database): 自動建庫並種子預設資料`
   - `database/db.go`: 拆分 DSN 建構並於缺少資料庫時自動建立，同步掛載權限與平台資料表初始化。
