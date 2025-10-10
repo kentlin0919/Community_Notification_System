@@ -46,3 +46,7 @@ Store secrets only in `.env`; never commit that file. Verify `JWTPASSWORD` and d
 
 ## 使用套件的版本
 - 確保環境安裝腳本有確認是否安裝必要套件
+
+
+## 軟體架構
+- clean architecture

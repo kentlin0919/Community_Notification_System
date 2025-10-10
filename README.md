@@ -314,6 +314,18 @@ sequenceDiagram
 
 > 若需要使用 `air`，請確保 `air` 可執行檔位於 `GOBIN` 或 `PATH`（`go env GOPATH`）中。
 
+### Docker 快速啟動 PostgreSQL
+若僅需臨時啟動 PostgreSQL 伺服器，可透過 Docker 一鍵起一個預設資料庫容器：
+```bash
+docker run --name postgres \
+  -e POSTGRES_PASSWORD=mysecretpassword \
+  -p 5432:5432 \
+  -d postgres
+```
+- 預設帳號為 `postgres`，密碼為 `mysecretpassword`，埠號對應本機 `5432`。
+- 建議首次啟動後手動建立 `db_community` 資料庫或修改環境變數指向欲使用的資料庫名稱。
+- 如需持久化資料，請額外掛載 volume（例：`-v pgdata:/var/lib/postgresql/data`）。
+
 ## 常用開發指令
 - `go mod tidy`：同步依賴版本並清理未使用模組。
 - `go run main.go`：啟動一次性本地伺服器。
