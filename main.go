@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "net/http"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 
@@ -48,6 +48,11 @@ func main() {
 
 	// 將 Swagger UI 綁定在 /swagger/index.html
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// 預設導向 Swagger UI，方便快速檢視文件
+	router.GET("/", func(ctx *gin.Context) {
+		ctx.Redirect(http.StatusFound, "/swagger/index.html")
+	})
 
 	port := os.Getenv("PORT")
 	router.Run(port)

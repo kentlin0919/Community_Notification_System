@@ -342,6 +342,7 @@ docker run --name postgres \
 - Swagger 註解位於控制器檔案內，執行 `swag init -g main.go` 後會更新 `docs/` 內容。
 - 開發時請勿手動修改 `docs/` 檔案，並於 API 契約變更後提供最新文件。
 - 本地預設可透過 `http://localhost:9080/swagger/index.html` 進行互動測試。
+- 造訪根路徑 `/` 時會自動導向 Swagger UI，方便快速檢視所有 API。
 
 ## 資料庫表格概觀
 - `user_info`：基本使用者資料（Email、加密密碼、權限、平台、Session）。
