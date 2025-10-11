@@ -30,9 +30,8 @@ func (m *MessageController) SendMessage(ctx *gin.Context) {
 	// 綁定 JSON 資料並驗證輸入格式
 	// 使用 ShouldBindJSON 可以自動驗證 JSON 格式是否符合結構體定義
 	if err := ctx.ShouldBindJSON(&message_model); err != nil {
-		var errorModel model.ErrorRequest
-		errorModel.Error = "無效的輸入資料"
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": errorModel})
+		errorModel := model.NewErrorRequest(http.StatusBadRequest, "無效的輸入資料")
+		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
 

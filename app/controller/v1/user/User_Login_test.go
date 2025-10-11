@@ -166,18 +166,21 @@ func TestUserLoginInvalidInput(t *testing.T) {
 		t.Fatalf("預期回傳狀態碼 %d，實際為 %d", http.StatusBadRequest, w.Code)
 	}
 
-	var response map[string]model.ErrorRequest
+	var response model.ErrorRequest
 	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Fatalf("解析錯誤回應失敗: %v", err)
 	}
 
-	errorResponse, ok := response["error"]
-	if !ok {
-		t.Fatalf("預期回應包含 error 欄位，實際為 %v", response)
+	if response.Code != http.StatusBadRequest {
+		t.Fatalf("預期錯誤代碼 %d，實際為 %d", http.StatusBadRequest, response.Code)
 	}
 
-	if errorResponse.Error != "無效的輸入資料" {
-		t.Fatalf("預期錯誤訊息 '無效的輸入資料'，實際為 '%s'", errorResponse.Error)
+	if response.Status != http.StatusText(http.StatusBadRequest) {
+		t.Fatalf("預期狀態文字 '%s'，實際為 '%s'", http.StatusText(http.StatusBadRequest), response.Status)
+	}
+
+	if response.Error != "無效的輸入資料" {
+		t.Fatalf("預期錯誤訊息 '無效的輸入資料'，實際為 '%s'", response.Error)
 	}
 }
 
@@ -221,6 +224,14 @@ func TestUserLoginWrongPassword(t *testing.T) {
 	if response.Error != "帳號或密碼錯誤" {
 		t.Fatalf("預期錯誤訊息 '帳號或密碼錯誤'，實際為 '%s'", response.Error)
 	}
+
+	if response.Code != http.StatusUnauthorized {
+		t.Fatalf("預期錯誤代碼 %d，實際為 %d", http.StatusUnauthorized, response.Code)
+	}
+
+	if response.Status != http.StatusText(http.StatusUnauthorized) {
+		t.Fatalf("預期狀態文字 '%s'，實際為 '%s'", http.StatusText(http.StatusUnauthorized), response.Status)
+	}
 }
 
 func TestUserLoginUserNotFound(t *testing.T) {
@@ -237,8 +248,8 @@ func TestUserLoginUserNotFound(t *testing.T) {
 
 	controller.UserLogin(ctx)
 
-	if w.Code != http.StatusUnauthorized {
-		t.Fatalf("預期回傳狀態碼 %d，實際為 %d", http.StatusUnauthorized, w.Code)
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("預期回傳狀態碼 %d，實際為 %d", http.StatusNotFound, w.Code)
 	}
 
 	var response model.ErrorRequest
@@ -248,5 +259,13 @@ func TestUserLoginUserNotFound(t *testing.T) {
 
 	if response.Error != "使用者不存在" {
 		t.Fatalf("預期錯誤訊息 '使用者不存在'，實際為 '%s'", response.Error)
+	}
+
+	if response.Code != http.StatusNotFound {
+		t.Fatalf("預期錯誤代碼 %d，實際為 %d", http.StatusNotFound, response.Code)
+	}
+
+	if response.Status != http.StatusText(http.StatusNotFound) {
+		t.Fatalf("預期狀態文字 '%s'，實際為 '%s'", http.StatusText(http.StatusNotFound), response.Status)
 	}
 }

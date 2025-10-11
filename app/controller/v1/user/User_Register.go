@@ -37,8 +37,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 
 	// 綁定 JSON 資料
 	if err := ctx.ShouldBindJSON(&registerModel); err != nil {
-		var errorModel model.ErrorRequest
-		errorModel.Error = "Invalid input"
+		errorModel := model.NewErrorRequest(http.StatusBadRequest, "Invalid input")
 		fmt.Print(err)
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
@@ -49,8 +48,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 	checkaccountStatue := checkAccount(&loginData)
 
 	if !checkaccountStatue {
-		var errorModel model.ErrorRequest
-		errorModel.Error = "已經註冊過了"
+		errorModel := model.NewErrorRequest(http.StatusBadRequest, "已經註冊過了")
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
@@ -58,8 +56,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 	// 加密密碼
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerModel.Password), bcrypt.DefaultCost)
 	if err != nil {
-		var errorModel model.ErrorRequest
-		errorModel.Error = "密碼加密失敗"
+		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "密碼加密失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -78,8 +75,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 
 	//確認jwt簽發
 	if err != nil {
-		var errorModel model.ErrorRequest
-		errorModel.Error = "JWT 簽發失敗"
+		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "JWT 簽發失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -90,8 +86,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 
 	if !re.Result {
 		log.Fatalf("建立失敗")
-		var errorModel model.ErrorRequest
-		errorModel.Error = "Regiser error"
+		errorModel := model.NewErrorRequest(http.StatusBadRequest, "Register error")
 		ctx.JSON(http.StatusBadRequest, errorModel)
 	}
 

@@ -1,5 +1,10 @@
 # 2025-10 Commit 摘要
 
+- 2025-10-10 `refactor(model): 統一錯誤回應結構`
+  - `app/models/model/model.go`: ErrorRequest 新增 `code`、`status` 欄位並提供建構函式。
+  - `app/controller/v1/user/*`、`app/controller/v1/message/Message_SendMessage.go`: 改用新錯誤格式回應並對應 HTTP 狀態碼。
+  - `app/controller/v1/user/User_Login_test.go`: 更新測試斷言以驗證新的錯誤結構與狀態碼。
+
 - 2025-10-10 `feat(router): 根路徑導向 Swagger UI`
   - `main.go`: 新增 `/` 路由自動重新導向至 Swagger 與引入 `net/http`。
   - `README.md`: 說明根路徑將自動開啟 Swagger 介面。

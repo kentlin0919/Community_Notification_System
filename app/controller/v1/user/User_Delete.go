@@ -29,7 +29,8 @@ func (u *UserController) UserDelete(ctx *gin.Context) {
 
 	// 綁定 JSON 資料
 	if err := ctx.ShouldBindJSON(&UserDeleteModel); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		errorModel := models.NewErrorRequest(http.StatusBadRequest, "Invalid input")
+		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
 
@@ -38,14 +39,12 @@ func (u *UserController) UserDelete(ctx *gin.Context) {
 
 	if result.Statue.Error != nil {
 		if result.Statue.Error == gorm.ErrRecordNotFound {
-			var errorModel models.ErrorRequest
-			errorModel.Error = "User Not Found"
+			errorModel := models.NewErrorRequest(http.StatusNotFound, "User Not Found")
 			ctx.JSON(http.StatusNotFound, errorModel)
 			return
 		}
 
-		var errorModel models.ErrorRequest
-		errorModel.Error = "System Error"
+		errorModel := models.NewErrorRequest(http.StatusInternalServerError, "System Error")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -53,8 +52,7 @@ func (u *UserController) UserDelete(ctx *gin.Context) {
 	deleteResult := repository.UserDeleteRepository(&result.Result)
 
 	if deleteResult.Statue.Error != nil {
-		var errorModel models.ErrorRequest
-		errorModel.Error = "Delete Error"
+		errorModel := models.NewErrorRequest(http.StatusInternalServerError, "Delete Error")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}

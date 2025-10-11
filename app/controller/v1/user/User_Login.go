@@ -35,9 +35,8 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	// 綁定 JSON 資料並驗證輸入格式
 	// 使用 ShouldBindJSON 可以自動驗證 JSON 格式是否符合結構體定義
 	if err := ctx.ShouldBindJSON(&loginData); err != nil {
-		var errorModel model.ErrorRequest
-		errorModel.Error = "無效的輸入資料"
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": errorModel})
+		errorModel := model.NewErrorRequest(http.StatusBadRequest, "無效的輸入資料")
+		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
 
@@ -51,13 +50,11 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	// 3. 處理其他可能的資料庫錯誤
 	if result.Statue.Error != nil {
 		if result.Statue.Error == gorm.ErrRecordNotFound {
-			var errorModel model.ErrorRequest
-			errorModel.Error = "使用者不存在"
-			ctx.JSON(http.StatusUnauthorized, errorModel)
+			errorModel := model.NewErrorRequest(http.StatusNotFound, "使用者不存在")
+			ctx.JSON(http.StatusNotFound, errorModel)
 			return
 		}
-		var errorModel model.ErrorRequest
-		errorModel.Error = "系統錯誤"
+		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "系統錯誤")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -67,8 +64,7 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	// 2. 防止時序攻擊
 	// 3. 符合安全最佳實踐
 	if err := bcrypt.CompareHashAndPassword([]byte(result.Result.Password), []byte(loginData.Password)); err != nil {
-		var errorModel model.ErrorRequest
-		errorModel.Error = "帳號或密碼錯誤"
+		errorModel := model.NewErrorRequest(http.StatusUnauthorized, "帳號或密碼錯誤")
 		ctx.JSON(http.StatusUnauthorized, errorModel)
 		return
 	}
@@ -77,8 +73,7 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	// 用於後續的身份驗證和授權
 	token, err := utils.GenerateJWT(result.Result.Email)
 	if err != nil {
-		var errorModel model.ErrorRequest
-		errorModel.Error = "JWT 簽發失敗"
+		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "JWT 簽發失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -105,8 +100,7 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	// 用於追蹤用戶活動和安全性監控
 	logResult := repository.UserLogRepository(&result.Result)
 	if logResult.Statue.Error != nil {
-		var errorModel model.ErrorRequest
-		errorModel.Error = "更新用戶最後登入時間失敗"
+		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "更新用戶最後登入時間失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
