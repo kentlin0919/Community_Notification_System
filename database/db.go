@@ -9,6 +9,8 @@ import (
 	userlog_db "Community_Notification_System/database/UserLog_DB"
 	user_db "Community_Notification_System/database/User_DB"
 
+	communitydb "Community_Notification_System/database/Community_DB"
+
 	"fmt"
 	"log"
 	"os"
@@ -126,4 +128,7 @@ func CreateTable() {
 
 	/// 創建Platform_DB
 	platform_db.NewPlatformInfoController().PlatformInfoTable(DB)
+
+	/// 創建Community_DB
+	communitydb.NewCommunityInfoController().CommunityInfoTable(DB)
 }

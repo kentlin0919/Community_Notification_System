@@ -78,7 +78,13 @@ Community_Notification_System/
 │     └─ v2/v2.go                  # 目前共用 v1 控制器
 ├─ utils/
 │  └─ Jwt_Token.go                 # JWT 簽發工具
-├─ docs/                           # Swag 產生的 Swagger 定義（勿手動修改）
+├─ docs/
+│  ├─ README.md                   # 文件索引與分類說明
+│  ├─ architecture/               # 架構流程與時序圖文件
+│  ├─ commit_summaries/           # 月度 commit 摘要（新→舊）
+│  ├─ docs.go                     # Swag 產生的程式碼（勿手動修改）
+│  ├─ swagger.json                # Swagger 定義（自動生成）
+│  └─ swagger.yaml                # Swagger 定義（自動生成）
 ├─ pkg/common/                     # 共用建表工具
 ├─ tmp/                            # air 熱重載暫存（保持忽略）
 ├─ AGENTS.md, GEMINI.md            # 專案補充說明
@@ -332,6 +338,11 @@ docker run --name postgres \
 - `air`：啟動熱重載開發流程（需 `.air.toml`）。
 - `swag init -g main.go`：更新 Swagger 文件（變更註解後執行）。
 - `go test ./...`：執行全部測試套件。
+
+## 文件資源
+- **文件索引**：`docs/README.md` 提供所有子目錄分類與新增文件指引。
+- **架構流程**：`docs/architecture/router_flow.md` 描述路由註冊、請求處理步驟與登入時序圖。
+- **Commit 摘要**：`docs/commit_summaries/commit_summary_2025_10.md` 維護逐月變更紀錄，請依新→舊排序更新，舊月份（例如 2025-09）位於同資料夾。
 
 ## 測試與品質保證
 - `app/controller/v1/user/User_Login_test.go` 展示使用 Gin 測試環境、SQLite in-memory 與 JWT mock 進行整合測試。

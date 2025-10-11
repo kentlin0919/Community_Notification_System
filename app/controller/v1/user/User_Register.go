@@ -31,11 +31,14 @@ import (
 // @Failure 500 {object} model.ErrorRequest "系統錯誤或 JWT 簽發失敗"
 // @Router /api/v1/register [post]
 func (u *UserController) UserRegister(ctx *gin.Context) {
+	// registerModel 充當請求本文的映射容器，對應 Swagger 中宣告的註冊欄位
 	var registerModel accountModel.Register
+	// user_info 代表待寫入資料庫的核心實體，整合帳號、個資與登入憑證
 	var user_info = &user_db.UserInfo{}
+	// loginData 只保留登入所需欄位，用來檢查帳號是否已存在
 	var loginData accountModel.User
 
-	// 綁定 JSON 資料
+	// 綁定 JSON 資料，若結構無法對應或缺欄位則直接回傳 400
 	if err := ctx.ShouldBindJSON(&registerModel); err != nil {
 		errorModel := model.NewErrorRequest(http.StatusBadRequest, "Invalid input")
 		fmt.Print(err)
@@ -43,6 +46,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 		return
 	}
 
+	// 將輸入的 Email 與 Password 複製到 loginData，以便後續查詢帳號是否已註冊
 	loginData.Email = registerModel.Email
 	loginData.Password = registerModel.Password
 	checkaccountStatue := checkAccount(&loginData)
@@ -53,7 +57,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 		return
 	}
 
-	// 加密密碼
+	// 加密密碼：即使資料庫外洩，亦可藉由單向雜湊降低密碼被破解的風險
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerModel.Password), bcrypt.DefaultCost)
 	if err != nil {
 		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "密碼加密失敗")
@@ -61,6 +65,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 		return
 	}
 
+	// 建立唯一識別資訊與使用者基礎欄位，確保跨系統追蹤時的唯一性與一致性
 	uuidString := uuid.New()
 	user_info.ID = uuidString.String()
 	user_info.Email = registerModel.Email
@@ -71,9 +76,10 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 	user_info.PermissionId = registerModel.Permission
 	user_info.Platform = registerModel.Platform
 	user_info.Session_id = uuid.New().String()
+	// 為新使用者簽發 JWT，後續前端登入流程可直接沿用此 Token
 	token, err := utils.GenerateJWT(user_info.Email)
 
-	//確認jwt簽發
+	// 確認 JWT 是否成功簽發，避免回傳未簽名的憑證造成安全風險
 	if err != nil {
 		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "JWT 簽發失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
@@ -82,6 +88,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 
 	user_info.Token = token
 
+	// 透過 repository 實際寫入資料庫，統一封裝資料存取邏輯
 	re := repository.RegisterRepository(user_info)
 
 	if !re.Result {
@@ -91,8 +98,10 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 	}
 
 	var userRequest accountModel.UserRequest
+	// 回應包含成功訊息與 JWT Token，供前端儲存並進行後續 API 驗證
 	userRequest.Message = "Register successful"
 	userRequest.Token = token
+	// 設置 session_id Cookie，以配合前端瀏覽器維持短期會話狀態
 	ctx.SetCookie(
 		"session_id",
 		user_info.Session_id,

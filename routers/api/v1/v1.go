@@ -19,4 +19,10 @@ func V1Routes(rg *gin.RouterGroup) {
 	//處理送通知
 	rg.POST("/sendmessage", v1.Message().SendMessage)
 
+	// 取得社區列表
+	rg.GET("/community/managers", v1.CommunityManager().CommunityManager_GetList)
+
+	// 新增社區
+	rg.POST("/community/register", v1.CommunityManager().CommunityManager_Register)
+
 }

@@ -17,4 +17,5 @@ type UserInfo struct {
 	Token        string    `json:"Token"`
 	Platform     int       `json:"Platform"`
 	Session_id   string    `json:"Session_id"`
+	Community_id uint64    `json:"community_id"`
 }

@@ -1,35 +1,72 @@
-# Repository Guidelines
+# GEMINI.md
 
-## Project Structure & Module Organization
-The entry point lives in `main.go`, which wires middleware, routes, and Swagger. Domain logic sits under `app/`, dividing controllers, models, and repositories by feature and version (for example, `app/controller/v1/user`). Database schema helpers are in `database/`, while middleware such as JWT and CORS lives in `middlewares/`. Generated API docs stay in `docs/`; do not edit them manually. Temporary build artifacts from `air` land in `tmp/` and should remain untracked. No dedicated test directory exists yet—place Go tests alongside the packages they cover.
+## Project Overview
 
-## Build, Test, and Development Commands
-Run `go mod tidy` after adding dependencies to keep `go.mod` clean. Use `go run main.go` for a one-off local server, or `air` for hot-reload via `.air.toml`. Regenerate Swagger after updating annotations with `swag init -g main.go`. Execute `go test ./...` to run the full suite once tests exist.
+This project is a Community Notification System built in Go. It utilizes the Gin web framework for handling HTTP requests and GORM for database interactions with PostgreSQL. The system features a versioned API (v1 and v2), JWT-based authentication, and Swagger for API documentation.
 
-## Coding Style & Naming Conventions
-Format every Go change with `gofmt` (or `go fmt ./...`) before committing; the repo follows standard Go tab indentation and import sorting. Package names stay lowercase with no underscores. Exported types and functions use PascalCase (`UserController`), while locals prefer camelCase. Keep request/response structs in `app/models`, and match JSON field tags to the casing exposed in the API.
+**Key Technologies:**
 
-## Testing Guidelines
-Add `_test.go` files beside the implementation files (`app/controller/v1/user/User_Login_test.go`). Favor table-driven tests and focus on controller behavior through Gin test contexts or repository logic with a mocked DB. Run `go test ./... -v` before opening a pull request and ensure new features include coverage.
+- **Language:** Go
+- **Web Framework:** Gin
+- **Database:** PostgreSQL
+- **ORM:** GORM
+- **Authentication:** JWT
+- **API Documentation:** Swagger
 
-## Commit & Pull Request Guidelines
-Follow the existing conventional commits style—prefix messages with scopes like `feat:`, `fix:`, or `ref:` plus a short summary (e.g., `feat: add message sender`). For pull requests, include a concise description, testing notes, and screenshots or cURL examples for API changes. Link related tickets or issues in the description and update Swagger output when contracts change.
+**Architecture:**
 
-## Security & Configuration Tips
-Store secrets only in `.env`; never commit that file. Verify `JWTPASSWORD` and database credentials before running migrations. Middleware assumes HTTPS when setting cookies—use secure transport in staging and production. Rotate JWT secrets if credentials leak and revoke affected tokens.
+The project follows a typical layered architecture for a Go web service:
 
-## 回覆語言
-- 繁體中文
+- `main.go`: The application entry point, responsible for initializing the server, database, and middleware.
+- `routers/`: Defines the API routes and groups them by version.
+- `app/controller/`: Contains the business logic for handling requests.
+- `app/models/`: Defines the data structures and models.
+- `app/repositories/`: Implements the database operations.
+- `database/`: Manages the database connection and schema creation.
+- `middlewares/`: Includes custom middleware for CORS, JWT authentication, and cookies.
+- `configs/`: Handles application configuration.
+- `docs/`: Contains the auto-generated Swagger documentation.
 
-## README 書寫條件
-- 要有詳細的版本資訊
-- 詳細的檔案結構
-- 針對每個功能畫出時序圖
-- 針對每個系統的環境安裝的詳細流程以及指令
-- 每次執行時都對 README.md 進行更新確保符合現在專案
+## Building and Running
 
+To build and run the project, follow these steps:
+
+1.  **Install Dependencies:**
+
+    ```bash
+    go mod tidy
+    ```
+
+2.  **Set Environment Variables:**
+    Create a `.env` file in the root directory with the following variables:
+
+    ```
+    PORT=:9080
+    DB_HOST=127.0.0.1
+    DB_USER=postgres
+    DB_PASSWORD=your_password
+    DB_NAME=db_Community
+    DB_PORT=5432
+    DB_TIMEZONE=Asia/Shanghai
+    JWTPASSWORD=your_jwt_secret
+    ```
+
+3.  **Run the Application:**
+    ```bash
+    go run main.go
+    ```
+
+The application will be accessible at `http://localhost:9080`.
+
+## Development Conventions
+
+- **API Versioning:** The API is versioned under the `/api/v1` and `/api/v2` paths.
+- **Authentication:** Most routes are protected by JWT authentication. The token should be provided in the `Authorization` header as a Bearer token.
+- **Database:** The application uses GORM to interact with a PostgreSQL database. Database tables are created automatically on startup.
+- **API Documentation:** API documentation is available at `http://localhost:9080/swagger/index.html`.
 
 ## 提交與 Pull Request 規範
+
 - Commit：簡短、命令式、標明範疇（如：`fix(chart): clamp pan at edges`）
 - 語言 ： 請以繁體中文書寫
 - 請將相關變更分組，避免不相關的重構
@@ -41,12 +78,27 @@ Store secrets only in `.env`; never commit that file. Verify `JWTPASSWORD` and d
 - 分支命名：`feature/<name>`、`fix/<name>`、`chore/<name>`
 - 每個 PR 需至少一位審核者
 - 請保持 PR 規模小且聚焦（盡量少於 300 行）
-- 請將所有commit 經過逐行分析後放進/docs中的commit_summary_2025_{當月月份}.md 的文件中
-- commit_summary_2025_{當月月份}.md 請以時間新到舊排序
+- 請將所有 commit 經過逐行分析後放進/docs 中的 commit*summary_2025*{當月月份}.md 的文件中
+- commit*summary_2025*{當月月份}.md 請以時間新到舊排序
 
 ## 使用套件的版本
+
 - 確保環境安裝腳本有確認是否安裝必要套件
 
-
 ## 軟體架構
+
 - clean architecture
+
+## 開發文件管理
+
+- 必須放在 /docs
+- 必須依照種類建立資料夾並依照種類存放
+- 除了 swagger 相關的不處理
+- 自動處理相關條件
+
+## 產生開發文件
+
+- 放到 /docs
+- 每行程式碼逐一分析
+- 必須要產生時序圖
+- 必須產生 class 圖

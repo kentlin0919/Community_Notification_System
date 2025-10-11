@@ -17,8 +17,8 @@ definitions:
         example: 1
         type: integer
       platform:
-        example: App
-        type: string
+        example: 1
+        type: integer
     type: object
   account.User:
     properties:
@@ -39,6 +39,67 @@ definitions:
         type: string
       token:
         example: example-jwt-token
+        type: string
+    type: object
+  community.CommunityListResponse:
+    properties:
+      communities:
+        items:
+          $ref: '#/definitions/community.CommunitySummary'
+        type: array
+      total:
+        example: 1
+        type: integer
+    type: object
+  community.CommunityRegister:
+    properties:
+      address:
+        type: string
+      alley_number:
+        type: integer
+      community_name:
+        type: string
+      district:
+        type: string
+      lane_number:
+        type: integer
+      municipality:
+        type: string
+      permission_id:
+        type: string
+      postal_code:
+        type: integer
+      road_name:
+        type: string
+    type: object
+  community.CommunitySummary:
+    properties:
+      address:
+        example: 251新北市淡水區濱海路一段306巷
+        type: string
+      alley_number:
+        example: 0
+        type: integer
+      community_id:
+        example: 1
+        type: integer
+      community_name:
+        example: 甜水郡社區
+        type: string
+      district:
+        example: 淡水區
+        type: string
+      lane_number:
+        example: 306
+        type: integer
+      municipality:
+        example: 新北市
+        type: string
+      postal_code:
+        example: 251
+        type: integer
+      road_name:
+        example: 濱海路一段
         type: string
     type: object
   message_model.MessageData:
@@ -71,8 +132,14 @@ definitions:
     type: object
   model.ErrorRequest:
     properties:
+      code:
+        example: 400
+        type: integer
       error:
         example: error
+        type: string
+      status:
+        example: Bad Request
         type: string
     type: object
   model.RequestMessage:
@@ -87,6 +154,108 @@ info:
   title: Community_Notification_System
   version: "1.0"
 paths:
+  /api/v1/community/managers:
+    get:
+      consumes:
+      - application/json
+      description: 依縣市、行政區、郵遞區號或關鍵字等條件查詢社區基本資料清單，並支援分頁查詢。
+      parameters:
+      - description: 縣市過濾（例如：新北市）
+        in: query
+        name: municipality
+        type: string
+      - description: 行政區過濾（例如：淡水區）
+        in: query
+        name: district
+        type: string
+      - description: 郵遞區號過濾（例如：251）
+        in: query
+        name: postal_code
+        type: integer
+      - description: 關鍵字搜尋（社區名稱或地址）
+        in: query
+        name: keyword
+        type: string
+      - description: 頁碼（從 1 開始，預設 1）
+        in: query
+        name: page
+        type: integer
+      - description: 每頁筆數（預設 20，最大 100）
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功取得社區清單
+          schema:
+            $ref: '#/definitions/community.CommunityListResponse'
+        "400":
+          description: 請求參數錯誤
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+        "401":
+          description: 未授權
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+        "500":
+          description: 系統錯誤
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+      security:
+      - BearerAuth: []
+      summary: 取得社區列表
+      tags:
+      - CommunityManager
+  /api/v1/community/register:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        新增社區基本資料，欄位說明如下：
+        - permission_id：綁定社區管理權限的唯一識別字串。
+        - postal_code：社區所在地的郵遞區號，以數字表示便於郵遞與查詢。
+        - municipality：社區所在的縣市名稱。
+        - district：社區所在的鄉鎮市區名稱。
+        - road_name：社區主要道路名稱，例如路、街或段。
+        - lane_number：地址中的巷或弄號碼，若無請填 0。
+        - alley_number：更細分的弄號碼或巷內編號，若無請填 0。
+        - community_name：社區或大樓的正式名稱。
+        - address：完整地址（含門牌號），提供精確位置資訊。
+      parameters:
+      - description: 社區基本資料
+        in: body
+        name: community
+        required: true
+        schema:
+          $ref: '#/definitions/community.CommunityRegister'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功新增社區
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 請求參數錯誤
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+        "401":
+          description: 未授權
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+        "500":
+          description: 系統錯誤
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+      security:
+      - BearerAuth: []
+      summary: 新增社區
+      tags:
+      - CommunityManager
   /api/v1/deleteUser:
     post:
       consumes:

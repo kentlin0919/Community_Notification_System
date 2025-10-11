@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"Community_Notification_System/app/controller/v1/communityManager"
 	"Community_Notification_System/app/controller/v1/message"
 	"Community_Notification_System/app/controller/v1/user"
 )
@@ -12,4 +13,9 @@ func User() *user.UserController {
 
 func Message() *message.MessageController {
 	return message.NewMessageController()
+}
+
+// CommunityManager 回傳 CommunityManagerController
+func CommunityManager() *communityManager.CommunityManagerController {
+	return communityManager.NewCommunityTableController()
 }

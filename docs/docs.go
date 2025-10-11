@@ -15,6 +15,150 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/community/managers": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "依縣市、行政區、郵遞區號或關鍵字等條件查詢社區基本資料清單，並支援分頁查詢。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CommunityManager"
+                ],
+                "summary": "取得社區列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "縣市過濾（例如：新北市）",
+                        "name": "municipality",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "行政區過濾（例如：淡水區）",
+                        "name": "district",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "郵遞區號過濾（例如：251）",
+                        "name": "postal_code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "關鍵字搜尋（社區名稱或地址）",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "頁碼（從 1 開始，預設 1）",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每頁筆數（預設 20，最大 100）",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功取得社區清單",
+                        "schema": {
+                            "$ref": "#/definitions/community.CommunityListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "請求參數錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "未授權",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/community/register": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增社區基本資料，欄位說明如下：\n- permission_id：綁定社區管理權限的唯一識別字串。\n- postal_code：社區所在地的郵遞區號，以數字表示便於郵遞與查詢。\n- municipality：社區所在的縣市名稱。\n- district：社區所在的鄉鎮市區名稱。\n- road_name：社區主要道路名稱，例如路、街或段。\n- lane_number：地址中的巷或弄號碼，若無請填 0。\n- alley_number：更細分的弄號碼或巷內編號，若無請填 0。\n- community_name：社區或大樓的正式名稱。\n- address：完整地址（含門牌號），提供精確位置資訊。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CommunityManager"
+                ],
+                "summary": "新增社區",
+                "parameters": [
+                    {
+                        "description": "社區基本資料",
+                        "name": "community",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/community.CommunityRegister"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功新增社區",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "請求參數錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "未授權",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/deleteUser": {
             "post": {
                 "security": [
@@ -265,8 +409,8 @@ const docTemplate = `{
                     "example": 1
                 },
                 "platform": {
-                    "type": "string",
-                    "example": "App"
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -297,6 +441,94 @@ const docTemplate = `{
                 "token": {
                     "type": "string",
                     "example": "example-jwt-token"
+                }
+            }
+        },
+        "community.CommunityListResponse": {
+            "type": "object",
+            "properties": {
+                "communities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/community.CommunitySummary"
+                    }
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "community.CommunityRegister": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "alley_number": {
+                    "type": "integer"
+                },
+                "community_name": {
+                    "type": "string"
+                },
+                "district": {
+                    "type": "string"
+                },
+                "lane_number": {
+                    "type": "integer"
+                },
+                "municipality": {
+                    "type": "string"
+                },
+                "permission_id": {
+                    "type": "string"
+                },
+                "postal_code": {
+                    "type": "integer"
+                },
+                "road_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "community.CommunitySummary": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "251新北市淡水區濱海路一段306巷"
+                },
+                "alley_number": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "community_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "community_name": {
+                    "type": "string",
+                    "example": "甜水郡社區"
+                },
+                "district": {
+                    "type": "string",
+                    "example": "淡水區"
+                },
+                "lane_number": {
+                    "type": "integer",
+                    "example": 306
+                },
+                "municipality": {
+                    "type": "string",
+                    "example": "新北市"
+                },
+                "postal_code": {
+                    "type": "integer",
+                    "example": 251
+                },
+                "road_name": {
+                    "type": "string",
+                    "example": "濱海路一段"
                 }
             }
         },
@@ -343,9 +575,17 @@ const docTemplate = `{
         "model.ErrorRequest": {
             "type": "object",
             "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 400
+                },
                 "error": {
                     "type": "string",
                     "example": "error"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "Bad Request"
                 }
             }
         },
