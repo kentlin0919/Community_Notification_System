@@ -27,7 +27,7 @@ import (
 // @Failure 401 {object} model.ErrorRequest "未授權"
 // @Failure 500 {object} model.ErrorRequest "系統錯誤"
 // @Security BearerAuth
-// @Router /api/v1/community/managers [get]
+// @Router /api/v1/community/getlist [get]
 func (c *CommunityManagerController) CommunityManager_GetList(ctx *gin.Context) {
 	var query communityModel.CommunityListQuery
 	if err := ctx.ShouldBindQuery(&query); err != nil {

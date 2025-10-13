@@ -1,5 +1,13 @@
 # 2025-10 Commit 摘要
 
+- 2025-10-10 `feat(platform): add platform listing endpoint`
+  - `app/controller/v1/platform/*`: 新增平台控制器與取得平台列表的 API。
+  - `app/repositories/platform/Platform_repository.go`: 建立平台資料存取邏輯，回傳平台清單資訊。
+  - `routers/api/v1/v1.go`、`app/controller/v1/v1.go`: 註冊平台路由並調整社區列表路徑。
+  - `app/repositories/community/community_repository.go`: 重構查詢條件與回傳結構以配合新的列表需求。
+  - `docs/docs.go`、`docs/swagger.json`、`docs/swagger.yaml`: 更新 Swagger 文件描述平台與社區列表端點。
+  - `__debug_bin892389873`: 移除不必要的除錯二進位檔案。
+
 - 2025-10-10 `refactor(model): 統一錯誤回應結構`
   - `app/models/model/model.go`: ErrorRequest 新增 `code`、`status` 欄位並提供建構函式。
   - `app/controller/v1/user/*`、`app/controller/v1/message/Message_SendMessage.go`: 改用新錯誤格式回應並對應 HTTP 狀態碼。

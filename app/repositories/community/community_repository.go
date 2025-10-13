@@ -16,44 +16,36 @@ type CommunityListResult struct {
 	Items []communitydb.CommunityInfo
 }
 
-func CommunityOneRepository(communityInfo communitydb.CommunityInfo) repositoryModels.RepositoryModel[communitydb.CommunityInfo] {
+func CommunityOneRepository(communityInfo communitydb.CommunityInfo) repositoryModels.RepositoryModel[CommunityListResult] {
 
-	var repositoryModel repositoryModels.RepositoryModel[communitydb.CommunityInfo]
+	baseQuery := database.DB.Model(&communitydb.CommunityInfo{})
 
-	query := database.DB.Model(&communitydb.CommunityInfo{})
+	applyFilters := func(db *gorm.DB) *gorm.DB {
 
-	if communityInfo.Community_id != 0 {
-		query = query.Where("community_id = ?", communityInfo.Community_id)
-	}
-	if communityInfo.PostalCode != 0 {
-		query = query.Where("postal_code = ?", communityInfo.PostalCode)
-	}
-	if communityInfo.Municipality != "" {
-		query = query.Where("municipality ILIKE ?", fmt.Sprintf("%%%s%%", communityInfo.Municipality))
-	}
-	if communityInfo.District != "" {
-		query = query.Where("district ILIKE ?", fmt.Sprintf("%%%s%%", communityInfo.District))
-	}
-	if communityInfo.RoadName != "" {
-		query = query.Where("road_name ILIKE ?", fmt.Sprintf("%%%s%%", communityInfo.RoadName))
-	}
-	if communityInfo.LaneNumber > 0 {
-		query = query.Where("lane_number = ?", communityInfo.LaneNumber)
-	}
-	if communityInfo.AlleyNumber > 0 {
-		query = query.Where("alley_number = ?", communityInfo.AlleyNumber)
-	}
-	if communityInfo.Community_name != "" {
-		query = query.Where("community_name ILIKE ?", fmt.Sprintf("%%%s%%", communityInfo.Community_name))
-	}
-	if communityInfo.Address != "" {
-		query = query.Where("address ILIKE ?", fmt.Sprintf("%%%s%%", communityInfo.Address))
+		if communityInfo.Municipality != "" {
+			db = db.Where("municipality = ?", communityInfo.Municipality)
+		}
+		if communityInfo.District != "" {
+			db = db.Where("district = ?", communityInfo.District)
+		}
+		if communityInfo.Community_name != "" {
+			keyword := fmt.Sprintf("%%%s%%", communityInfo.Community_name)
+			db = db.Where("(community_name ILIKE ? OR address ILIKE ?)", keyword, keyword)
+		}
+		return db
 	}
 
-	result := query.First(&repositoryModel.Result)
-	repositoryModel.Statue = *result
+	filteredForCount := applyFilters(baseQuery.Session(&gorm.Session{}))
+	var result repositoryModels.RepositoryModel[CommunityListResult]
+	countResult := filteredForCount.Count(&result.Result.Total)
+	if countResult.Error != nil {
+		return result
+	}
 
-	return repositoryModel
+	listResult := filteredForCount.Order("community_id asc").Find(&result.Result.Items)
+	result.Statue = *listResult
+
+	return result
 
 }
 

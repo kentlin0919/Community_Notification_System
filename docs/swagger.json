@@ -7,7 +7,7 @@
         "version": "1.0"
     },
     "paths": {
-        "/api/v1/community/managers": {
+        "/api/v1/community/getlist": {
             "get": {
                 "security": [
                     {
@@ -265,6 +265,35 @@
                     },
                     "500": {
                         "description": "系統錯誤或 JWT 簽發失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/getlist": {
+            "get": {
+                "description": "取得所有可用平台名稱，供前端顯示於選項列表。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Platform"
+                ],
+                "summary": "取得平台列表",
+                "responses": {
+                    "200": {
+                        "description": "成功取得平台清單",
+                        "schema": {
+                            "$ref": "#/definitions/platform.PlatformListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "取得平台資料失敗",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorRequest"
                         }
@@ -587,6 +616,28 @@
                 "Message": {
                     "type": "string",
                     "example": "message"
+                }
+            }
+        },
+        "platform.PlatformListResponse": {
+            "type": "object",
+            "properties": {
+                "platforms": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/platform.PlatformSummary"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "platform.PlatformSummary": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
                 }
             }
         }

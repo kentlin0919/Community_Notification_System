@@ -148,13 +148,27 @@ definitions:
         example: message
         type: string
     type: object
+  platform.PlatformListResponse:
+    properties:
+      platforms:
+        items:
+          $ref: '#/definitions/platform.PlatformSummary'
+        type: array
+      total:
+        type: integer
+    type: object
+  platform.PlatformSummary:
+    properties:
+      name:
+        type: string
+    type: object
 info:
   contact: {}
   description: Community_Notification_System
   title: Community_Notification_System
   version: "1.0"
 paths:
-  /api/v1/community/managers:
+  /api/v1/community/getlist:
     get:
       consumes:
       - application/json
@@ -334,6 +348,25 @@ paths:
       summary: 使用者登入
       tags:
       - User
+  /api/v1/platform/getlist:
+    get:
+      consumes:
+      - application/json
+      description: 取得所有可用平台名稱，供前端顯示於選項列表。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功取得平台清單
+          schema:
+            $ref: '#/definitions/platform.PlatformListResponse'
+        "500":
+          description: 取得平台資料失敗
+          schema:
+            $ref: '#/definitions/model.ErrorRequest'
+      summary: 取得平台列表
+      tags:
+      - Platform
   /api/v1/register:
     post:
       consumes:
