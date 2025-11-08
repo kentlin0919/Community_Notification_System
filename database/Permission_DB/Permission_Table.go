@@ -27,7 +27,10 @@ func seedDefaultPermissions(db *gorm.DB) error {
 	defaultPermissions := []PermissionInfo{
 		{PermissionID: "1", Name: "系統管理員"},
 		{PermissionID: "2", Name: "社區管理員"},
-		{PermissionID: "3", Name: "一般住戶"},
+		{PermissionID: "3", Name: "保全"},
+		{PermissionID: "4", Name: "主委"},
+		{PermissionID: "5", Name: "委員"},
+		{PermissionID: "6", Name: "一般住戶"},
 	}
 
 	for _, perm := range defaultPermissions {

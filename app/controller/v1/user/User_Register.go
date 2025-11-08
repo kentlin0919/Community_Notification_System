@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"unicode/utf8"
 
 	"net/http"
 
@@ -42,6 +43,12 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&registerModel); err != nil {
 		errorModel := model.NewErrorRequest(http.StatusBadRequest, "Invalid input")
 		fmt.Print(err)
+		ctx.JSON(http.StatusBadRequest, errorModel)
+		return
+	}
+
+	if utf8.RuneCountInString(registerModel.Password) < 8 {
+		errorModel := model.NewErrorRequest(http.StatusBadRequest, "密碼長度至少需 8 碼")
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}

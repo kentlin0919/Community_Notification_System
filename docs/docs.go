@@ -380,7 +380,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/message_model.MessageData"
+                            "$ref": "#/definitions/message_model.FCMNotificationRequest"
                         }
                     }
                 ],
@@ -425,6 +425,14 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2025-03-23T15:04:05-00:00"
                 },
+                "community_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "home_id": {
+                    "type": "string",
+                    "example": "1"
+                },
                 "name": {
                     "type": "string",
                     "example": "kent"
@@ -448,15 +456,49 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "user@example.com"
+                    "example": "kent900919@gmail.com"
+                },
+                "fcmtoken": {
+                    "type": "string",
+                    "example": "example-fcm-token"
                 },
                 "password": {
                     "type": "string",
-                    "example": "yourpassword"
+                    "example": "09190919"
                 },
                 "platform": {
                     "type": "string",
                     "example": "App"
+                }
+            }
+        },
+        "account.UserInfo": {
+            "type": "object",
+            "properties": {
+                "Birthdaytime": {
+                    "type": "string",
+                    "example": "2025-03-23T15:04:05Z"
+                },
+                "Home_id": {
+                    "type": "string"
+                },
+                "PermissionId": {
+                    "type": "integer"
+                },
+                "Platform": {
+                    "type": "integer"
+                },
+                "Session_id": {
+                    "type": "string"
+                },
+                "community_id": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -470,6 +512,9 @@ const docTemplate = `{
                 "token": {
                     "type": "string",
                     "example": "example-jwt-token"
+                },
+                "user_info": {
+                    "$ref": "#/definitions/account.UserInfo"
                 }
             }
         },
@@ -561,34 +606,28 @@ const docTemplate = `{
                 }
             }
         },
-        "message_model.MessageData": {
+        "message_model.FCMNotificationRequest": {
             "type": "object",
+            "required": [
+                "body",
+                "deviceToken",
+                "title"
+            ],
             "properties": {
-                "Detail": {
-                    "type": "string",
-                    "example": "Detail"
-                },
-                "IsAllUser": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "Subtile": {
-                    "type": "string",
-                    "example": "Subtile"
-                },
-                "Title": {
-                    "type": "string",
-                    "example": "Test"
-                },
                 "Userselect": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "example": [
-                        "user1@example.com",
-                        "user2@example.com"
-                    ]
+                    }
+                },
+                "body": {
+                    "type": "string"
+                },
+                "deviceToken": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },

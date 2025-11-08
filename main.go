@@ -10,6 +10,7 @@ import (
 	"Community_Notification_System/configs"
 	"Community_Notification_System/database"
 	"Community_Notification_System/middlewares"
+	"Community_Notification_System/pkg/firebase"
 	routers "Community_Notification_System/routers"
 
 	// swaggerFiles 用於提供 Swagger UI 所需的檔案
@@ -41,6 +42,8 @@ func main() {
 
 	//DB 初始化
 	database.InitDB()
+	//Firebase 初始化
+	firebase.InitFirebase()
 
 	apiGroup := router.Group("/api")
 	routers.RegisterRoutes(apiGroup)

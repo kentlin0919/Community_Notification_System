@@ -13,6 +13,7 @@ import (
 	accountModel "Community_Notification_System/app/models/account"
 	"Community_Notification_System/app/models/model"
 	repository "Community_Notification_System/app/repositories/user"
+	"Community_Notification_System/database"
 	"Community_Notification_System/utils"
 )
 
@@ -82,6 +83,23 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	// 使用 UUID 確保 session ID 的唯一性和安全性
 	sessionID := uuid.New().String()
 
+	result.Result.Token = token
+	result.Result.Session_id = sessionID
+
+	// 更新用戶的 Token 和 Session ID 到資料庫
+	// 確保用戶的最新登入狀態被記錄
+	updateUserToken := database.DB.Model(&result.Result).Where("email = ?", result.Result.Email).Updates(map[string]interface{}{
+		"Token":      result.Result.Token,
+		"Session_id": result.Result.Session_id,
+		"Fcmtoken":   loginData.Fcmtoken,
+	})
+
+	if updateUserToken.Error != nil {
+		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "更新用戶登入狀態失敗")
+		ctx.JSON(http.StatusInternalServerError, errorModel)
+		return
+	}
+
 	// 設置安全的 Cookie
 	// 1. 使用 HTTPS only
 	// 2. 防止 JavaScript 訪問
@@ -109,5 +127,15 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	var request accountModel.UserRequest
 	request.Message = "登入成功"
 	request.Token = token
+	request.UserInfo = accountModel.UserInfo{
+		PermissionId: result.Result.PermissionId,
+		Name:         result.Result.Name,
+		Email:        result.Result.Email,
+		Home_id:      result.Result.Home_id,
+		Birthdaytime: result.Result.Birthdaytime,
+		PlatformID:   result.Result.Platform,
+		Session_id:   sessionID,
+		Community_id: result.Result.Community_id,
+	}
 	ctx.JSON(http.StatusOK, request)
 }

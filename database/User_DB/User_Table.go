@@ -30,7 +30,7 @@ func (u *UserTablesController) UserTable(DB *gorm.DB) {
 
 func seedDefaultAdminUser(db *gorm.DB) error {
 
-	hashedPassword, errHashedPassword := bcrypt.GenerateFromPassword([]byte("0919"), bcrypt.DefaultCost)
+	hashedPassword, errHashedPassword := bcrypt.GenerateFromPassword([]byte("09190919"), bcrypt.DefaultCost)
 	if errHashedPassword != nil {
 		var errorModel model.ErrorRequest
 		errorModel.Error = "密碼加密失敗"
@@ -47,6 +47,7 @@ func seedDefaultAdminUser(db *gorm.DB) error {
 		PermissionId: 1,
 		Name:         "系統管理員",
 		Platform:     3,
+		Community_id: 0,
 	}
 
 	var existing UserInfo

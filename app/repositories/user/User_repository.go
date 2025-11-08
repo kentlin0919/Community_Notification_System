@@ -94,3 +94,16 @@ func UserInfoListRepository(userList []string) repositoryModels.RepositoryModel[
 
 	return repositoryModels
 }
+
+func UpdateUserInfoRepository(user_info *user_db.UserInfo) repositoryModels.RepositoryModel[bool] {
+
+	var repositoryModel repositoryModels.RepositoryModel[bool]
+
+	err := database.DB.Save(&user_info)
+
+	repositoryModel.Statue = *err
+
+	repositoryModel.Result = err.Error == nil
+
+	return repositoryModel
+}

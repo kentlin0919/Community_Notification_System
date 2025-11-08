@@ -7,6 +7,12 @@ definitions:
       bethday:
         example: "2025-03-23T15:04:05-00:00"
         type: string
+      community_id:
+        example: 1
+        type: integer
+      home_id:
+        example: "1"
+        type: string
       name:
         example: kent
         type: string
@@ -23,13 +29,36 @@ definitions:
   account.User:
     properties:
       email:
-        example: user@example.com
+        example: kent900919@gmail.com
+        type: string
+      fcmtoken:
+        example: example-fcm-token
         type: string
       password:
-        example: yourpassword
+        example: "09190919"
         type: string
       platform:
         example: App
+        type: string
+    type: object
+  account.UserInfo:
+    properties:
+      Birthdaytime:
+        example: "2025-03-23T15:04:05Z"
+        type: string
+      Home_id:
+        type: string
+      PermissionId:
+        type: integer
+      Platform:
+        type: integer
+      Session_id:
+        type: string
+      community_id:
+        type: integer
+      email:
+        type: string
+      name:
         type: string
     type: object
   account.UserRequest:
@@ -40,6 +69,8 @@ definitions:
       token:
         example: example-jwt-token
         type: string
+      user_info:
+        $ref: '#/definitions/account.UserInfo'
     type: object
   community.CommunityListResponse:
     properties:
@@ -102,27 +133,22 @@ definitions:
         example: 濱海路一段
         type: string
     type: object
-  message_model.MessageData:
+  message_model.FCMNotificationRequest:
     properties:
-      Detail:
-        example: Detail
-        type: string
-      IsAllUser:
-        example: false
-        type: boolean
-      Subtile:
-        example: Subtile
-        type: string
-      Title:
-        example: Test
-        type: string
       Userselect:
-        example:
-        - user1@example.com
-        - user2@example.com
         items:
           type: string
         type: array
+      body:
+        type: string
+      deviceToken:
+        type: string
+      title:
+        type: string
+    required:
+    - body
+    - deviceToken
+    - title
     type: object
   message_model.MessageRequest:
     properties:
@@ -408,7 +434,7 @@ paths:
         name: message
         required: true
         schema:
-          $ref: '#/definitions/message_model.MessageData'
+          $ref: '#/definitions/message_model.FCMNotificationRequest'
       produces:
       - application/json
       responses:

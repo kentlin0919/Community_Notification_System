@@ -11,3 +11,10 @@ type MessageData struct {
 type MessageRequest struct {
 	Message string `json:"Message" example:"Sucessful send Message"`
 }
+
+type FCMNotificationRequest struct {
+	DeviceToken string   `json:"deviceToken" binding:"required"`
+	Title       string   `json:"title" binding:"required"`
+	Body        string   `json:"body" binding:"required"`
+	Userselect  []string `json:"Userselect"`
+}
