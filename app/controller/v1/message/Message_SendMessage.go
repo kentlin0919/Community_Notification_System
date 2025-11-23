@@ -1,11 +1,11 @@
 package message
 
 import (
-	"context"
 	message_model "Community_Notification_System/app/models/message"
 	"Community_Notification_System/app/models/model"
 	repository "Community_Notification_System/app/repositories/user"
 	"Community_Notification_System/pkg/firebase"
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -50,6 +50,13 @@ func (m *MessageController) SendMessage(ctx *gin.Context) {
 			Body:  req.Body,
 		},
 		Token: req.DeviceToken, // This is the device token obtained from the client app.
+	}
+
+	// Check if Firebase client is initialized
+	if firebase.FcmClient == nil {
+		log.Println("Firebase client is not initialized")
+		ctx.JSON(http.StatusServiceUnavailable, gin.H{"error": "Firebase service not available"})
+		return
 	}
 
 	// Send the message.

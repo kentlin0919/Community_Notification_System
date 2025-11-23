@@ -6,6 +6,7 @@
     "humao.rest-client",
     "42crunch.vscode-openapi",
     "cweijan.vscode-postgresql-client2",
-    "usernamehw.errorlens"
+    "usernamehw.errorlens",
+    "ms-azuretools.vscode-docker"
   ]
 }

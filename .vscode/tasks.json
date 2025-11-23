@@ -2,24 +2,35 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "go",
-			"label": "go: build package",
-			"command": "build",
-			"args": [
-				"${fileDirname}"
-			],
-			"problemMatcher": [
-				"$go"
-			],
-			"group": "build",
-			"detail": "cd /Users/kent/progarm/goProject/Community_Notification_System; go build ${fileDirname}"
+			"label": "Run Air",
+			"type": "shell",
+			"command": "/Users/kent/go/bin/air",
+			"problemMatcher": [],
+			"isBackground": true,
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
+			"label": "Run Air (Debug)",
+			"type": "shell",
+			"command": "/Users/kent/go/bin/air -c .air-debug.toml",
+			"problemMatcher": "$go",
+			"isBackground": true,
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"options": {
+				"env": {
+					"PATH": "/Users/kent/go/bin:${env:PATH}"
+				}
+			}
 		}
-
-		, {
-            "label": "Run Air",
-            "type": "shell",
-            "command": "air",
-            "problemMatcher": []
-        }
 	]
 }

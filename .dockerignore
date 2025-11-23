@@ -1,0 +1,15 @@
+# Build artifacts
+tmp
+*.log
+
+# Environment / secrets
+.env
+serviceAccountKey.json
+
+# Tooling & caches
+.gocache
+.vscode
+.idea
+
+# VCS
+.git

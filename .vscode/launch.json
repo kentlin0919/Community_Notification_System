@@ -3,48 +3,28 @@
   "configurations": [
     {
       // 一般 Delve 偵錯模式
-      "name": "Delve Debug with Hot Reload",
+      "name": "Debug (Standard)",
       "type": "go",
       "request": "launch",
       "mode": "debug",
       "program": "${workspaceFolder}",
-      "dlvToolPath": "/Users/kent/go/bin/dlv",
       "env": {
         "PATH": "/opt/homebrew/bin:/Users/kent/go/bin:${env:PATH}",
-        "GOROOT": "/opt/homebrew/Cellar/go/1.24.5/libexec",
+        "GOROOT": "",
         "GOPATH": "/Users/kent/go",
         "AIR_DEBUG": "false"
       },
       "args": [],
-      "buildFlags": "",
       "showLog": true
     },
     {
-      // 用 air 啟動 + 自動 attach delve
-      "name": "Air Debug (with Delve)",
-      "type": "go",
-      "request": "launch",
-      "mode": "debug",
-      "program": "${workspaceFolder}",
-      "preLaunchTask": "Run Air",
-      "dlvToolPath": "/Users/kent/go/bin/dlv",
-      "env": {
-        "PATH": "/opt/homebrew/bin:/Users/kent/go/bin:${env:PATH}",
-        "AIR_DEBUG": "true",
-        "GOROOT": "/opt/homebrew/Cellar/go/1.24.5/libexec",
-        "GOPATH": "/Users/kent/go"
-      },
-      "args": []
-    },
-    {
-      // 連接 air 已啟動的 delve server
-      "name": "Attach to Air Debug",
+      "name": "Debug with Hot Reload",
       "type": "go",
       "request": "attach",
       "mode": "remote",
       "port": 40000,
       "host": "127.0.0.1",
-      "dlvToolPath": "/Users/kent/go/bin/dlv",
+      "debugAdapter": "legacy",
       "showLog": true
     }
   ]

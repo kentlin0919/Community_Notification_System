@@ -1,5 +1,9 @@
 # GEMINI.md
 
+# 回覆語言
+
+- 繁體中文
+
 ## Project Overview
 
 This project is a Community Notification System built in Go. It utilizes the Gin web framework for handling HTTP requests and GORM for database interactions with PostgreSQL. The system features a versioned API (v1 and v2), JWT-based authentication, and Swagger for API documentation.

@@ -1,4 +1,3 @@
-
 package firebase
 
 import (
@@ -20,12 +19,14 @@ func InitFirebase() {
 	opt := option.WithCredentialsFile("serviceAccountKey.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
-		log.Fatalf("error initializing app: %v\n", err)
+		log.Printf("error initializing app: %v\n", err)
+		return
 	}
 
 	client, err := app.Messaging(context.Background())
 	if err != nil {
-		log.Fatalf("error getting Messaging client: %v\n", err)
+		log.Printf("error getting Messaging client: %v\n", err)
+		return
 	}
 
 	FcmClient = client

@@ -22,6 +22,7 @@ Community Notification System 是以 Gin + GORM 打造的 RESTful 服務，提�
 | github.com/swaggo/gin-swagger | `v1.6.0` | Swagger UI Gin middleware | `go mod download github.com/swaggo/gin-swagger@v1.6.0` |
 | Air | 建議 `v1.51.0+` | 熱重載開發工具（需自行安裝） | `go install github.com/cosmtrek/air@v1.51.0` |
 | PostgreSQL | 建議 `14+` | 正式環境資料庫 | `macOS: brew install postgresql@14`<br>`Ubuntu/Debian: sudo apt-get install -y postgresql postgresql-contrib` |
+| Docker / Docker Compose | Docker Engine `24+`、Compose v2 `2.24+` | 容器化開發與部署 | `macOS: brew install --cask docker`<br>`Ubuntu/Debian: curl -fsSL https://get.docker.com | sh && sudo apt-get install -y docker-compose-plugin` |
 
 ## 系統模組概觀
 - **main.go**：載入設定 → 初始化資料庫 → 套用中介層 → 掛載 `/api/v1`、`/api/v2` 路由與 Swagger UI。
@@ -34,12 +35,16 @@ Community Notification System 是以 Gin + GORM 打造的 RESTful 服務，提�
 ## 檔案結構
 ```text
 Community_Notification_System/
-├─ main.go                         # 服務進入點，載入設定、中介層與路由
-├─ go.mod / go.sum                 # 依賴與模組設定
+├─ main.go                          # 服務進入點，載入設定、中介層與路由
+├─ go.mod / go.sum                  # 依賴與模組設定
+├─ Dockerfile                       # 多階段建置：dev（air 熱重載）與 runner（精簡執行）
+├─ docker-compose.yml               # Docker 開發環境編排（app + PostgreSQL）
+├─ .dockerignore                    # Docker build 排除清單
+├─ .env.docker.example              # Docker 預設環境變數範例，請複製為 .env
 ├─ app/
 │  ├─ controller/
 │  │  └─ v1/
-│  │     ├─ v1.go                 # 控制器工廠，提供 Message/User 實例
+│  │     ├─ v1.go                  # 控制器工廠，提供 Message/User 實例
 │  │     ├─ message/
 │  │     │  ├─ Message_Controller.go
 │  │     │  └─ Message_SendMessage.go
@@ -72,23 +77,27 @@ Community_Notification_System/
 │  ├─ jwt_middleware.go
 │  └─ cookie_middleware.go
 ├─ routers/
-│  ├─ router.go                    # 註冊 /api/v1、/api/v2
+│  ├─ router.go                     # 註冊 /api/v1、/api/v2
 │  └─ api/
-│     ├─ v1/v1.go                  # v1 路由：登入、註冊、刪除、發送訊息
-│     └─ v2/v2.go                  # 目前共用 v1 控制器
+│     ├─ v1/v1.go                   # v1 路由：登入、註冊、刪除、發送訊息
+│     └─ v2/v2.go                   # 目前共用 v1 控制器
 ├─ utils/
-│  └─ Jwt_Token.go                 # JWT 簽發工具
+│  └─ Jwt_Token.go                  # JWT 簽發工具
 ├─ docs/
-│  ├─ README.md                   # 文件索引與分類說明
-│  ├─ architecture/               # 架構流程與時序圖文件
-│  ├─ commit_summaries/           # 月度 commit 摘要（新→舊）
-│  ├─ docs.go                     # Swag 產生的程式碼（勿手動修改）
-│  ├─ swagger.json                # Swagger 定義（自動生成）
-│  └─ swagger.yaml                # Swagger 定義（自動生成）
-├─ pkg/common/                     # 共用建表工具
-├─ tmp/                            # air 熱重載暫存（保持忽略）
-├─ AGENTS.md, GEMINI.md            # 專案補充說明
-└─ README.md                       # 本文件
+│  ├─ README.md                    # 文件索引與分類說明
+│  ├─ architecture/                # 架構流程與時序圖文件
+│  ├─ devops/                      # 基礎設施與環境文件
+│  │  └─ docker_dev.md             # Docker 開發環境指南
+│  ├─ commit_summaries/            # 月度 commit 摘要（新→舊）
+│  ├─ docs.go                      # Swag 產生的程式碼（勿手動修改）
+│  ├─ swagger.json                 # Swagger 定義（自動生成）
+│  └─ swagger.yaml                 # Swagger 定義（自動生成）
+├─ scripts/
+│  └─ install_dependencies.sh      # 本機開發環境安裝腳本
+├─ pkg/common/                      # 共用建表工具
+├─ tmp/                             # air 熱重載暫存（保持忽略）
+├─ AGENTS.md, GEMINI.md             # 專案補充說明
+└─ README.md                        # 本文件
 ```
 
 ## 核心功能時序圖
@@ -190,6 +199,30 @@ sequenceDiagram
 > 註：訊息推播目前完成收件者查詢流程，實際派送邏輯可在 `app/repositories/message` 或整合外部服務時補強。
 
 ## 環境安裝指南
+
+### Docker（跨平台，建議用於開發）
+1. 安裝 Docker 與 Compose（版本需求見前述表格），並啟用 Docker daemon。
+2. 建立環境變數檔：
+   ```bash
+   cp .env.docker.example .env
+   # 調整 JWTPASSWORD、DB_PASSWORD 以符合本機需求
+   ```
+3. 透過 Compose 啟動：
+   ```bash
+   docker compose up --build
+   ```
+   - 監聽埠：API `9080`、PostgreSQL `5432`
+   - 自動使用 `air` 熱重載，變更 Go 檔案後會重新編譯並重啟
+   - 首次啟動會自動下載依賴與建立資料表
+4. 停止或清除資料：
+   ```bash
+   docker compose down          # 停止並保留資料
+   docker compose down -v       # 停止並刪除 pgdata volume
+   ```
+5. （可選）在容器內執行測試：
+   ```bash
+   docker compose run --rm app go test ./... -v
+   ```
 
 ### macOS (Homebrew)
 1. 安裝必要工具：
@@ -320,7 +353,9 @@ sequenceDiagram
 
 > 若需要使用 `air`，請確保 `air` 可執行檔位於 `GOBIN` 或 `PATH`（`go env GOPATH`）中。
 
-### Docker 快速啟動 PostgreSQL
+### Docker 快速啟動 PostgreSQL（僅資料庫）
+> 如需同時啟動應用與資料庫，請優先使用上方 `docker compose up --build`。
+
 若僅需臨時啟動 PostgreSQL 伺服器，可透過 Docker 一鍵起一個預設資料庫容器：
 ```bash
 docker run --name postgres \
@@ -333,6 +368,8 @@ docker run --name postgres \
 - 如需持久化資料，請額外掛載 volume（例：`-v pgdata:/var/lib/postgresql/data`）。
 
 ## 常用開發指令
+- `docker compose up --build`：啟動 Docker 開發環境（app + PostgreSQL，含熱重載）。
+- `docker compose down` / `docker compose down -v`：停止容器 / 停止並清空資料庫 volume。
 - `go mod tidy`：同步依賴版本並清理未使用模組。
 - `go run main.go`：啟動一次性本地伺服器。
 - `air`：啟動熱重載開發流程（需 `.air.toml`）。

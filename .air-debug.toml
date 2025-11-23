@@ -6,7 +6,7 @@ tmp_dir = "tmp"
   bin = "tmp/main"
   include_ext = ["go"] # 監控的文件擴展名
   exclude_dir = ["assets", "vendor"] # 排除的目錄
-  full_bin = "dlv dap --listen=:40000 --log --continue --accept-multiclient --headless --api-version=2 --check-go-version=false --log-output=dap,tmp/main"
+  full_bin = "dlv exec ./tmp/main --headless --listen=:40000 --api-version=2 --accept-multiclient --continue"
 
 
 

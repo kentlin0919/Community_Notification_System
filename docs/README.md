@@ -5,6 +5,9 @@
 ## 架構與流程
 - `architecture/router_flow.md`：說明路由註冊與請求處理時序，含登入流程時序圖。
 
+## DevOps / 環境
+- `devops/docker_dev.md`：Docker 開發環境設定、啟動步驟與容器關係圖。
+
 ## Commit 摘要
 - `commit_summaries/commit_summary_2025_10.md`：2025 年 10 月變更摘要，最新紀錄置於最上方。
 - `commit_summaries/commit_summary_2025_09.md`：2025 年 9 月變更摘要。
