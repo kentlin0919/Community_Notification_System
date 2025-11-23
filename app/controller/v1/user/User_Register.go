@@ -84,7 +84,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 	user_info.Platform = registerModel.Platform
 	user_info.Session_id = uuid.New().String()
 	// 為新使用者簽發 JWT，後續前端登入流程可直接沿用此 Token
-	token, err := utils.GenerateJWT(user_info.Email)
+	token, err := utils.GenerateJWT(user_info.Email, uint(user_info.PermissionId), user_info.ID)
 
 	// 確認 JWT 是否成功簽發，避免回傳未簽名的憑證造成安全風險
 	if err != nil {

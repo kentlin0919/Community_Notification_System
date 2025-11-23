@@ -1,7 +1,7 @@
 package platform_db
 
 import (
-	"Community_Notification_System/pkg/common"
+	"Community_Notification_System/pkg/databasepkg"
 	"errors"
 	"fmt"
 	"log"
@@ -17,7 +17,7 @@ func NewPlatformInfoController() *PlatformInfoController {
 
 func (u *PlatformInfoController) PlatformInfoTable(DB *gorm.DB) {
 	// 檢查是否存在 PlatformInfo 表
-	common.NewCreateTableController().Base_Create_Table(DB, &PlatformInfo{}, "platform_info")
+	databasepkg.NewCreateTableController().Base_Create_Table(DB, &PlatformInfo{}, "platform_info")
 	if err := seedDefaultPlatformInfo(DB); err != nil {
 		log.Printf("初始化 platform_info 預設資料失敗: %v", err)
 	}

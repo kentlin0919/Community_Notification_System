@@ -1,7 +1,7 @@
 package communitydb
 
 import (
-	"Community_Notification_System/pkg/common"
+	"Community_Notification_System/pkg/databasepkg"
 	"errors"
 	"fmt"
 	"log"
@@ -17,7 +17,7 @@ func NewCommunityInfoController() *CommunityInfoController {
 
 func (c *CommunityInfoController) CommunityInfoTable(DB *gorm.DB) {
 	// 檢查是否存在 CommunityInfo 表
-	common.NewCreateTableController().Base_Create_Table(DB, &CommunityInfo{}, "community_info")
+	databasepkg.NewCreateTableController().Base_Create_Table(DB, &CommunityInfo{}, "community_info")
 
 	if err := seedDefaultCommunityInfo(DB); err != nil {
 		log.Printf("初始化 CommunityInfo 預設資料失敗: %v", err)

@@ -1,9 +1,10 @@
 package utils
 
-// Claims represents the JWT payload used throughout the project.
-// It includes the user identifier and any additional fields you may need.
-// Extend this struct as required (e.g., roles, permissions, etc.).
+import "github.com/golang-jwt/jwt"
+
 type Claims struct {
-	UserID   uint   `json:"user_id"`
-	Username string `json:"username"`
+	Username     string `json:"username"`
+	PermissionID uint   `json:"permission_id"`
+	UserID       string `json:"user_id"`
+	jwt.StandardClaims
 }

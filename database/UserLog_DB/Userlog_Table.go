@@ -1,7 +1,7 @@
 package userlog_db
 
 import (
-	"Community_Notification_System/pkg/common"
+	// "Community_Notification_System/pkg/common"
 
 	"gorm.io/gorm"
 )
@@ -13,5 +13,5 @@ func NewUserLogTableController() *UserLogTableController {
 }
 
 func (u *UserLogTableController) UserLogTable(DB *gorm.DB) {
-	common.NewCreateTableController().Base_Create_Table(DB, &UserLog{}, "user_log")
+	DB.AutoMigrate(&UserLog{})
 }

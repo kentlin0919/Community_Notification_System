@@ -2,7 +2,7 @@ package user_db
 
 import (
 	"Community_Notification_System/app/models/model"
-	"Community_Notification_System/pkg/common"
+	"Community_Notification_System/pkg/databasepkg"
 	"errors"
 	"fmt"
 	"log"
@@ -22,7 +22,7 @@ func NewUserDBController() *UserTablesController {
 func (u *UserTablesController) UserTable(DB *gorm.DB) {
 	// 檢查是否存在 UserInfo 表
 
-	common.NewCreateTableController().Base_Create_Table(DB, &UserInfo{}, "user_info")
+	databasepkg.NewCreateTableController().Base_Create_Table(DB, &UserInfo{}, "user_info")
 	if err := seedDefaultAdminUser(DB); err != nil {
 		log.Printf("初始化 UserInfo 預設資料失敗: %v", err)
 	}

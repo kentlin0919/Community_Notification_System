@@ -2,16 +2,15 @@ package main
 
 import (
 	"net/http"
-
-	"github.com/gin-gonic/gin"
-
 	"os"
 
 	"Community_Notification_System/configs"
 	"Community_Notification_System/database"
 	"Community_Notification_System/middlewares"
+	"Community_Notification_System/pkg/apisync"
 	"Community_Notification_System/pkg/firebase"
 	routers "Community_Notification_System/routers"
+	"github.com/gin-gonic/gin"
 
 	// swaggerFiles 用於提供 Swagger UI 所需的檔案
 	swaggerFiles "github.com/swaggo/files"
@@ -48,6 +47,10 @@ func main() {
 
 	apiGroup := router.Group("/api")
 	routers.RegisterRoutes(apiGroup)
+
+	// 同步 API 路由到資料庫
+	apisync.SyncApiRoutes(router)
+
 	// 啟動伺服器
 
 	// 將 Swagger UI 綁定在 /swagger/index.html

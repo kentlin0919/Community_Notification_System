@@ -72,7 +72,7 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 
 	// 生成 JWT Token
 	// 用於後續的身份驗證和授權
-	token, err := utils.GenerateJWT(result.Result.Email)
+	token, err := utils.GenerateJWT(result.Result.Email, uint(result.Result.PermissionId), result.Result.ID)
 	if err != nil {
 		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "JWT 簽發失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)

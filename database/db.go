@@ -12,6 +12,7 @@ import (
 	communitydb "Community_Notification_System/database/Community_DB"
 
 	actionlog_db "Community_Notification_System/database/ActionLog_DB"
+	apiroute_db "Community_Notification_System/database/ApiRoute_DB"
 
 	"fmt"
 	"log"
@@ -136,4 +137,7 @@ func CreateTable() {
 
 	/// 創建ActionLog_DB
 	actionlog_db.NewActionLogController().ActionLogTable(DB)
+
+	/// 創建ApiRoute_DB
+	apiroute_db.NewApiRouteController().ApiRouteTable(DB)
 }
