@@ -37,6 +37,7 @@ func main() {
 	router.Use(middlewares.CORSMiddleware())
 	router.Use(middlewares.JWTAuthMiddleware())
 	router.Use(middlewares.CookieMiddleware())
+	router.Use(middlewares.ActionLogMiddleware())
 	//env 初始化
 	configs.InitConfig()
 

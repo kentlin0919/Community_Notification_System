@@ -11,6 +11,8 @@ import (
 
 	communitydb "Community_Notification_System/database/Community_DB"
 
+	actionlog_db "Community_Notification_System/database/ActionLog_DB"
+
 	"fmt"
 	"log"
 	"os"
@@ -131,4 +133,7 @@ func CreateTable() {
 
 	/// 創建Community_DB
 	communitydb.NewCommunityInfoController().CommunityInfoTable(DB)
+
+	/// 創建ActionLog_DB
+	actionlog_db.NewActionLogController().ActionLogTable(DB)
 }
