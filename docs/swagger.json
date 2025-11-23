@@ -1,7 +1,691 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "Community_Notification_System",
+        "title": "Community_Notification_System",
+        "contact": {},
+        "version": "1.0"
     },
-    "paths": {}
+    "paths": {
+        "/api/v1/community/getlist": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "依縣市、行政區、郵遞區號或關鍵字等條件查詢社區基本資料清單，並支援分頁查詢。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CommunityManager"
+                ],
+                "summary": "取得社區列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "縣市過濾（例如：新北市）",
+                        "name": "municipality",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "行政區過濾（例如：淡水區）",
+                        "name": "district",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "郵遞區號過濾（例如：251）",
+                        "name": "postal_code",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "關鍵字搜尋（社區名稱或地址）",
+                        "name": "keyword",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "頁碼（從 1 開始，預設 1）",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每頁筆數（預設 20，最大 100）",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功取得社區清單",
+                        "schema": {
+                            "$ref": "#/definitions/community.CommunityListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "請求參數錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "未授權",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/community/register": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新增社區基本資料，欄位說明如下：\n- permission_id：綁定社區管理權限的唯一識別字串。\n- postal_code：社區所在地的郵遞區號，以數字表示便於郵遞與查詢。\n- municipality：社區所在的縣市名稱。\n- district：社區所在的鄉鎮市區名稱。\n- road_name：社區主要道路名稱，例如路、街或段。\n- lane_number：地址中的巷或弄號碼，若無請填 0。\n- alley_number：更細分的弄號碼或巷內編號，若無請填 0。\n- community_name：社區或大樓的正式名稱。\n- address：完整地址（含門牌號），提供精確位置資訊。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CommunityManager"
+                ],
+                "summary": "新增社區",
+                "parameters": [
+                    {
+                        "description": "社區基本資料",
+                        "name": "community",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/community.CommunityRegister"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功新增社區",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "請求參數錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "未授權",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/deleteUser": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "使用者提供帳號與密碼後刪除使用者",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "使用者刪除",
+                "parameters": [
+                    {
+                        "description": "使用者資料（Email \u0026 Password ＆ Platform）",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/account.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登入成功，返回 JWT Token 和成功訊息",
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的輸入資料",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "密碼錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "404": {
+                        "description": "使用者不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤或 JWT 簽發失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/login": {
+            "post": {
+                "description": "使用者提供帳號與密碼後登入系統，並取得 JWT Token。登入成功後會設置 session cookie 並返回 JWT token。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "使用者登入",
+                "parameters": [
+                    {
+                        "description": "登入資料（Email \u0026 Password）",
+                        "name": "login",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/account.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登入成功，返回 JWT Token 和成功訊息",
+                        "schema": {
+                            "$ref": "#/definitions/account.UserRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的輸入資料",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "密碼錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "404": {
+                        "description": "使用者不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤或 JWT 簽發失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/platform/getlist": {
+            "get": {
+                "description": "取得所有可用平台名稱，供前端顯示於選項列表。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Platform"
+                ],
+                "summary": "取得平台列表",
+                "responses": {
+                    "200": {
+                        "description": "成功取得平台清單",
+                        "schema": {
+                            "$ref": "#/definitions/platform.PlatformListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "取得平台資料失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/register": {
+            "post": {
+                "description": "新用戶註冊功能，包含基本資料驗證、密碼加密、JWT Token 生成和 Session 設置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "使用者註冊",
+                "parameters": [
+                    {
+                        "description": "註冊資料（Email、Password、Name、Birthday、Permission、Platform）",
+                        "name": "Register",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/account.Register"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "註冊成功，返回 JWT Token 和成功訊息",
+                        "schema": {
+                            "$ref": "#/definitions/account.UserRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的輸入資料或帳號已存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤或 JWT 簽發失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sendmessage": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "使用者傳送訊息，需要 JWT Token 驗證",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Message"
+                ],
+                "summary": "傳送訊息",
+                "parameters": [
+                    {
+                        "description": "訊息資料",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/message_model.FCMNotificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "訊息送出成功",
+                        "schema": {
+                            "$ref": "#/definitions/message_model.MessageRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "輸入資料格式錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "未授權，缺少或無效的 JWT Token",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "伺服器內部錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "account.Register": {
+            "type": "object",
+            "properties": {
+                "Email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "bethday": {
+                    "type": "string",
+                    "example": "2025-03-23T15:04:05-00:00"
+                },
+                "community_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "home_id": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "kent"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "yourpassword"
+                },
+                "permission": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "platform": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "account.User": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "kent900919@gmail.com"
+                },
+                "fcmtoken": {
+                    "type": "string",
+                    "example": "example-fcm-token"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "09190919"
+                },
+                "platform": {
+                    "type": "string",
+                    "example": "App"
+                }
+            }
+        },
+        "account.UserInfo": {
+            "type": "object",
+            "properties": {
+                "Birthdaytime": {
+                    "type": "string",
+                    "example": "2025-03-23T15:04:05Z"
+                },
+                "Home_id": {
+                    "type": "string"
+                },
+                "PermissionId": {
+                    "type": "integer"
+                },
+                "Platform": {
+                    "type": "integer"
+                },
+                "Session_id": {
+                    "type": "string"
+                },
+                "community_id": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "account.UserRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Login successful"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "example-jwt-token"
+                },
+                "user_info": {
+                    "$ref": "#/definitions/account.UserInfo"
+                }
+            }
+        },
+        "community.CommunityListResponse": {
+            "type": "object",
+            "properties": {
+                "communities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/community.CommunitySummary"
+                    }
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "community.CommunityRegister": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "alley_number": {
+                    "type": "integer"
+                },
+                "community_name": {
+                    "type": "string"
+                },
+                "district": {
+                    "type": "string"
+                },
+                "lane_number": {
+                    "type": "integer"
+                },
+                "municipality": {
+                    "type": "string"
+                },
+                "permission_id": {
+                    "type": "string"
+                },
+                "postal_code": {
+                    "type": "integer"
+                },
+                "road_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "community.CommunitySummary": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "251新北市淡水區濱海路一段306巷"
+                },
+                "alley_number": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "community_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "community_name": {
+                    "type": "string",
+                    "example": "甜水郡社區"
+                },
+                "district": {
+                    "type": "string",
+                    "example": "淡水區"
+                },
+                "lane_number": {
+                    "type": "integer",
+                    "example": 306
+                },
+                "municipality": {
+                    "type": "string",
+                    "example": "新北市"
+                },
+                "postal_code": {
+                    "type": "integer",
+                    "example": 251
+                },
+                "road_name": {
+                    "type": "string",
+                    "example": "濱海路一段"
+                }
+            }
+        },
+        "message_model.FCMNotificationRequest": {
+            "type": "object",
+            "required": [
+                "body",
+                "deviceToken",
+                "title"
+            ],
+            "properties": {
+                "Userselect": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "body": {
+                    "type": "string"
+                },
+                "deviceToken": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "message_model.MessageRequest": {
+            "type": "object",
+            "properties": {
+                "Message": {
+                    "type": "string",
+                    "example": "Sucessful send Message"
+                }
+            }
+        },
+        "model.ErrorRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "error": {
+                    "type": "string",
+                    "example": "error"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "Bad Request"
+                }
+            }
+        },
+        "model.RequestMessage": {
+            "type": "object",
+            "properties": {
+                "Message": {
+                    "type": "string",
+                    "example": "message"
+                }
+            }
+        },
+        "platform.PlatformListResponse": {
+            "type": "object",
+            "properties": {
+                "platforms": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/platform.PlatformSummary"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "platform.PlatformSummary": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
 }
