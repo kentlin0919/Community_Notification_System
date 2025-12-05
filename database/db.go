@@ -1,8 +1,11 @@
 package database
 
 import (
+	facility_db "Community_Notification_System/database/Facility_DB"
 	homedb "Community_Notification_System/database/Home_DB"
+	maintenance_db "Community_Notification_System/database/Maintenance_DB"
 	platform_db "Community_Notification_System/database/Platform_DB"
+	visitor_db "Community_Notification_System/database/Visitor_DB"
 
 	message_db "Community_Notification_System/database/Message_DB"
 	permission_db "Community_Notification_System/database/Permission_DB"
@@ -140,4 +143,13 @@ func CreateTable() {
 
 	/// 創建ApiRoute_DB
 	apiroute_db.NewApiRouteController().ApiRouteTable(DB)
+
+	/// 創建Facility_DB
+	facility_db.NewFacilityController().FacilityTable(DB)
+
+	/// 創建Visitor_DB
+	visitor_db.NewVisitorController().VisitorTable(DB)
+
+	/// 創建Maintenance_DB
+	maintenance_db.NewMaintenanceController().MaintenanceTable(DB)
 }

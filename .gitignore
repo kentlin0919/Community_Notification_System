@@ -1,3 +1,33 @@
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*~
+*.bak
+*.tmp
+*.orig
+
+# Go dependencies and cache
+vendor/
+.gocache/
+
+# Compiled binaries and build artifacts
+*.out
+tmp_build
+tmp/
+*debug_bin*
+
+# Log files
+*.log
+firebase-debug.log
+
+# Environment files
 .env
+.env.*
 serviceAccountKey.json
-/.gemini
+
+# OS-specific
+.DS_Store
+
+# Gemini CLI metadata
+.gemini/

@@ -18,5 +18,5 @@ func (r *ApiRouteRepository) GetRequiredPermission(path string, method string) (
 	if err != nil {
 		return 0, err // Return 0 and the error if route not found or other db error
 	}
-	return route.RequiredPermissionID, nil
+	return uint(route.RequiredPermissionID), nil
 }

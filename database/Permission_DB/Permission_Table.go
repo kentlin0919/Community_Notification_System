@@ -40,7 +40,7 @@ func seedDefaultPermissions(db *gorm.DB) error {
 		case err == nil:
 			continue
 		case errors.Is(err, gorm.ErrRecordNotFound):
-			perm.ID = perm.PermissionID
+			// perm.ID is auto-increment, no need to set it manually from string PermissionID
 			if createErr := db.Create(&perm).Error; createErr != nil {
 				return fmt.Errorf("新增預設權限 %s 失敗: %w", perm.PermissionID, createErr)
 			}

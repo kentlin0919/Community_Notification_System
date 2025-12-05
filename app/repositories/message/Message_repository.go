@@ -21,11 +21,12 @@ func MessageRepository(userInfoList []*user_db.UserInfo, messageModel *message_m
 	for _, userInfo := range userInfoList {
 		// 為每個用戶創建新的訊息記錄
 		var message message_db.MessageInfo
-		message.UserID = userInfo.ID           // 設置用戶ID
-		message.Email = userInfo.Email         // 設置用戶郵箱
-		message.Detail = messageModel.Detail   // 設置訊息詳細內容
-		message.Subtile = messageModel.Subtile // 設置訊息標題
-		message.CreateTime = time.Time{}       // 設置訊息創建時間
+		message.UserID = userInfo.ID          // 設置用戶ID
+		message.Title = messageModel.Title    // 設置訊息標題
+		message.Content = messageModel.Detail // 設置訊息詳細內容
+		message.Type = "mail"                 // 預設類型
+		message.Status = "unread"             // 預設狀態
+		message.CreateTime = time.Now()       // 設置訊息創建時間
 
 		// 將訊息保存到資料庫
 		lastErr = database.DB.Create(&message)

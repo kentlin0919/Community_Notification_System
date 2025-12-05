@@ -17,7 +17,7 @@ type Register struct {
 	Permission  int       `json:"permission" example:"1"`
 	Platform    int       `json:"platform" example:"1"`
 	CommunityID uint64    `json:"community_id" example:"1"`
-	Home_id     string    `json:"home_id" example:"1"`
+	Home_id     uint64    `json:"home_id" example:"1"`
 }
 
 type UserRequest struct {
@@ -30,7 +30,7 @@ type UserInfo struct {
 	PermissionId int       `json:"PermissionId"`
 	Name         string    `json:"name"`
 	Email        string    `json:"email"`
-	Home_id      string    `json:"Home_id"`
+	Home_id      uint64    `json:"Home_id"`
 	Birthdaytime time.Time `json:"Birthdaytime" example:"2025-03-23T15:04:05Z"`
 	PlatformID   int       `json:"Platform"`
 	Session_id   string    `json:"Session_id"`

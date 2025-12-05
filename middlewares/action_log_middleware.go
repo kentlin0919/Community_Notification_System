@@ -29,11 +29,11 @@ func ActionLogMiddleware() gin.HandlerFunc {
 		c.Next()
 
 		// After request
-		endTime := time.Now()
-		latency := endTime.Sub(startTime)
+		// endTime := time.Now()
+		// latency := endTime.Sub(startTime)
 
 		// Get user ID from JWT token
-		userID := uint(0)
+		userID := ""
 		claims, exists := c.Get("claims")
 		if exists {
 			if claimsMap, ok := claims.(*utils.Claims); ok {
@@ -50,12 +50,10 @@ func ActionLogMiddleware() gin.HandlerFunc {
 		}
 
 		logEntry := &ActionLog_DB.ActionLog{
-			Timestamp:   startTime,
-			Module:      module,
-			APIPath:     c.Request.URL.Path,
-			ErrorCode:   c.Writer.Status(),
-			UserID:      userID,
-			Description: latency.String(),
+			Timestamp: startTime,
+			Module:    module,
+			APIPath:   c.Request.URL.Path,
+			UserID:    userID,
 		}
 
 		repo := action_log.ActionLogRepository{}
