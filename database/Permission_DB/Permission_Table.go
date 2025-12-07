@@ -1,7 +1,7 @@
 package permission_db
 
 import (
-	"Community_Notification_System/pkg/databasepkg"
+	"Community_Notification_System/pkg/databasePkg"
 	"errors"
 	"fmt"
 	"log"
@@ -17,7 +17,7 @@ func NewPermissionInfoController() *PermissionInfoController {
 
 func (u *PermissionInfoController) PermissionInfoTable(DB *gorm.DB) {
 	// 檢查是否存在 UserInfo 表
-	databasepkg.NewCreateTableController().Base_Create_Table(DB, &PermissionInfo{}, "permission_info")
+	databasePkg.NewCreateTableController().Base_Create_Table(DB, &PermissionInfo{}, "permission_info")
 	if err := seedDefaultPermissions(DB); err != nil {
 		log.Printf("初始化 permission_info 預設資料失敗: %v", err)
 	}

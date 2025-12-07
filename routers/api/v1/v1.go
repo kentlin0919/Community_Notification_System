@@ -17,15 +17,15 @@ func V1Routes(rg *gin.RouterGroup) {
 	rg.POST("/deleteUser", v1.User().UserDelete)
 
 	//處理送通知
-	rg.POST("/sendmessage", v1.Message().SendMessage)
+	rg.POST("/sendMessage", v1.Message().SendMessage)
 
 	// 取得社區列表
-	rg.GET("/community/getlist", v1.CommunityManager().CommunityManager_GetList)
+	rg.GET("/community/getList", v1.CommunityManager().CommunityManager_GetList)
 
 	// 新增社區
 	rg.POST("/community/register", v1.CommunityManager().CommunityManager_Register)
 
 	// 取得平台列表
-	rg.GET("/platform/getlist", v1.Platform().Platform_GetList)
+	rg.GET("/platform/getList", v1.Platform().Platform_GetList)
 
 }

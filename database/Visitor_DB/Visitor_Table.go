@@ -1,7 +1,7 @@
 package visitor_db
 
 import (
-	"Community_Notification_System/pkg/databasepkg"
+	"Community_Notification_System/pkg/databasePkg"
 
 	"gorm.io/gorm"
 )
@@ -13,5 +13,5 @@ func NewVisitorController() *VisitorController {
 }
 
 func (v *VisitorController) VisitorTable(DB *gorm.DB) {
-	databasepkg.NewCreateTableController().Base_Create_Table(DB, &VisitorInfo{}, "visitor_info")
+	databasePkg.NewCreateTableController().Base_Create_Table(DB, &VisitorInfo{}, "visitor_info")
 }

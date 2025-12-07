@@ -1,5 +1,6 @@
 {
-    "go.alternateTools": {
-        "dlv": "/Users/kent/go/bin/dlv"
-    }
+  "go.alternateTools": {
+    "dlv": "/Users/kent/go/bin/dlv"
+  },
+  "cSpell.words": ["gorm", "varchar"]
 }

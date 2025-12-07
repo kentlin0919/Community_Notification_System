@@ -78,8 +78,8 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 	user_info.Email = registerModel.Email
 	user_info.Name = registerModel.Name
 	user_info.Password = string(hashedPassword) // 存儲加密後的密碼
-	user_info.Birthdaytime = registerModel.Bethday
-	user_info.Registertime = time.Now()
+	user_info.BirthdayTime = registerModel.Birthday
+	user_info.RegisterTime = time.Now()
 	user_info.PermissionId = registerModel.Permission
 	user_info.Platform = registerModel.Platform
 	user_info.Session_id = uuid.New().String()

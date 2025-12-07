@@ -1,7 +1,7 @@
 package maintenance_db
 
 import (
-	"Community_Notification_System/pkg/databasepkg"
+	"Community_Notification_System/pkg/databasePkg"
 
 	"gorm.io/gorm"
 )
@@ -13,5 +13,5 @@ func NewMaintenanceController() *MaintenanceController {
 }
 
 func (m *MaintenanceController) MaintenanceTable(DB *gorm.DB) {
-	databasepkg.NewCreateTableController().Base_Create_Table(DB, &MaintenanceReports{}, "maintenance_reports")
+	databasePkg.NewCreateTableController().Base_Create_Table(DB, &MaintenanceReports{}, "maintenance_reports")
 }

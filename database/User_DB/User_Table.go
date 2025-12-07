@@ -2,7 +2,7 @@ package user_db
 
 import (
 	"Community_Notification_System/app/models/model"
-	"Community_Notification_System/pkg/databasepkg"
+	"Community_Notification_System/pkg/databasePkg"
 	"errors"
 	"fmt"
 	"log"
@@ -22,7 +22,7 @@ func NewUserDBController() *UserTablesController {
 func (u *UserTablesController) UserTable(DB *gorm.DB) {
 	// 檢查是否存在 UserInfo 表
 
-	databasepkg.NewCreateTableController().Base_Create_Table(DB, &UserInfo{}, "user_info")
+	databasePkg.NewCreateTableController().Base_Create_Table(DB, &UserInfo{}, "user_info")
 	if err := seedDefaultAdminUser(DB); err != nil {
 		log.Printf("初始化 UserInfo 預設資料失敗: %v", err)
 	}
@@ -42,8 +42,8 @@ func seedDefaultAdminUser(db *gorm.DB) error {
 		ID:           uuidString.String(),
 		Email:        "kent900919@gmail.com",
 		Password:     string(hashedPassword), // 存儲加密後的密碼
-		Birthdaytime: time.Now(),
-		Registertime: time.Now(),
+		BirthdayTime: time.Now(),
+		RegisterTime: time.Now(),
 		PermissionId: 1,
 		Name:         "系統管理員",
 		Platform:     3,

@@ -1,7 +1,7 @@
 package facility_db
 
 import (
-	"Community_Notification_System/pkg/databasepkg"
+	"Community_Notification_System/pkg/databasePkg"
 
 	"gorm.io/gorm"
 )
@@ -13,6 +13,6 @@ func NewFacilityController() *FacilityController {
 }
 
 func (f *FacilityController) FacilityTable(DB *gorm.DB) {
-	databasepkg.NewCreateTableController().Base_Create_Table(DB, &Facilities{}, "facilities")
-	databasepkg.NewCreateTableController().Base_Create_Table(DB, &FacilityReservations{}, "facility_reservations")
+	databasePkg.NewCreateTableController().Base_Create_Table(DB, &Facilities{}, "facilities")
+	databasePkg.NewCreateTableController().Base_Create_Table(DB, &FacilityReservations{}, "facility_reservations")
 }

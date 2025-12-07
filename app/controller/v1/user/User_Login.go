@@ -132,7 +132,7 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 		Name:         result.Result.Name,
 		Email:        result.Result.Email,
 		Home_id:      result.Result.Home_id,
-		Birthdaytime: result.Result.Birthdaytime,
+		Birthdaytime: result.Result.BirthdayTime,
 		PlatformID:   result.Result.Platform,
 		Session_id:   sessionID,
 		Community_id: result.Result.Community_id,

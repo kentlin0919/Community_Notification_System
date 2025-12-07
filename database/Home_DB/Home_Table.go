@@ -1,7 +1,7 @@
 package Home_db
 
 import (
-	"Community_Notification_System/pkg/databasepkg"
+	"Community_Notification_System/pkg/databasePkg"
 
 	"gorm.io/gorm"
 )
@@ -14,6 +14,6 @@ func NewUserHomeTableController() *UserHomeTablesController {
 
 func (u *UserHomeTablesController) UserHomeTable(DB *gorm.DB) {
 
-	databasepkg.NewCreateTableController().Base_Create_Table(DB, &UserHome{}, "user_home")
+	databasePkg.NewCreateTableController().Base_Create_Table(DB, &UserHome{}, "user_home")
 
 }

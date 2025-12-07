@@ -1,4 +1,4 @@
-package databasepkg
+package databasePkg
 
 import (
 	"fmt"
