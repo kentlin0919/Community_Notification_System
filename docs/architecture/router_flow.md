@@ -13,10 +13,20 @@
    - `middlewares.CORSMiddleware()`：設定跨域標頭。
    - `middlewares.JWTAuthMiddleware()`：驗證 JWT，並將驗證資訊存放於 `Context`。
    - `middlewares.CookieMiddleware()`：處理 Cookie（讀取 / 寫入）。
+   - `middlewares.CommunityContextMiddleware()`：規劃中。建立本次請求的 `community_id` 上下文，後續社區型資料一律在該範圍內處理。
 3. 請求進入 `/api` 路由群組後，由 `routers.RegisterRoutes` 將路徑導向對應版本（`/v1` 或 `/v2`）。
 4. 在版本化路由群組內（例如 `routers/api/v1/v1.go`），依 HTTP 方法與路徑綁定到控制器，例如 `v1.User().UserLogin`。
-5. 控制器執行對應的商業流程：驗證輸入、呼叫服務 / 資料存取層、產生回應。
-6. Gin 將控制器的回應序列化為 JSON，並送回客戶端。
+5. 控制器執行對應的商業流程：驗證輸入、從 `Context` 取得 `community_id`、呼叫服務 / 資料存取層、產生回應。
+6. Repository 進行資料查詢或異動時，應將 `community_id` 作為必要條件，避免跨社區操作。
+7. Gin 將控制器的回應序列化為 JSON，並送回客戶端。
+
+## 社區上下文規則
+- 住戶與社區管理員登入後，JWT 應帶入 `community_id`。
+- `CommunityContextMiddleware()` 應優先從 JWT claims 取得 `community_id`，必要時再驗證 Header、Path 或 Query 的目標社區是否一致。
+- 一般住戶不可任意指定其他社區。
+- 社區管理員只能操作自己管理的社區。
+- 平台管理員若支援跨社區操作，也必須明確指定目標 `community_id`，且需通過權限驗證。
+- 建議跳過社區上下文判斷的路由：`/login`、`/register`、`/platform/getlist`、`/community/getlist`、`/community/register`、Swagger。
 
 ## 主要路由總覽
 | 版本 | 方法 | 路徑 | 控制器方法 |
@@ -39,7 +49,7 @@ sequenceDiagram
     participant Repo as Repository/DB
 
     Client->>Gin: POST /api/v1/login
-    Gin->>MW: 執行 CORS / JWT / Cookie 中介層
+    Gin->>MW: 執行 CORS / JWT / Cookie / Community Context 中介層
     MW-->>Gin: 驗證與上下文處理完成
     Gin->>Router: 導向 /api → /v1 群組
     Router->>Ctrl: 呼叫 User().UserLogin
@@ -52,4 +62,5 @@ sequenceDiagram
 ## 擴充建議
 - 新增 API 時，優先決定版本號並在對應的 `routers/api/{version}` 檔案中註冊，必要時建立新的控制器。
 - 若新增中介層，請在 `main.go` 中統一掛載，維持一致的安全與日誌策略。
+- 所有社區型 API 都應先定義 `community_id` 來源與驗證方式，再進入 controller 與 repository 設計。
 - 建議為關鍵路由撰寫表單驗證與整合測試，確保版本演進時行為一致。

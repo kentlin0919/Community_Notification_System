@@ -6,13 +6,14 @@ Community Notification System 是以 Gin + GORM 打造的 RESTful 服務，提�
 - 採 `controller / repository / model` 分層，降低路由、商業邏輯與資料存取耦合度。
 - 透過環境變數配置 PostgreSQL 連線，啟動時自動檢查並建立必要資料表。
 - 中介層覆蓋 JWT 驗證、CORS、Cookie 解析，可快速擴充額外安全策略。
+- 將新增 `CommunityContextMiddleware`，把登入者所屬 `community_id` 寫入請求上下文，讓後續查詢與異動都受社區範圍限制。
 - Swagger (`/swagger/index.html`) 自動反映註解變更，方便檢視與測試 API。
 - 內建登入整合測試，範例化 SQLite in-memory + Gin 測試流程。
 
 ## 版本資訊
 | 元件 | 版本 | 說明 | 安裝指令 |
 | --- | --- | --- | --- |
-| Go | `go 1.23`（toolchain `go1.24.1`） | 於 `go.mod` 指定，建議使用 Go 1.23 以上版本開發 | `macOS: brew install go@1.23`<br>`Linux: wget https://go.dev/dl/go1.23.0.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz` |
+| Go | `go 1.23`（toolchain `go1.24.1`，Docker 使用 `go1.26.1`） | 於 `go.mod` 指定，Docker debug 基底已更新為官方最新穩定版 Go 1.26.1（2026-03-05） | `macOS: brew install go`<br>`Linux: wget https://go.dev/dl/go1.26.1.linux-amd64.tar.gz && sudo tar -C /usr/local -xzf go1.26.1.linux-amd64.tar.gz` |
 | Gin | `v1.10.0` | HTTP Web Framework，負責路由與中介層 | `go mod download github.com/gin-gonic/gin@v1.10.0` |
 | GORM | `v1.30.0` | ORM 連線 PostgreSQL 與 SQLite（測試使用） | `go mod download gorm.io/gorm@v1.30.0` |
 | gorm.io/driver/postgres | `v1.5.11` | PostgreSQL 驅動程式 | `go mod download gorm.io/driver/postgres@v1.5.11` |
@@ -20,13 +21,16 @@ Community Notification System 是以 Gin + GORM 打造的 RESTful 服務，提�
 | github.com/golang-jwt/jwt | `v3.2.2` | JWT token 生成與驗證 | `go mod download github.com/golang-jwt/jwt@v3.2.2+incompatible` |
 | github.com/swaggo/swag | `v1.16.4` | Swagger 註解解析工具 | `go install github.com/swaggo/swag/cmd/swag@v1.16.4` |
 | github.com/swaggo/gin-swagger | `v1.6.0` | Swagger UI Gin middleware | `go mod download github.com/swaggo/gin-swagger@v1.6.0` |
-| Air | 建議 `v1.51.0+` | 熱重載開發工具（需自行安裝） | `go install github.com/cosmtrek/air@v1.51.0` |
+| Air | `v1.61.7` | 熱重載開發工具；Docker debug 映像固定此版本以相容 Go 1.24 | `go install github.com/air-verse/air@v1.61.7` |
+| Delve | `v1.24.2` | Go 遠端偵錯工具；供 Docker attach debug 使用 | `go install github.com/go-delve/delve/cmd/dlv@v1.24.2` |
 | PostgreSQL | 建議 `14+` | 正式環境資料庫 | `macOS: brew install postgresql@14`<br>`Ubuntu/Debian: sudo apt-get install -y postgresql postgresql-contrib` |
 
 ## 系統模組概觀
 - **main.go**：載入設定 → 初始化資料庫 → 套用中介層 → 掛載 `/api/v1`、`/api/v2` 路由與 Swagger UI。
-- **middlewares/**：實作 CORS、JWT 驗證、Cookie 解析，未帶 JWT 的受保護端點將被拒絕。
+- **middlewares/**：實作 CORS、JWT 驗證、Cookie 解析，並規劃新增 `CommunityContextMiddleware`，統一建立社區上下文。
 - **app/controller/v1/**：依功能拆分 `user` 與 `message` 控制器，負責請求驗證與呼叫 repository。
+- **docs/features/community_management/**：社區管理大項功能資料夾，集中管理社區建立與社區查詢等文件。
+- **docs/features/facility_booking/**：設施預約大項功能資料夾，集中管理新增設施、預約設計、改期與取消等文件。
 - **app/repositories/**：封裝資料庫操作，回傳帶狀態的泛型結果模型。
 - **database/**：集中初始化邏輯與各資料表 schema，啟動時自動建表。
 - **utils/**：目前提供 JWT 簽發工具，從 `JWTPASSWORD` 讀取密鑰。
@@ -70,7 +74,8 @@ Community_Notification_System/
 ├─ middlewares/
 │  ├─ cors_middleware.go
 │  ├─ jwt_middleware.go
-│  └─ cookie_middleware.go
+│  ├─ cookie_middleware.go
+│  └─ community_context_middleware.go # 規劃中：建立 community_id 上下文
 ├─ routers/
 │  ├─ router.go                    # 註冊 /api/v1、/api/v2
 │  └─ api/
@@ -81,7 +86,17 @@ Community_Notification_System/
 ├─ docs/
 │  ├─ README.md                   # 文件索引與分類說明
 │  ├─ architecture/               # 架構流程與時序圖文件
+│  ├─ analysis/                   # 專案分析、整體流程與類別關係文件
 │  ├─ commit_summaries/           # 月度 commit 摘要（新→舊）
+│  ├─ features/                   # 功能文件，採一個功能一個資料夾管理
+│  │  ├─ community_management/    # 社區管理大項功能資料夾（規劃中）
+│  │  │  ├─ community_getlist/    # 社區列表查詢功能文件
+│  │  │  └─ community_register/   # 新增社區功能文件
+│  │  ├─ facility_booking/        # 設施預約大項功能資料夾（規劃中）
+│  │  │  ├─ facility_create/      # 新增預約設施功能文件
+│  │  │  ├─ facility_reservation/ # 社區基本設施預約設計文件
+│  │  │  ├─ reservation_reschedule_request/ # 申請更改預約時間功能文件
+│  │  │  └─ reservation_cancel/   # 取消預約功能文件
 │  ├─ docs.go                     # Swag 產生的程式碼（勿手動修改）
 │  ├─ swagger.json                # Swagger 定義（自動生成）
 │  └─ swagger.yaml                # Swagger 定義（自動生成）
@@ -94,6 +109,7 @@ Community_Notification_System/
 ## 核心功能時序圖
 
 ### 使用者登入 (`POST /api/v1/login`)
+
 ```mermaid
 sequenceDiagram
     participant Client as 用戶端
@@ -118,6 +134,7 @@ sequenceDiagram
 ```
 
 ### 使用者註冊 (`POST /api/v1/register`)
+
 ```mermaid
 sequenceDiagram
     participant Client as 用戶端
@@ -140,6 +157,7 @@ sequenceDiagram
 ```
 
 ### 刪除使用者 (`POST /api/v1/deleteUser`)
+
 ```mermaid
 sequenceDiagram
     participant Client as 用戶端
@@ -163,6 +181,7 @@ sequenceDiagram
 ```
 
 ### 傳送訊息 (`POST /api/v1/sendmessage`)
+
 ```mermaid
 sequenceDiagram
     participant Client as 用戶端
@@ -188,6 +207,24 @@ sequenceDiagram
 ```
 
 > 註：訊息推播目前完成收件者查詢流程，實際派送邏輯可在 `app/repositories/message` 或整合外部服務時補強。
+
+## 文件索引
+- `docs/analysis/project_analysis.md`：專案分析文件，整理架構、模組分工、資料表、整體 activity diagram、sequence diagram 與 class diagram。
+- `docs/features/README.md`：功能文件索引，列出各功能資料夾。
+- `docs/features/user_login/README.md`：使用者登入功能文件。
+- `docs/features/user_register/README.md`：使用者註冊功能文件。
+- `docs/features/user_delete/README.md`：使用者刪除功能文件。
+- `docs/features/community_management/community_getlist/README.md`：社區列表查詢功能文件。
+- `docs/features/community_management/community_register/README.md`：社區送出申請，並由 Super admin 審核核可後建立社區與初始社區 admin 的功能文件。
+- `docs/features/platform_getlist/README.md`：平台列表查詢功能文件。
+- `docs/features/message_send/README.md`：發送通知功能文件。
+- `docs/features/permission_management/README.md`：權限管理共用規格，定義 `PermissionID 1 ~ 7` 的權限階層與社區範圍。
+- `docs/features/facility_booking/facility_create/README.md`：新增預約設施功能文件，聚焦設施主檔建立與預設規則初始化。
+- `docs/features/facility_booking/facility_reservation/README.md`：社區基本設施預約設計文件，包含 Activity、Sequence、Class Diagram 與資料表草案。
+- `docs/features/facility_booking/reservation_reschedule_request/README.md`：申請更改預約時間功能文件，包含改期流程、時序圖與資料設計建議。
+- `docs/features/facility_booking/reservation_cancel/README.md`：取消預約功能文件，包含取消流程、違規規則與通知設計。
+- `docs/architecture/router_flow.md`：路由與 middleware 請求流向補充說明。
+- `docs/README.md`：`docs` 目錄總索引。
 
 ## 環境安裝指南
 
@@ -235,6 +272,23 @@ sequenceDiagram
    # 或
    air
    ```
+
+### Docker Debug
+1. 建置並啟動 PostgreSQL + API + Delve：
+   ```bash
+   docker compose up --build
+   ```
+2. API 預設對外埠：
+   ```text
+   http://127.0.0.1:9080
+   ```
+3. Delve 遠端偵錯埠：
+   ```text
+   127.0.0.1:40000
+   ```
+4. VS Code 請使用 `Docker: Remote Debug` 設定 attach。
+5. 若 Docker build 失敗，先確認映像內 Air 版本不是 `latest`；本專案已固定 `v1.61.7` 以避免 Go 1.24 相容性問題。
+6. 若未提供 `serviceAccountKey.json` 或 Firebase Project 設定，API 仍可啟動，但推播相關端點會回傳 `503 Service Unavailable`。
 
 ### Ubuntu / Debian Linux
 1. 安裝 Go 1.23（官方壓縮包）：
@@ -359,12 +413,16 @@ docker run --name postgres \
 - `user_info`：基本使用者資料（Email、加密密碼、權限、平台、Session）。
 - `user_log`：記錄登入等操作行為，包含時間戳與動作描述。
 - `message_info`、`home_info`：預留表格，啟動時若不存在將自動建立。
+- 後續 `community/register` 建議以 transaction 同步建立 `community_info` 與該社區的初始 `admin user_info`。
+- 設施預約功能目前已完成文件設計，資料表規劃詳見 `docs/features/facility_booking/facility_reservation/README.md`，尚未實作至 `database/`。
 - 建表邏輯集中於 `database/`，調整 schema 時請同步更新對應模型與自動遷移流程。
 
 ## 中介層與安全性
 - `middlewares/jwt_middleware.go`：預設保護除登入/註冊/Swagger 外之 API，驗證失敗回傳 401。
 - `middlewares/cors_middleware.go`：允許跨域請求與憑證傳送，若需限制來源可調整 `Access-Control-Allow-Origin`。
 - `middlewares/cookie_middleware.go`：讀取 `session_id` 供後續流程使用，可擴充為 session 驗證。
+- `middlewares/community_context_middleware.go`：規劃中。負責從 JWT claims、Header、Path 或 Query 解析 `community_id`，並驗證該請求只能操作所屬社區資料。
+- 後續所有社區型資料查詢與異動都應以 `community_id` 做資料隔離，避免跨社區操作。
 - 請於部署前確認 `.env` 中的 `JWTPASSWORD`、資料庫密碼與 HTTPS 配置。
 
 ## 貢獻流程
