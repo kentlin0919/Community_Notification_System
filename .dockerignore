@@ -1,0 +1,10 @@
+.git
+.vscode
+.gocache
+bin
+tmp
+docs
+*.log
+.env
+Dockerfile
+docker-compose*.yml

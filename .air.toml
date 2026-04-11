@@ -3,7 +3,6 @@
 # 監控的目錄
 root = "."
 tmp_dir = "tmp" # 用來存儲臨時文件的目錄
-color = "true" # 是否啟用顏色
 
 [build]
   cmd = "go build -o tmp/main ."

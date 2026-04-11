@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: community_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_password
+      POSTGRES_DB: db_Community
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: community_app
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+    ports:
+      - "9080:9080"      # API & Swagger
+      - "40000:40000"    # Delve DAP debug port
+    volumes:
+      - .:/app
+    environment:
+      - PORT=:9080
+      - DB_HOST=db
+      - DB_USER=postgres
+      - DB_PASSWORD=your_password
+      - DB_NAME=db_Community
+      - DB_PORT=5432
+      - DB_TIMEZONE=Asia/Shanghai
+      - JWTPASSWORD=your_jwt_secret
+    depends_on:
+      - db
+    # 預設啟動熱重載與 Delve 遠端偵錯服務
+    command: ["air", "-c", ".air-debug.toml"]
+
+volumes:
+  postgres_data:

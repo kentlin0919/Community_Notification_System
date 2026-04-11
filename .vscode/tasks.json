@@ -1,25 +1,61 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "go",
-			"label": "go: build package",
-			"command": "build",
-			"args": [
-				"${fileDirname}"
-			],
-			"problemMatcher": [
-				"$go"
-			],
-			"group": "build",
-			"detail": "cd /Users/kent/progarm/goProject/Community_Notification_System; go build ${fileDirname}"
-		}
-
-		, {
-            "label": "Run Air",
-            "type": "shell",
-            "command": "air",
-            "problemMatcher": []
-        }
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "docker-compose: up",
+      "type": "shell",
+      "command": "docker compose up -d --build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "docker-compose: logs",
+      "type": "shell",
+      "command": "docker compose logs -f app",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "docker-compose: wait-dlv",
+      "type": "shell",
+      "command": "for i in $(seq 1 60); do nc -z 127.0.0.1 40000 && exit 0; sleep 1; done; echo 'Timed out waiting for Delve on 127.0.0.1:40000' >&2; exit 1",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": [
+        "docker-compose: up"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "docker-compose: down",
+      "type": "shell",
+      "command": "docker compose down",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "never",
+        "panel": "shared"
+      }
+    }
+  ]
 }
