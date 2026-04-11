@@ -1,11 +1,11 @@
 package message
 
 import (
-	"context"
 	message_model "Community_Notification_System/app/models/message"
 	"Community_Notification_System/app/models/model"
 	repository "Community_Notification_System/app/repositories/user"
 	"Community_Notification_System/pkg/firebase"
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -42,6 +42,12 @@ func (m *MessageController) SendMessage(ctx *gin.Context) {
 	UserInfoList := repository.UserInfoListRepository(req.Userselect)
 
 	fmt.Print(UserInfoList)
+
+	if firebase.FcmClient == nil {
+		errorModel := model.NewErrorRequest(http.StatusServiceUnavailable, "Firebase 推播服務尚未初始化")
+		ctx.JSON(http.StatusServiceUnavailable, errorModel)
+		return
+	}
 
 	// The message to send.
 	message := &messaging.Message{

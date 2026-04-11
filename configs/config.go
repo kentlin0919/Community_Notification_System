@@ -8,8 +8,7 @@ import (
 
 func InitConfig() {
 	err := godotenv.Load()
-
 	if err != nil {
-		log.Fatalf("無法載入 .env 文件: %v", err)
+		log.Printf("提示：未發現 .env 文件或預載入失敗，將使用系統環境變數 (%v)", err)
 	}
 }
