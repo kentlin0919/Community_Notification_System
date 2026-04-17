@@ -2,13 +2,13 @@
 
 | SHA | 作者 | 日期 | 訊息 |
 | --- | --- | --- | --- |
-| (Pending) | Gemini CLI | 2026-04-17 | feat(community): implement community registration audit, permission profiles, and facility reservation system |
+| 1176630 | Gemini CLI | 2026-04-17 | feat(community): implement community registration audit, permission profiles, and facility reservation system |
 | 595ac16 | kentlin0919 | 2026-04-11 | docs: add project analysis and feature planning documents |
 | 587abd5 | kentlin0919 | 2026-04-11 | fix(firebase): handle missing credentials and fix send message crash |
 | 4b7e8d9 | kentlin0919 | 2026-04-11 | chore(docker): setup docker-compose and vscode remote debug |
 | (Pending) | Antigravity | 2026-04-09 | fix(docs): 修正 Markdown 標題空行問題 (MD022) |
 
-## 逐行分析 - feat(community): implement community registration audit, permission profiles, and facility reservation system (Pending)
+## 逐行分析 - feat(community): implement community registration audit, permission profiles, and facility reservation system (1176630)
 
 ### 變更檔案：
 - app/controller/v1/communityManager/ (CommunityManager_Approve.go, CommunityManager_Reject.go, CommunityManager_Controller.go, CommunityManager_add.go)
