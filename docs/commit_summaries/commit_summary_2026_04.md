@@ -2,10 +2,45 @@
 
 | SHA | 作者 | 日期 | 訊息 |
 | --- | --- | --- | --- |
+| (Pending) | Gemini CLI | 2026-04-17 | feat(community): implement community registration audit, permission profiles, and facility reservation system |
 | 595ac16 | kentlin0919 | 2026-04-11 | docs: add project analysis and feature planning documents |
 | 587abd5 | kentlin0919 | 2026-04-11 | fix(firebase): handle missing credentials and fix send message crash |
 | 4b7e8d9 | kentlin0919 | 2026-04-11 | chore(docker): setup docker-compose and vscode remote debug |
 | (Pending) | Antigravity | 2026-04-09 | fix(docs): 修正 Markdown 標題空行問題 (MD022) |
+
+## 逐行分析 - feat(community): implement community registration audit, permission profiles, and facility reservation system (Pending)
+
+### 變更檔案：
+- app/controller/v1/communityManager/ (CommunityManager_Approve.go, CommunityManager_Reject.go, CommunityManager_Controller.go, CommunityManager_add.go)
+- app/controller/v1/facility/ (Facility_Controller.go, Facility_Create.go)
+- app/controller/v1/permission/ (Permission_Controller.go, Permission_Update.go)
+- app/controller/v1/reservation/ (Reservation_Controller.go, Reservation_Create.go, Reservation_Cancel.go, Reservation_Reschedule.go)
+- app/models/ (community, facility, permission, reservation models)
+- app/repositories/ (community, facility, permission, reservation repositories)
+- database/ (CommunityRegisterApplication_Schema.go, CommunityPermissionProfile_Schema.go, Facility_DB, etc.)
+- middlewares/ (community_context_middleware.go, jwt_middleware.go, permission_middleware.go)
+- routers/api/v1/v1.go
+- utils/Jwt_Token.go
+- docs/ (swagger files and implementation docs)
+
+### 變更描述：
+實現完整的社區申請審核流程、社區專屬權限角色名稱定義，以及公用設施預約管理系統，並擴充 JWT 以支援多租戶隔離。
+
+### 分析細節：
+1. **社區管理 (Community Management)**:
+   - 重構 `CommunityManager_Register` 為申請單模式，狀態預設為 `pending`。
+   - 新增 `Approve` 與 `Reject` API，由 Super Admin 審核申請並自動建立正式社區與首位管理員。
+2. **權限管理 (Permission Management)**:
+   - 支援社區管理員自定義角色名稱（針對等級 3-7），並新增對應的查詢與更新 API。
+   - 擴充 `jwt_middleware.go` 以從 Token 提取 `user_id`, `permission_id` 與 `community_id` 並存入 Context。
+3. **設施與預約 (Facility & Reservation)**:
+   - 實作設施主檔建立功能（包含封面圖、位置、狀態等）。
+   - 實作預約系統核心邏輯：新增預約、取消預約、變更時段申請以及管理員核准變更時段。
+4. **JWT 與 安全 (Security)**:
+   - 擴充 `GenerateJWT` 函數，將關鍵身分與租戶資訊（CommunityID）加密至 Token 中，強化多租戶數據隔離。
+5. **API 文件與開發指南**:
+   - 更新 Swagger 定義以符合最新 API 規格。
+   - 針對新功能撰寫詳細的實作說明文件 (`Implementation_Doc.md`)。
 
 ## 逐行分析 - docs: add project analysis and feature planning documents (595ac16)
 

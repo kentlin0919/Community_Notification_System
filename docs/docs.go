@@ -15,6 +15,128 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/admin/facilities": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "社區管理員新增公用設施與預設預約條件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Facility Management"
+                ],
+                "summary": "新增預約設施",
+                "parameters": [
+                    {
+                        "description": "設施資料",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/facility.CreateFacilityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "設施新增成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "請求參數錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "無法取得登入資訊",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "403": {
+                        "description": "權限不足",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "409": {
+                        "description": "該社區已存在相同名稱的設施",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/permissions/profile": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "社區 Admin (或 Super admin) 可修改 PermissionID = 3~7 的顯示名稱。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Permission Management"
+                ],
+                "summary": "管理社區專屬角色名稱",
+                "parameters": [
+                    {
+                        "description": "更新請求",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/permission.UpdatePermissionProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "請求參數錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "無法取得登入資訊",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "403": {
+                        "description": "這不是允許您管理的社區",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/community/getlist": {
             "get": {
                 "security": [
@@ -101,12 +223,7 @@ const docTemplate = `{
         },
         "/api/v1/community/register": {
             "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "新增社區基本資料，欄位說明如下：\n- permission_id：綁定社區管理權限的唯一識別字串。\n- postal_code：社區所在地的郵遞區號，以數字表示便於郵遞與查詢。\n- municipality：社區所在的縣市名稱。\n- district：社區所在的鄉鎮市區名稱。\n- road_name：社區主要道路名稱，例如路、街或段。\n- lane_number：地址中的巷或弄號碼，若無請填 0。\n- alley_number：更細分的弄號碼或巷內編號，若無請填 0。\n- community_name：社區或大樓的正式名稱。\n- address：完整地址（含門牌號），提供精確位置資訊。",
+                "description": "社區申請人填寫基本資料送出申請，狀態預設為 pending。",
                 "consumes": [
                     "application/json"
                 ],
@@ -116,26 +233,24 @@ const docTemplate = `{
                 "tags": [
                     "CommunityManager"
                 ],
-                "summary": "新增社區",
+                "summary": "社區送出申請",
                 "parameters": [
                     {
-                        "description": "社區基本資料",
-                        "name": "community",
+                        "description": "社區申請資料",
+                        "name": "application",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/community.CommunityRegister"
+                            "$ref": "#/definitions/community.RegisterApplicationRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "成功新增社區",
+                        "description": "社區申請已送出",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -144,14 +259,129 @@ const docTemplate = `{
                             "$ref": "#/definitions/model.ErrorRequest"
                         }
                     },
-                    "401": {
-                        "description": "未授權",
+                    "500": {
+                        "description": "系統錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/community/register/{id}/approve": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "僅允許 Super admin 操作，核可後建立正式社區與初始 admin 帳號。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CommunityManager"
+                ],
+                "summary": "核可社區申請",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Application ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "核可成功，回傳社區與管理員資訊",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "請求錯誤或無此申請單",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "403": {
+                        "description": "權限不足",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorRequest"
                         }
                     },
                     "500": {
-                        "description": "系統錯誤",
+                        "description": "核可流程失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/community/register/{id}/reject": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "僅允許 Super admin 操作，駁回申請並提供原因。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CommunityManager"
+                ],
+                "summary": "駁回社區申請",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Application ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "駁回原因",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/community.RejectApplicationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "已駁回申請",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "請求錯誤或無此申請單",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "403": {
+                        "description": "權限不足",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "駁回流程失敗",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorRequest"
                         }
@@ -273,6 +503,38 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "系統錯誤或 JWT 簽發失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/permissions/profile": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "取得社區客製化的 3~7 等級角色。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Permission Management"
+                ],
+                "summary": "查詢社區角色列表",
+                "responses": {
+                    "200": {
+                        "description": "成功回傳",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "無法取得登入資訊",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorRequest"
                         }
@@ -533,38 +795,6 @@ const docTemplate = `{
                 }
             }
         },
-        "community.CommunityRegister": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "alley_number": {
-                    "type": "integer"
-                },
-                "community_name": {
-                    "type": "string"
-                },
-                "district": {
-                    "type": "string"
-                },
-                "lane_number": {
-                    "type": "integer"
-                },
-                "municipality": {
-                    "type": "string"
-                },
-                "permission_id": {
-                    "type": "string"
-                },
-                "postal_code": {
-                    "type": "integer"
-                },
-                "road_name": {
-                    "type": "string"
-                }
-            }
-        },
         "community.CommunitySummary": {
             "type": "object",
             "properties": {
@@ -603,6 +833,137 @@ const docTemplate = `{
                 "road_name": {
                     "type": "string",
                     "example": "濱海路一段"
+                }
+            }
+        },
+        "community.RegisterApplicationRequest": {
+            "type": "object",
+            "required": [
+                "address",
+                "admin_email",
+                "admin_name",
+                "admin_password",
+                "applicant_email",
+                "applicant_name",
+                "community_name",
+                "district",
+                "municipality",
+                "postal_code",
+                "road_name"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "251新北市淡水區濱海路一段306巷"
+                },
+                "admin_email": {
+                    "type": "string",
+                    "example": "admin@example.com"
+                },
+                "admin_name": {
+                    "type": "string",
+                    "example": "AdminName"
+                },
+                "admin_password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "password123"
+                },
+                "admin_phone": {
+                    "type": "string",
+                    "example": "0912345678"
+                },
+                "alley_number": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "applicant_email": {
+                    "type": "string",
+                    "example": "applicant@example.com"
+                },
+                "applicant_name": {
+                    "type": "string",
+                    "example": "ApplicantName"
+                },
+                "applicant_phone": {
+                    "type": "string",
+                    "example": "0987654321"
+                },
+                "community_name": {
+                    "type": "string",
+                    "example": "甜水郡社區"
+                },
+                "district": {
+                    "type": "string",
+                    "example": "淡水區"
+                },
+                "lane_number": {
+                    "type": "integer",
+                    "example": 306
+                },
+                "municipality": {
+                    "type": "string",
+                    "example": "新北市"
+                },
+                "postal_code": {
+                    "type": "integer",
+                    "example": 251
+                },
+                "remark": {
+                    "type": "string",
+                    "example": "申請建立測試社區"
+                },
+                "road_name": {
+                    "type": "string",
+                    "example": "濱海路一段"
+                }
+            }
+        },
+        "community.RejectApplicationRequest": {
+            "type": "object",
+            "properties": {
+                "reject_reason": {
+                    "type": "string",
+                    "example": "資訊不全，請重新申請"
+                }
+            }
+        },
+        "facility.CreateFacilityRequest": {
+            "type": "object",
+            "required": [
+                "community_id",
+                "facility_type",
+                "name"
+            ],
+            "properties": {
+                "community_id": {
+                    "type": "integer"
+                },
+                "cover_image": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "facility_type": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "draft",
+                        "active",
+                        "inactive",
+                        "maintenance"
+                    ]
                 }
             }
         },
@@ -663,6 +1024,27 @@ const docTemplate = `{
                 "Message": {
                     "type": "string",
                     "example": "message"
+                }
+            }
+        },
+        "permission.UpdatePermissionProfileRequest": {
+            "type": "object",
+            "required": [
+                "display_name",
+                "permission_id"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string",
+                    "maxLength": 50
+                },
+                "permission_id": {
+                    "type": "integer",
+                    "maximum": 7,
+                    "minimum": 3
                 }
             }
         },

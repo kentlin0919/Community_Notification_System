@@ -18,6 +18,10 @@ func NewPermissionInfoController() *PermissionInfoController {
 func (u *PermissionInfoController) PermissionInfoTable(DB *gorm.DB) {
 	// 檢查是否存在 UserInfo 表
 	common.NewCreateTableController().Base_Create_Table(DB, &PermissionInfo{}, "permission_info")
+	
+	// 建立社區自訂權限表
+	common.NewCreateTableController().Base_Create_Table(DB, &CommunityPermissionProfile{}, "community_permission_profile")
+	
 	if err := seedDefaultPermissions(DB); err != nil {
 		log.Printf("初始化 permission_info 預設資料失敗: %v", err)
 	}
@@ -25,12 +29,13 @@ func (u *PermissionInfoController) PermissionInfoTable(DB *gorm.DB) {
 
 func seedDefaultPermissions(db *gorm.DB) error {
 	defaultPermissions := []PermissionInfo{
-		{PermissionID: "1", Name: "系統管理員"},
-		{PermissionID: "2", Name: "社區管理員"},
-		{PermissionID: "3", Name: "保全"},
-		{PermissionID: "4", Name: "主委"},
-		{PermissionID: "5", Name: "委員"},
-		{PermissionID: "6", Name: "一般住戶"},
+		{PermissionID: "1", Name: "系統管理員 (Super Admin)"},
+		{PermissionID: "2", Name: "社區管理員 (Admin)"},
+		{PermissionID: "3", Name: "自訂角色 A (如: 保全)"},
+		{PermissionID: "4", Name: "自訂角色 B (如: 主委)"},
+		{PermissionID: "5", Name: "自訂角色 C (如: 委員)"},
+		{PermissionID: "6", Name: "自訂角色 D (如: 櫃台)"},
+		{PermissionID: "7", Name: "自訂角色 E (如: 財務)"},
 	}
 
 	for _, perm := range defaultPermissions {

@@ -70,6 +70,20 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		// 使用 claims
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			c.Set("username", claims["username"])
+			c.Set("user_id", claims["user_id"])
+			
+			// 支援從 float64/int 轉換
+			if pid, ok := claims["permission_id"].(float64); ok {
+				c.Set("permission_id", int(pid))
+			} else {
+				c.Set("permission_id", claims["permission_id"])
+			}
+			
+			if cid, ok := claims["community_id"].(float64); ok {
+				c.Set("community_id", uint64(cid))
+			} else {
+				c.Set("community_id", claims["community_id"])
+			}
 		}
 
 	}
