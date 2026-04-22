@@ -22,7 +22,7 @@ The project follows a clean architecture pattern, separating concerns into disti
 - **`app/controller/`**: Contains the business logic for handling requests. Controllers are responsible for parsing requests, validating input, and calling repositories to interact with the database.
 - **`app/models/`**: Defines the data structures and models used throughout the application, including request/response bodies and database entities.
 - **`app/repositories/`**: Implements the database operations, abstracting the data access logic from the controllers.
-- **`database/`**: Manages the database connection and schema creation. It uses GORM to automatically migrate the database schema on startup.
+- **`database/`**: Manages the database connection and schema creation. It uses GORM to automatically migrate the database schema on startup. (IoT-related schemas are reserved for future phases).
 - **`middlewares/`**: Includes custom middleware for CORS, JWT authentication, and cookie handling, providing a centralized way to manage cross-cutting concerns.
 - **`configs/`**: Handles application configuration, loading environment variables from a `.env` file.
 - **`docs/`**: Contains the auto-generated Swagger documentation, as well as other development documents like architecture diagrams and commit summaries.
@@ -85,7 +85,22 @@ Community_Notification_System/
 ├─ app/
 │  ├─ controller/
 │  │  └─ v1/
-│  │     ├─ v1.go                 # 控制器工廠，提供 Message/User 實例
+│  │     ├─ v1.go                 # 控制器工廠，提供各模組實例
+│  │     ├─ communityManager/
+│  │     │  ├─ CommunityManager_Controller.go
+│  │     │  ├─ CommunityManager_add.go
+│  │     │  ├─ CommunityManager_GetList.go
+│  │     │  ├─ CommunityManager_Approve.go
+│  │     │  └─ CommunityManager_Reject.go
+│  │     ├─ facility/
+│  │     │  └─ Facility_Controller.go
+│  │     ├─ reservation/
+│  │     │  └─ Reservation_Controller.go
+│  │     ├─ permission/
+│  │     │  └─ CommunityPermission_Controller.go
+│  │     ├─ platform/
+│  │     │  ├─ Platform_Controller.go
+│  │     │  └─ Platform_GetList.go
 │  │     ├─ message/
 │  │     │  ├─ Message_Controller.go
 │  │     │  └─ Message_SendMessage.go
@@ -95,44 +110,64 @@ Community_Notification_System/
 │  │        ├─ User_Login_test.go
 │  │        ├─ User_Register.go
 │  │        ├─ User_Delete.go
-│  │        └─ User_Update.go (預留)
+│  │        └─ User_Update.go
 │  ├─ models/
 │  │  ├─ account/                  # 登入/註冊請求與回應模型
-│  │  ├─ message/                  # 訊息推播請求模型
+│  │  ├─ community/                # 社區與申請單模型
+│  │  ├─ facility/                 # 設施主檔模型
+│  │  ├─ reservation/              # 預約與改期模型
+│  │  ├─ permission/               # 權限角色 Profile 模型
+│  │  ├─ platform/                 # 平台清單模型
+│  │  ├─ message/                  # 訊息推播模型
 │  │  ├─ model/                    # 共用錯誤與訊息結構
 │  │  └─ repository/               # 泛型回傳包裝器
 │  └─ repositories/
-│     ├─ user/                     # 使用者 CRUD、登入紀錄、查詢列表
-│     ├─ message/                  # 訊息相關查詢（預留）
-│     └─ home/                     # 住戶相關 repository（預留）
+│     ├─ user/                     # 使用者 CRUD
+│     ├─ community/                # 社區申請與審核
+│     ├─ facility/                 # 設施管理
+│     ├─ reservation/              # 預約邏輯
+│     ├─ permission/               # 權限 Profile 管理
+│     ├─ platform/                 # 平台查詢
+│     ├─ message/                  # 訊息相關
+│     └─ home/                     # 住戶相關
 ├─ configs/
 │  └─ config.go                    # 載入 .env
 ├─ database/
 │  ├─ db.go                        # 建立 GORM 連線並自動建表
-│  ├─ User_DB/                     # 使用者資料表 schema 與建表邏輯
+│  ├─ Community_DB/                # 社區與申請單 Schema
+│  ├─ Facility_DB/                 # 設施、規則、預約與改期 Schema
+│  ├─ Permission_DB/               # 權限與角色名稱 Schema
+│  ├─ Platform_DB/                 # 平台 Schema
+│  ├─ User_DB/                     # 使用者資料表 Schema
 │  ├─ UserLog_DB/                  # 使用者操作紀錄表
-│  ├─ Message_DB/                  # 訊息資料表（預留）
-│  └─ Home_DB/                     # 住戶資料表（預留）
+│  ├─ Message_DB/                  # 訊息資料表
+│  └─ Home_DB/                     # 住戶資料表
 ├─ middlewares/
 │  ├─ cors_middleware.go
 │  ├─ jwt_middleware.go
-│  └─ cookie_middleware.go
+│  ├─ cookie_middleware.go
+│  ├─ community_context_middleware.go # 解析社區 ID 上下文
+│  └─ permission_middleware.go        # 權限等級驗證
 ├─ routers/
 │  ├─ router.go                    # 註冊 /api/v1、/api/v2
 │  └─ api/
-│     ├─ v1/v1.go                  # v1 路由：登入、註冊、刪除、發送訊息
+│     ├─ v1/v1.go                  # v1 路由定義
 │     └─ v2/v2.go                  # 目前共用 v1 控制器
 ├─ utils/
 │  └─ Jwt_Token.go                 # JWT 簽發工具
 ├─ docs/
 │  ├─ README.md                   # 文件索引與分類說明
 │  ├─ architecture/               # 架構流程與時序圖文件
-│  ├─ commit_summaries/           # 月度 commit 摘要（新→舊）
-│  ├─ docs.go                     # Swag 產生的程式碼（勿手動修改）
-│  ├─ swagger.json                # Swagger 定義（自動生成）
-│  └─ swagger.yaml                # Swagger 定義（自動生成）
-├─ pkg/common/                     # 共用建表工具
-├─ tmp/                            # air 熱重載暫存（保持忽略）
+│  ├─ analysis/                   # 專案分析與類別圖 [含 IOT 未來規劃]
+│  │  └─ dashboard_design_spec.md  # 儀表板設計規格
+│  ├─ commit_summaries/           # 月度 commit 摘要
+│  ├─ docs.go                     # Swag 產生的程式碼
+│  ├─ swagger.json                # Swagger 定義
+│  └─ swagger.yaml                # Swagger 定義
+├─ pkg/
+│  ├─ common/                      # 共用建表工具
+│  └─ firebase/                    # Firebase FCM 初始化
+├─ tmp/                            # air 熱重載暫存
 ├─ AGENTS.md, GEMINI.md            # 專案補充說明
 └─ README.md                       # 本文件
 ```
@@ -164,7 +199,7 @@ Community_Notification_System/
 ## 開發文件管理
 
 - 必須放在 /docs
-- 必須依照種類建立資料夾並依照種類存放
+- 必須依照種類及功能建立資料夾並依照種類存放
 - 除了 swagger 相關的不處理
 - 自動處理相關條件
 

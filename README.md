@@ -32,7 +32,7 @@ Community Notification System 是以 Gin + GORM 打造的 RESTful 服務，提�
 - **docs/features/community_management/**：社區管理大項功能資料夾，集中管理社區建立與社區查詢等文件。
 - **docs/features/facility_booking/**：設施預約大項功能資料夾，集中管理新增設施、預約設計、改期與取消等文件。
 - **app/repositories/**：封裝資料庫操作，回傳帶狀態的泛型結果模型。
-- **database/**：集中初始化邏輯與各資料表 schema，啟動時自動建表。
+- **database/**：集中初始化邏輯與各資料表 schema，啟動時自動建表。IOT 相關資料表已預留，但目前非開發重點。
 - **utils/**：目前提供 JWT 簽發工具，從 `JWTPASSWORD` 讀取密鑰。
 
 ## 檔案結構
@@ -43,7 +43,22 @@ Community_Notification_System/
 ├─ app/
 │  ├─ controller/
 │  │  └─ v1/
-│  │     ├─ v1.go                 # 控制器工廠，提供 Message/User 實例
+│  │     ├─ v1.go                 # 控制器工廠，提供各模組實例
+│  │     ├─ communityManager/
+│  │     │  ├─ CommunityManager_Controller.go
+│  │     │  ├─ CommunityManager_add.go
+│  │     │  ├─ CommunityManager_GetList.go
+│  │     │  ├─ CommunityManager_Approve.go
+│  │     │  └─ CommunityManager_Reject.go
+│  │     ├─ facility/
+│  │     │  └─ Facility_Controller.go
+│  │     ├─ reservation/
+│  │     │  └─ Reservation_Controller.go
+│  │     ├─ permission/
+│  │     │  └─ CommunityPermission_Controller.go
+│  │     ├─ platform/
+│  │     │  ├─ Platform_Controller.go
+│  │     │  └─ Platform_GetList.go
 │  │     ├─ message/
 │  │     │  ├─ Message_Controller.go
 │  │     │  └─ Message_SendMessage.go
@@ -53,55 +68,65 @@ Community_Notification_System/
 │  │        ├─ User_Login_test.go
 │  │        ├─ User_Register.go
 │  │        ├─ User_Delete.go
-│  │        └─ User_Update.go (預留)
+│  │        └─ User_Update.go
 │  ├─ models/
 │  │  ├─ account/                  # 登入/註冊請求與回應模型
-│  │  ├─ message/                  # 訊息推播請求模型
+│  │  ├─ community/                # 社區與申請單模型
+│  │  ├─ facility/                 # 設施主檔模型
+│  │  ├─ reservation/              # 預約與改期模型
+│  │  ├─ permission/               # 權限角色 Profile 模型
+│  │  ├─ platform/                 # 平台清單模型
+│  │  ├─ message/                  # 訊息推播模型
 │  │  ├─ model/                    # 共用錯誤與訊息結構
 │  │  └─ repository/               # 泛型回傳包裝器
 │  └─ repositories/
-│     ├─ user/                     # 使用者 CRUD、登入紀錄、查詢列表
-│     ├─ message/                  # 訊息相關查詢（預留）
-│     └─ home/                     # 住戶相關 repository（預留）
+│     ├─ user/                     # 使用者 CRUD
+│     ├─ community/                # 社區申請與審核
+│     ├─ facility/                 # 設施管理
+│     ├─ reservation/              # 預約邏輯
+│     ├─ permission/               # 權限 Profile 管理
+│     ├─ platform/                 # 平台查詢
+│     ├─ message/                  # 訊息相關
+│     └─ home/                     # 住戶相關
 ├─ configs/
 │  └─ config.go                    # 載入 .env
 ├─ database/
 │  ├─ db.go                        # 建立 GORM 連線並自動建表
-│  ├─ User_DB/                     # 使用者資料表 schema 與建表邏輯
+│  ├─ Community_DB/                # 社區與申請單 Schema
+│  ├─ Facility_DB/                 # 設施、規則、預約與改期 Schema
+│  ├─ Permission_DB/               # 權限與角色名稱 Schema
+│  ├─ Platform_DB/                 # 平台 Schema
+│  ├─ User_DB/                     # 使用者資料表 Schema
 │  ├─ UserLog_DB/                  # 使用者操作紀錄表
-│  ├─ Message_DB/                  # 訊息資料表（預留）
-│  └─ Home_DB/                     # 住戶資料表（預留）
+│  ├─ Message_DB/                  # 訊息資料表
+│  └─ Home_DB/                     # 住戶資料表
 ├─ middlewares/
 │  ├─ cors_middleware.go
 │  ├─ jwt_middleware.go
 │  ├─ cookie_middleware.go
-│  └─ community_context_middleware.go # 規劃中：建立 community_id 上下文
+│  ├─ community_context_middleware.go # 解析社區 ID 上下文
+│  └─ permission_middleware.go        # 權限等級驗證
 ├─ routers/
 │  ├─ router.go                    # 註冊 /api/v1、/api/v2
 │  └─ api/
-│     ├─ v1/v1.go                  # v1 路由：登入、註冊、刪除、發送訊息
+│     ├─ v1/v1.go                  # v1 路由定義
 │     └─ v2/v2.go                  # 目前共用 v1 控制器
 ├─ utils/
 │  └─ Jwt_Token.go                 # JWT 簽發工具
 ├─ docs/
-│  ├─ README.md                   # 文件索引與分類說明
-│  ├─ architecture/               # 架構流程與時序圖文件
-│  ├─ analysis/                   # 專案分析、整體流程與類別關係文件
-│  ├─ commit_summaries/           # 月度 commit 摘要（新→舊）
-│  ├─ features/                   # 功能文件，採一個功能一個資料夾管理
-│  │  ├─ community_management/    # 社區管理大項功能資料夾（規劃中）
-│  │  │  ├─ community_getlist/    # 社區列表查詢功能文件
-│  │  │  └─ community_register/   # 新增社區功能文件
-│  │  ├─ facility_booking/        # 設施預約大項功能資料夾（規劃中）
-│  │  │  ├─ facility_create/      # 新增預約設施功能文件
-│  │  │  ├─ facility_reservation/ # 社區基本設施預約設計文件
-│  │  │  ├─ reservation_reschedule_request/ # 申請更改預約時間功能文件
-│  │  │  └─ reservation_cancel/   # 取消預約功能文件
-│  ├─ docs.go                     # Swag 產生的程式碼（勿手動修改）
-│  ├─ swagger.json                # Swagger 定義（自動生成）
-│  └─ swagger.yaml                # Swagger 定義（自動生成）
-├─ pkg/common/                     # 共用建表工具
-├─ tmp/                            # air 熱重載暫存（保持忽略）
+│  ├─ api/                 # API 相關 (Swagger, JSON Schema, docs.go)
+│  ├─ analysis/            # 業務分析與需求規格 (PRD, Business Analysis)
+│  ├─ architecture/        # 架構流程與 UML 圖 (UML, Sequence) [含 IOT 未來規劃]
+│  ├─ design/              # UI/UX 設計與 Stitch 生成紀錄
+│  ├─ system/              # 系統環境與資料庫設計 (Security, Schema)
+│  ├─ management/          # 專案管理與 Roadmap (Commit Summaries)
+│  └─ README.md            # 文件總索引
+├─ pkg/
+│  ├─ common/                      # 共用建表工具
+│  └─ firebase/                    # Firebase FCM 初始化
+├─ scripts/
+│  └─ install_dependencies.sh      # 環境安裝腳本
+├─ tmp/                            # air 熱重載暫存
 ├─ AGENTS.md, GEMINI.md            # 專案補充說明
 └─ README.md                       # 本文件
 ```
@@ -190,7 +215,7 @@ sequenceDiagram
     participant Ctrl as MessageController
     participant Repo as UserRepository
     participant DB as PostgreSQL
-    participant Queue as 通知服務 (預留)
+    participant FCM as Firebase FCM
     Client->>Gin: Authorization: Bearer token\nPOST /api/v1/sendmessage
     Gin->>JWTmw: 驗證 JWT
     JWTmw-->>Gin: 驗證通過
@@ -199,31 +224,102 @@ sequenceDiagram
     Ctrl->>Repo: UserInfoListRepository(userList)
     loop 每位收件者
         Repo->>DB: SELECT user WHERE email = ?
-        DB-->>Repo: UserInfo or nil
+        DB-->>Repo: UserInfo (含 FcmToken)
     end
     Repo-->>Ctrl: 收件者清單
-    Ctrl->>Queue: 推播/通知整合（待擴充）
+    Ctrl->>FCM: 呼叫 FcmClient.Send()
+    FCM-->>Ctrl: Success/Fail
     Ctrl-->>Client: 200 OK + 收件結果摘要
 ```
 
-> 註：訊息推播目前完成收件者查詢流程，實際派送邏輯可在 `app/repositories/message` 或整合外部服務時補強。
+### 社區註冊審核 (`PATCH /api/v1/community/register/:id/approve`)
+
+```mermaid
+sequenceDiagram
+    participant Admin as Super Admin
+    participant RG as Gin Group
+    participant Ctrl as CommunityCtrl
+    participant Repo as CommunityRepo
+    participant URepo as UserRepo
+    participant DB as PostgreSQL
+    Admin->>RG: PATCH /community/register/{id}/approve
+    RG->>Ctrl: CommunityManager_Approve(ctx)
+    Ctrl->>Ctrl: 檢查者身分 (PermissionID=1)
+    Ctrl->>Repo: GetApplicationByID(id)
+    Repo->>DB: SELECT application
+    Ctrl->>URepo: 檢查 Admin Email 是否重複
+    Ctrl->>Repo: ApproveApplicationTransaction(...)
+    Note over Repo, DB: 啟動 Transaction
+    Repo->>DB: INSERT community_info
+    Repo->>DB: INSERT user_info (Admin)
+    Repo->>DB: UPDATE application status='approved'
+    Note over Repo, DB: Commit Transaction
+    Ctrl-->>Admin: 200 OK (社區與管理員資訊)
+```
+
+### 設施預約 (`POST /api/v1/facilities/:id/reservations`)
+
+```mermaid
+sequenceDiagram
+    participant User as 住戶
+    participant MW as CommunityContextMW
+    participant Ctrl as ReservationCtrl
+    participant Repo as ReservationRepo
+    participant DB as PostgreSQL
+    User->>MW: POST /facilities/{id}/reservations
+    MW->>MW: 解析 community_id 並驗證
+    MW->>Ctrl: CreateReservation(ctx)
+    Ctrl->>DB: SELECT facility & rules
+    Ctrl->>Repo: CreateReservationRepository(...)
+    Repo->>Repo: CheckConflict (檢查時段重疊)
+    Repo->>DB: INSERT facility_reservation
+    Ctrl-->>User: 201 Created
+```
+
+### 預約改期申請 (`POST /api/v1/reservations/:id/reschedule`)
+
+```mermaid
+sequenceDiagram
+    participant User as 住戶
+    participant Admin as 社區管理員
+    participant Ctrl as ReservationCtrl
+    participant Repo as ReservationRepo
+    participant DB as PostgreSQL
+    User->>Ctrl: Reschedule(req)
+    Ctrl->>Repo: CreateRescheduleRequest(...)
+    Repo->>DB: INSERT reschedule_request (status=pending)
+    User-->>Admin: (等待審核通知)
+    Admin->>Ctrl: AdminApproveReschedule(id, isApprove=true)
+    Ctrl->>Repo: ApproveRescheduleRequestRepo(...)
+    Note over Repo, DB: 啟動 Transaction
+    Repo->>DB: UPDATE facility_reservation (Time)
+    Repo->>DB: UPDATE reschedule_request (approved)
+    Note over Repo, DB: Commit Transaction
+    Ctrl-->>Admin: 200 OK (改期成功)
+```
+
+### 權限角色自定義 (`PUT /api/v1/admin/permissions/profile`)
+
+```mermaid
+sequenceDiagram
+    participant Admin as 社區管理員
+    participant Ctrl as PermissionCtrl
+    participant Repo as PermissionRepo
+    participant DB as PostgreSQL
+    Admin->>Ctrl: UpdatePermissionProfile(roleNames)
+    Ctrl->>Ctrl: 提取 community_id
+    Ctrl->>Repo: UpdateCommunityPermissionProfile(...)
+    Repo->>DB: UPSERT community_permission_profile\n(針對該社區的 PermissionID 3-7)
+    Ctrl-->>Admin: 200 OK (設定已儲存)
+```
 
 ## 文件索引
-- `docs/analysis/project_analysis.md`：專案分析文件，整理架構、模組分工、資料表、整體 activity diagram、sequence diagram 與 class diagram。
-- `docs/features/README.md`：功能文件索引，列出各功能資料夾。
-- `docs/features/user_login/README.md`：使用者登入功能文件。
-- `docs/features/user_register/README.md`：使用者註冊功能文件。
-- `docs/features/user_delete/README.md`：使用者刪除功能文件。
-- `docs/features/community_management/community_getlist/README.md`：社區列表查詢功能文件。
-- `docs/features/community_management/community_register/README.md`：社區送出申請，並由 Super admin 審核核可後建立社區與初始社區 admin 的功能文件。
-- `docs/features/platform_getlist/README.md`：平台列表查詢功能文件。
-- `docs/features/message_send/README.md`：發送通知功能文件。
-- `docs/features/permission_management/README.md`：權限管理共用規格，定義 `PermissionID 1 ~ 7` 的權限階層與社區範圍。
-- `docs/features/facility_booking/facility_create/README.md`：新增預約設施功能文件，聚焦設施主檔建立與預設規則初始化。
-- `docs/features/facility_booking/facility_reservation/README.md`：社區基本設施預約設計文件，包含 Activity、Sequence、Class Diagram 與資料表草案。
-- `docs/features/facility_booking/reservation_reschedule_request/README.md`：申請更改預約時間功能文件，包含改期流程、時序圖與資料設計建議。
-- `docs/features/facility_booking/reservation_cancel/README.md`：取消預約功能文件，包含取消流程、違規規則與通知設計。
-- `docs/architecture/router_flow.md`：路由與 middleware 請求流向補充說明。
+- `docs/analysis/PRD_Dashboard.md`：首頁儀表板需求規格書。
+- `docs/analysis/PRD_Smart_Access.md`：智慧通行與門禁訪客需求規格書。
+- `docs/analysis/Business_Analysis.md`：專案整體業務邏輯與流程分析。
+- `docs/management/Smart_Community_Roadmap.md`：智慧社區功能矩陣與未來發展藍圖。
+- `docs/system/Database_Schema_Extended.md`：智慧社區 2.0 擴展資料庫設計 (門禁、維修、能耗) [未來規劃]。
+- `docs/architecture/`：存放 UML、時序圖與類別圖。
 - `docs/README.md`：`docs` 目錄總索引。
 
 ## 環境安裝指南
@@ -414,7 +510,7 @@ docker run --name postgres \
 - `user_log`：記錄登入等操作行為，包含時間戳與動作描述。
 - `message_info`、`home_info`：預留表格，啟動時若不存在將自動建立。
 - 後續 `community/register` 建議以 transaction 同步建立 `community_info` 與該社區的初始 `admin user_info`。
-- 設施預約功能目前已完成文件設計，資料表規劃詳見 `docs/features/facility_booking/facility_reservation/README.md`，尚未實作至 `database/`。
+- 設施預約功能目前已完成文件設計，資料表規劃詳見 `docs/features/facility_booking/facility_reservation/README.md`，尚未實作至 `database/`。IOT 相關模組資料表 (IoT_DB) 已預留設計，但目前不在第一階段開發範圍。
 - 建表邏輯集中於 `database/`，調整 schema 時請同步更新對應模型與自動遷移流程。
 
 ## 中介層與安全性

@@ -13,30 +13,33 @@
    - `middlewares.CORSMiddleware()`：設定跨域標頭。
    - `middlewares.JWTAuthMiddleware()`：驗證 JWT，並將驗證資訊存放於 `Context`。
    - `middlewares.CookieMiddleware()`：處理 Cookie（讀取 / 寫入）。
-   - `middlewares.CommunityContextMiddleware()`：規劃中。建立本次請求的 `community_id` 上下文，後續社區型資料一律在該範圍內處理。
+   - `middlewares.CommunityContextMiddleware()`：解析並驗證 `community_id` 上下文，確保多租戶資料隔離。
+   - `middlewares.PermissionMiddleware()`：驗證使用者權限等級。
 3. 請求進入 `/api` 路由群組後，由 `routers.RegisterRoutes` 將路徑導向對應版本（`/v1` 或 `/v2`）。
-4. 在版本化路由群組內（例如 `routers/api/v1/v1.go`），依 HTTP 方法與路徑綁定到控制器，例如 `v1.User().UserLogin`。
-5. 控制器執行對應的商業流程：驗證輸入、從 `Context` 取得 `community_id`、呼叫服務 / 資料存取層、產生回應。
-6. Repository 進行資料查詢或異動時，應將 `community_id` 作為必要條件，避免跨社區操作。
+4. 在版本化路由群組內（例如 `routers/api/v1/v1.go`），依 HTTP 方法與路徑綁定到控制器。
+5. 控制器執行對應的商業流程：從 `Context` 取得 `community_id`、驗證輸入、呼叫 Repository。
+6. Repository 執行資料存取時，必須將 `community_id` 作為必要條件，避免跨租戶操作。
 7. Gin 將控制器的回應序列化為 JSON，並送回客戶端。
 
 ## 社區上下文規則
 - 住戶與社區管理員登入後，JWT 應帶入 `community_id`。
-- `CommunityContextMiddleware()` 應優先從 JWT claims 取得 `community_id`，必要時再驗證 Header、Path 或 Query 的目標社區是否一致。
-- 一般住戶不可任意指定其他社區。
-- 社區管理員只能操作自己管理的社區。
-- 平台管理員若支援跨社區操作，也必須明確指定目標 `community_id`，且需通過權限驗證。
-- 建議跳過社區上下文判斷的路由：`/login`、`/register`、`/platform/getlist`、`/community/getlist`、`/community/register`、Swagger。
+- `CommunityContextMiddleware()` 優先從 JWT claims 取得 `community_id`。
+- 一般住戶不可任意指定其他社區，社區管理員只能操作所屬社區。
+- 平台管理員若進行跨社區操作，需明確指定目標 `community_id` 並通過權限驗證。
+- 免除社區上下文驗證的路由：`/login`、`/register`、`/platform/getlist`、`/community/getlist`、`/community/register`、Swagger。
 
 ## 主要路由總覽
-| 版本 | 方法 | 路徑 | 控制器方法 |
-|------|------|------|------------|
-| v1 / v2 | POST | `/login` | `app/controller/v1/user_controller.go:UserLogin` |
-| v1 / v2 | POST | `/register` | `app/controller/v1/user_controller.go:UserRegister` |
-| v1 / v2 | POST | `/deleteUser` | `app/controller/v1/user_controller.go:UserDelete` |
-| v1 / v2 | POST | `/sendmessage` | `app/controller/v1/message_controller.go:SendMessage` |
+| 版本 | 方法 | 路徑 | 控制器方法 | 說明 |
+|------|------|------|------------|------|
+| v1 | POST | `/login` | `UserLogin` | 登入 |
+| v1 | POST | `/register` | `UserRegister` | 註冊 |
+| v1 | PATCH | `/community/register/:id/approve` | `CommunityManager_Approve` | 審核社區申請 |
+| v1 | POST | `/admin/facilities` | `CreateFacility` | 建立設施 |
+| v1 | POST | `/facilities/:id/reservations` | `CreateReservation` | 預約設施 |
+| v1 | PATCH | `/reservations/:id/cancel` | `CancelReservation` | 取消預約 |
+| v1 | POST | `/reservations/:id/reschedule` | `Reschedule` | 申請改期 |
 
-> 註：v2 目前共用 v1 控制器實作，若未來功能差異化，只需在 `routers/api/v2` 建立新的控制器綁定即可。
+> 註：v2 目前共用 v1 控制器實作，若未來版本差異化，只需在 `routers/api/v2` 建立獨立控制器綁定即可。
 
 ## 時序圖：`POST /api/v1/login`
 ```mermaid

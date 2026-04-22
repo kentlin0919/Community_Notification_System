@@ -2,11 +2,38 @@
 
 | SHA | 作者 | 日期 | 訊息 |
 | --- | --- | --- | --- |
+| (Session) | Antigravity | 2026-04-20 | doc: 維護專案文件 (README, GEMINI, Analysis, Router Flow) 以符合實作現況 |
 | 1176630 | Gemini CLI | 2026-04-17 | feat(community): implement community registration audit, permission profiles, and facility reservation system |
 | 595ac16 | kentlin0919 | 2026-04-11 | docs: add project analysis and feature planning documents |
 | 587abd5 | kentlin0919 | 2026-04-11 | fix(firebase): handle missing credentials and fix send message crash |
 | 4b7e8d9 | kentlin0919 | 2026-04-11 | chore(docker): setup docker-compose and vscode remote debug |
 | (Pending) | Antigravity | 2026-04-09 | fix(docs): 修正 Markdown 標題空行問題 (MD022) |
+
+## 逐行分析 - doc: 維護專案文件 (README, GEMINI, Analysis, Router Flow) (Session)
+
+### 變更檔案：
+- README.md
+- GEMINI.md
+- docs/analysis/project_analysis.md
+- docs/architecture/router_flow.md
+- docs/commit_summaries/commit_summary_2026_04.md
+
+### 變更描述：
+同步功能開發現況至各項文件，包含檔案結構、核心功能時序圖、API 總覽與成熟度觀察。
+
+### 分析細節：
+1. **README.md**:
+   - 加入設施預約、社區審核、預約改期與權限 Profile 的 Mermaid 時序圖。
+   - 修正檔案結構樹與核心功能描述。
+2. **GEMINI.md**:
+   - 修正檔案結構樹，移除「預留」標籤，同步最新目錄結構。
+3. **project_analysis.md**:
+   - 更新 API 總覽表。
+   - 擴充類別圖 (Class Diagram) 以納入設施與預約模型。
+   - 更新「功能成熟度觀察」，確認社區審核與設施系統已實作完成。
+4. **router_flow.md**:
+   - 更新中介層列表（加入 Permission 與 CommunityContext 中介層）。
+   - 更新路由表，移除過時的範例。
 
 ## 逐行分析 - feat(community): implement community registration audit, permission profiles, and facility reservation system (1176630)
 

@@ -62,7 +62,11 @@
 負責資料存取邏輯與 GORM 操作。
 
 - `app/repositories/user/User_repository.go`
+- `app/repositories/community/CommunityRegisterApplication.go`
 - `app/repositories/community/community_repository.go`
+- `app/repositories/facility/Facility_Repository.go`
+- `app/repositories/reservation/Reservation_Repository.go`
+- `app/repositories/permission/CommunityPermissionProfile_Repository.go`
 - `app/repositories/platform/Platform_repository.go`
 - `app/repositories/message/Message_repository.go`
 
@@ -101,8 +105,14 @@
 | User | POST | `/api/v1/deleteUser` | 刪除使用者 | 是 |
 | Message | POST | `/api/v1/sendmessage` | 發送 FCM 推播 | 是 |
 | Community | GET | `/api/v1/community/getlist` | 查詢社區清單 | 是 |
-| Community | POST | `/api/v1/community/register` | 社區送出申請 | 否或依產品策略 |
-| Community | PATCH | `/api/v1/community/register/:id/approve` | Super admin 核可申請並建立社區與初始 admin | 是 |
+| Community | POST | `/api/v1/community/register` | 社區送出申請（申請單） | 否 |
+| Community | PATCH | `/api/v1/community/register/:id/approve` | Super Admin 審核核可 | 是 |
+| Community | PATCH | `/api/v1/community/register/:id/reject` | Super Admin 審核駁回 | 是 |
+| Permission | PUT | `/api/v1/admin/permissions/profile` | 設定社區自定義角色名稱 | 是 |
+| Facility | POST | `/api/v1/admin/facilities` | 建立預約設施主檔 | 是 |
+| Reservation | POST | `/api/v1/facilities/:id/reservations` | 建立設施預約 | 是 |
+| Reservation | PATCH | `/api/v1/reservations/:id/cancel` | 取消設施預約 | 是 |
+| Reservation | POST | `/api/v1/reservations/:id/reschedule` | 申請改期 | 是 |
 | Platform | GET | `/api/v1/platform/getlist` | 查詢平台清單 | 否 |
 
 ## 5. 資料模型分析
@@ -230,86 +240,86 @@ classDiagram
       +UserDelete(ctx)
     }
 
-    class MessageController {
-      +SendMessage(ctx)
-    }
-
     class CommunityManagerController {
-      +CommunityManager_GetList(ctx)
       +CommunityManager_Register(ctx)
+      +CommunityManager_Approve(ctx)
     }
 
-    class PlatformController {
-      +Platform_GetList(ctx)
+    class FacilityController {
+      +CreateFacility(ctx)
     }
 
-    class RepositoryModel~T~ {
-      +gorm.DB Statue
-      +T Result
+    class ReservationController {
+      +CreateReservation(ctx)
+      +Reschedule(ctx)
     }
 
     class UserInfo {
       +ID string
       +Email string
-      +Password string
       +PermissionId int
-      +Session_id string
       +Community_id uint64
     }
 
     class CommunityInfo {
       +Community_id uint64
-      +Municipality string
-      +District string
       +Community_name string
-      +Address string
     }
 
-    class PlatformInfo {
-      +ID int
-      +Platform string
+    class CommunityRegisterApplication {
+      +ID uint64
+      +CommunityName string
+      +AdminEmail string
+      +Status string
     }
 
-    class MessageInfo {
-      +ID string
+    class FacilityInfo {
+      +ID uint64
+      +CommunityID uint64
+      +Name string
+      +Status string
+    }
+
+    class FacilityReservation {
+      +ID uint64
+      +FacilityID uint64
       +UserID string
-      +Email string
-      +Title string
-      +Detail string
+      +ReservationDate string
     }
 
-    UserController --> RepositoryModel : 使用
-    MessageController --> RepositoryModel : 使用
-    CommunityManagerController --> RepositoryModel : 使用
-    PlatformController --> RepositoryModel : 使用
-    RepositoryModel --> UserInfo
-    RepositoryModel --> CommunityInfo
-    RepositoryModel --> PlatformInfo
-    RepositoryModel --> MessageInfo
+    class CommunityPermissionProfile {
+      +CommunityID uint64
+      +PermissionID int
+      +RoleName string
+    }
+
+    UserInfo --> CommunityInfo : 屬於
+    CommunityRegisterApplication ..> CommunityInfo : 核可後建立
+    FacilityInfo --> CommunityInfo : 屬於
+    FacilityReservation --> FacilityInfo : 預約
+    FacilityReservation --> UserInfo : 由...預約
+    CommunityPermissionProfile --> CommunityInfo : 定義角色名
 ```
 
 ## 9. 功能成熟度觀察
 
 ### 已具備的能力
 
-- 使用者登入含密碼雜湊驗證
-- 使用者註冊含 JWT 與 Session Cookie
-- 社區資料查詢與新增
-- 平台列表查詢
-- FCM 單次推播發送
-- 自動建表與預設資料 seed
+- 使用者登入/註冊/刪除 (JWT + Session Cookie)
+- 社區申請單審核流程 (Super Admin Approve/Reject)
+- 設施主檔建立與規則配置
+- 設施預約、取消與改期申請流程
+- 社區自定義角色名稱設定 (Permission Profiles)
+- FCM 推播發送整合
+- 多租戶隔離中介層 (CommunityContextMiddleware)
 
 ### 尚未完整落地的部分
 
-- `v2` 路由尚未真正獨立版本化
+- `v2` 路由尚未真正開發獨立邏輯
 - `UserUpdate` 尚未實作
-- `sendmessage` 雖有 `message_info` schema 與 repository，但 controller 未落庫
-- JWT middleware 白名單以字串比對，Swagger 路由比對較脆弱
-- 尚未建立 `CommunityContextMiddleware`，目前缺少「請求屬於哪一個社區」的統一判斷機制
-- repository 多數仍未全面以 `community_id` 做查詢隔離，後續新增預約與設施功能時需優先補齊
-- `community/register` 目前仍只建立社區主檔，尚未支援申請單、`Super admin` 審核與核可後建立該社區初始 admin
-- `CORSMiddleware` 設定 `Allow-Origin: *` 與 `Allow-Credentials: true` 併用，瀏覽器端存在規格風險
-- 專案命名為 clean architecture，但目前尚屬分層式 MVC / Repository 結構
+- 首頁儀表板數據彙整 API (例如：查詢我的預約、最近公告)
+- 權限管理更細部的 Action-based 授權 (目前僅用 Level 判斷)
+- 專案架構正朝 Clean Architecture 演進，目前較接近分層式 MVC
 
 ## 10. 建議後續整理方向
 

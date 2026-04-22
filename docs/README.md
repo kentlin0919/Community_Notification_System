@@ -7,8 +7,14 @@
 ### `architecture/`
 - `router_flow.md`：說明路由註冊、middleware 鏈與登入請求流向。
 
+### `skills/`
+- [Skills 總覽](skills/README.md)：定義專案中的 AI 代理人工作流與標準化任務指令集。
+- [自動化審核](skills/skill_auto_approval.md)：定義社區申請單的自動檢核與決策邏輯。
+- [系統維護](skills/skill_maintenance_cron.md)：定義清理過期數據與系統檢查的維護任務。
+- [訊息推播](skills/skill_notification_dispatch.md)：標準化訊息分發與 Firebase FCM 整合工作流。
+
 ### `analysis/`
-- `project_analysis.md`：專案整體分析，包含架構盤點、資料模型、整體 activity diagram、整體 sequence diagram 與 class diagram。
+- `project_analysis.md`：專案整體分析，包含架架構盤點 ... (含 IOT 未來規劃)。
 
 ### `features/`
 - `README.md`：功能文件索引，說明功能資料夾命名與維護規範。
@@ -24,6 +30,8 @@
 - `facility_booking/`：設施預約大項功能資料夾。
 - `facility_booking/facility_create/README.md`：新增預約設施功能文件，聚焦設施主檔建立流程與驗證規則。
 - `facility_booking/facility_reservation/README.md`：社區基本設施預約設計文件，包含流程圖、功能拆分、類別圖與資料表草案。
+- `facility_booking/detailed_design_plan.md`：預約系統詳細設計規劃，包含時段衝突檢查、容量控管、違規停權與核銷流程。
+- `facility_booking/ui_specification.md`：預約系統 UI/UX 詳細規劃，定義住戶端與管理端各頁面的欄位、組件與互動邏輯。
 - `facility_booking/reservation_reschedule_request/README.md`：申請更改預約時間功能文件，說明改期流程、驗證規則與資料設計建議。
 - `facility_booking/reservation_cancel/README.md`：取消預約功能文件，說明取消規則、違規處理與通知流程。
 
