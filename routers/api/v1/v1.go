@@ -46,4 +46,9 @@ func V1Routes(rg *gin.RouterGroup) {
 	// 取得平台列表
 	rg.GET("/platform/getlist", v1.Platform().Platform_GetList)
 
+	// 包裹管理
+	rg.POST("/parcels", v1.Parcel().CreateParcel)
+	rg.GET("/parcels", v1.Parcel().GetParcelList)
+	rg.PUT("/parcels/:id/pickup", v1.Parcel().PickupParcel)
+
 }

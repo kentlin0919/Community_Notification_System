@@ -4,6 +4,7 @@ import (
 	"Community_Notification_System/app/controller/v1/communityManager"
 	"Community_Notification_System/app/controller/v1/facility"
 	"Community_Notification_System/app/controller/v1/message"
+	"Community_Notification_System/app/controller/v1/parcel"
 	"Community_Notification_System/app/controller/v1/permission"
 	"Community_Notification_System/app/controller/v1/reservation"
 	platform "Community_Notification_System/app/controller/v1/platform"
@@ -42,4 +43,9 @@ func Facility() *facility.FacilityController {
 // Reservation 回傳設施預約控制器
 func Reservation() *reservation.ReservationController {
 	return reservation.NewReservationController()
+}
+
+// Parcel 回傳包裹管理控制器
+func Parcel() *parcel.ParcelController {
+	return parcel.NewParcelController()
 }
