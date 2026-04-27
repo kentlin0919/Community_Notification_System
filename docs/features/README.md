@@ -11,6 +11,7 @@
 - `community_management/community_register/`：新增社區
 - `platform_getlist/`：平台列表查詢
 - `message_send/`：發送通知
+- `parcel_management/`：包裹管理（代收與領取）
 - `permission_management/`：權限管理共用規格
 - `facility_booking/`：設施預約大項功能資料夾
 - `facility_booking/facility_create/`：新增預約設施

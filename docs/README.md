@@ -26,6 +26,9 @@
 - `community_management/community_register/README.md`：新增社區功能文件。
 - `platform_getlist/README.md`：平台列表查詢功能文件。
 - `message_send/README.md`：發送通知功能文件。
+- `parcel_management/README.md`：包裹管理功能文件總覽，涵蓋代收錄入與住戶領取。
+- `parcel_management/parcel_receive/README.md`：管理員代收包裹流程。
+- `parcel_management/parcel_pickup/README.md`：住戶領取包裹流程。
 - `permission_management/README.md`：權限管理共用規格，定義 `Super admin`、`Admin` 與 `PermissionID 3 ~ 7` 的授權規則。
 - `facility_booking/`：設施預約大項功能資料夾。
 - `facility_booking/facility_create/README.md`：新增預約設施功能文件，聚焦設施主檔建立流程與驗證規則。

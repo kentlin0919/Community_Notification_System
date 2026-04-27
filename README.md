@@ -31,6 +31,7 @@ Community Notification System 是以 Gin + GORM 打造的 RESTful 服務，提�
 - **app/controller/v1/**：依功能拆分 `user` 與 `message` 控制器，負責請求驗證與呼叫 repository。
 - **docs/features/community_management/**：社區管理大項功能資料夾，集中管理社區建立與社區查詢等文件。
 - **docs/features/facility_booking/**：設施預約大項功能資料夾，集中管理新增設施、預約設計、改期與取消等文件。
+- **docs/features/parcel_management/**：包裹管理功能資料夾，包含管理員代收錄入與住戶領取流程。
 - **app/repositories/**：封裝資料庫操作，回傳帶狀態的泛型結果模型。
 - **database/**：集中初始化邏輯與各資料表 schema，啟動時自動建表。IOT 相關資料表已預留，但目前非開發重點。
 - **utils/**：目前提供 JWT 簽發工具，從 `JWTPASSWORD` 讀取密鑰。
@@ -119,7 +120,7 @@ Community_Notification_System/
 │  ├─ architecture/        # 架構流程與 UML 圖 (UML, Sequence) [含 IOT 未來規劃]
 │  ├─ design/              # UI/UX 設計與 Stitch 生成紀錄
 │  ├─ system/              # 系統環境與資料庫設計 (Security, Schema)
-│  ├─ management/          # 專案管理與 Roadmap (Commit Summaries)
+│  ├─ features/            # 功能細部設計 (Parcel Management, Facility Booking, etc.)
 │  └─ README.md            # 文件總索引
 ├─ pkg/
 │  ├─ common/                      # 共用建表工具
