@@ -2,6 +2,12 @@
 
 | SHA | 作者 | 日期 | 訊息 |
 | --- | --- | --- | --- |
+| b9e0386 | Antigravity | 2026-04-27 | merge: 合併包裹管理功能分支 feature/parcel-management |
+| ad00fa4 | Antigravity | 2026-04-27 | fix(platform): 修正 log.Printf 格式字串型別不匹配 |
+| eb9433f | Antigravity | 2026-04-27 | docs(parcel): 新增包裹管理功能文件與更新索引 |
+| 7568fc4 | Antigravity | 2026-04-27 | feat(parcel): 新增包裹管理 Controller 與路由註冊 |
+| c67d503 | Antigravity | 2026-04-27 | feat(parcel): 新增包裹管理 Model 與 Repository 層 |
+| 1444f27 | Antigravity | 2026-04-27 | feat(parcel): 新增包裹資料表 Schema 並註冊 AutoMigrate |
 | (Session) | Antigravity | 2026-04-20 | doc: 維護專案文件 (README, GEMINI, Analysis, Router Flow) 以符合實作現況 |
 | 1176630 | Gemini CLI | 2026-04-17 | feat(community): implement community registration audit, permission profiles, and facility reservation system |
 | 595ac16 | kentlin0919 | 2026-04-11 | docs: add project analysis and feature planning documents |
