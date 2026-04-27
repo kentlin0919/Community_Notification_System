@@ -40,7 +40,7 @@ func seedDefaultPlatformInfo(db *gorm.DB) error {
 			if createErr := db.Create(&perm).Error; createErr != nil {
 				return fmt.Errorf("新增預設權限 %s 失敗: %w", perm.Platform, createErr)
 			}
-			log.Printf("新增預設權限：%s - %s", perm.ID, perm.Platform)
+			log.Printf("新增預設權限：%d - %s", perm.ID, perm.Platform)
 		default:
 			return fmt.Errorf("查詢權限 %s 失敗: %w", perm.Platform, err)
 		}
