@@ -11,6 +11,7 @@ import (
 
 	communitydb "Community_Notification_System/database/Community_DB"
 	facility_db "Community_Notification_System/database/Facility_DB"
+	parcel_db "Community_Notification_System/database/Parcel_DB"
 
 	"fmt"
 	"log"
@@ -135,4 +136,7 @@ func CreateTable() {
 
 	/// 創建Facility_DB
 	facility_db.NewFacilityDBController().FacilityTable(DB)
+
+	/// 創建Parcel_DB
+	parcel_db.NewParcelDBController().ParcelTable(DB)
 }
