@@ -24,9 +24,9 @@ import (
 // @Produce json
 // @Param id path int true "Application ID"
 // @Success 200 {object} map[string]interface{} "核可成功，回傳社區與管理員資訊"
-// @Failure 400 {object} model.ErrorRequest "請求錯誤或無此申請單"
-// @Failure 403 {object} model.ErrorRequest "權限不足"
-// @Failure 500 {object} model.ErrorRequest "核可流程失敗"
+// @Failure 400 {object} model.Response400Error "請求錯誤或無此申請單"
+// @Failure 403 {object} model.Response403Error "權限不足"
+// @Failure 500 {object} model.Response500Error "核可流程失敗"
 // @Security BearerAuth
 // @Router /api/v1/community/register/{id}/approve [patch]
 func (c *CommunityManagerController) CommunityManager_Approve(ctx *gin.Context) {

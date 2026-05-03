@@ -17,10 +17,10 @@ import (
 // @Produce json
 // @Param id path int true "包裹 ID"
 // @Success 200 {object} map[string]interface{} "包裹領取成功"
-// @Failure 400 {object} model.ErrorRequest "請求參數錯誤或重複領取"
-// @Failure 401 {object} model.ErrorRequest "無法取得登入資訊"
-// @Failure 404 {object} model.ErrorRequest "找不到包裹"
-// @Failure 500 {object} model.ErrorRequest "伺服器錯誤"
+// @Failure 400 {object} model.Response400Error "請求參數錯誤或重複領取"
+// @Failure 401 {object} model.Response401Error "無法取得登入資訊"
+// @Failure 404 {object} model.Response404Error "找不到包裹"
+// @Failure 500 {object} model.Response500Error "伺服器錯誤"
 // @Security BearerAuth
 // @Router /api/v1/parcels/{id}/pickup [put]
 func (c *ParcelController) PickupParcel(ctx *gin.Context) {

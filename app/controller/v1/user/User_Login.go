@@ -25,10 +25,10 @@ import (
 // @Produce json
 // @Param login body accountModel.User true "登入資料（Email & Password）"
 // @Success 200 {object} accountModel.UserRequest "登入成功，返回 JWT Token 和成功訊息"
-// @Failure 400 {object} model.ErrorRequest "無效的輸入資料"
-// @Failure 401 {object} model.ErrorRequest "密碼錯誤"
-// @Failure 404 {object} model.ErrorRequest "使用者不存在"
-// @Failure 500 {object} model.ErrorRequest "系統錯誤或 JWT 簽發失敗"
+// @Failure 400 {object} model.Response400Error "無效的輸入資料"
+// @Failure 401 {object} model.Response401Error "密碼錯誤"
+// @Failure 404 {object} model.Response404Error "使用者不存在"
+// @Failure 500 {object} model.Response500Error "系統錯誤或 JWT 簽發失敗"
 // @Router /api/v1/login [post]
 func (u *UserController) UserLogin(ctx *gin.Context) {
 	var loginData accountModel.User

@@ -18,8 +18,8 @@ import (
 // @Param home_id query int false "住戶 ID"
 // @Param status query int false "狀態 (1=待領取, 2=已領取)"
 // @Success 200 {object} map[string]interface{} "查詢成功"
-// @Failure 401 {object} model.ErrorRequest "無法取得登入資訊"
-// @Failure 500 {object} model.ErrorRequest "伺服器錯誤"
+// @Failure 401 {object} model.Response401Error "無法取得登入資訊"
+// @Failure 500 {object} model.Response500Error "伺服器錯誤"
 // @Security BearerAuth
 // @Router /api/v1/parcels [get]
 func (c *ParcelController) GetParcelList(ctx *gin.Context) {

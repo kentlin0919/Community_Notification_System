@@ -23,9 +23,9 @@ import (
 // @Param page query int false "頁碼（從 1 開始，預設 1）"
 // @Param page_size query int false "每頁筆數（預設 20，最大 100）"
 // @Success 200 {object} communityModel.CommunityListResponse "成功取得社區清單"
-// @Failure 400 {object} model.ErrorRequest "請求參數錯誤"
-// @Failure 401 {object} model.ErrorRequest "未授權"
-// @Failure 500 {object} model.ErrorRequest "系統錯誤"
+// @Failure 400 {object} model.Response400Error "請求參數錯誤"
+// @Failure 401 {object} model.Response401Error "未授權"
+// @Failure 500 {object} model.Response500Error "系統錯誤"
 // @Security BearerAuth
 // @Router /api/v1/community/getlist [get]
 func (c *CommunityManagerController) CommunityManager_GetList(ctx *gin.Context) {

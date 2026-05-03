@@ -21,7 +21,7 @@ import (
 // @Success 200 {object} models.RequestMessage "登入成功，返回 JWT Token 和成功訊息"
 // @Failure 400 {object} models.ErrorRequest "無效的輸入資料"
 // @Failure 401 {object} models.ErrorRequest "密碼錯誤"
-// @Failure 404 {object} model.ErrorRequest "使用者不存在"
+// @Failure 404 {object} model.Response404Error "使用者不存在"
 // @Failure 500 {object} models.ErrorRequest "系統錯誤或 JWT 簽發失敗"
 // @Router /api/v1/deleteUser [post]
 func (u *UserController) UserDelete(ctx *gin.Context) {

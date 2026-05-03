@@ -17,7 +17,7 @@ import (
 // @Accept json
 // @Produce json
 // @Success 200 {object} platformModel.PlatformListResponse "成功取得平台清單"
-// @Failure 500 {object} model.ErrorRequest "取得平台資料失敗"
+// @Failure 500 {object} model.Response500Error "取得平台資料失敗"
 // @Router /api/v1/platform/getlist [get]
 func (p *PlatformController) Platform_GetList(ctx *gin.Context) {
 	repoResult := repository.PlatformRepository()

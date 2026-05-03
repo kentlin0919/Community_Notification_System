@@ -24,9 +24,9 @@ func NewFacilityController() *FacilityController {
 // @Produce json
 // @Param body body facilityModel.CreateFacilityRequest true "設施資料"
 // @Success 201 {object} map[string]interface{} "設施新增成功"
-// @Failure 400 {object} model.ErrorRequest "請求參數錯誤"
-// @Failure 401 {object} model.ErrorRequest "無法取得登入資訊"
-// @Failure 403 {object} model.ErrorRequest "權限不足"
+// @Failure 400 {object} model.Response400Error "請求參數錯誤"
+// @Failure 401 {object} model.Response401Error "無法取得登入資訊"
+// @Failure 403 {object} model.Response403Error "權限不足"
 // @Failure 409 {object} model.ErrorRequest "該社區已存在相同名稱的設施"
 // @Security BearerAuth
 // @Router /api/v1/admin/facilities [post]

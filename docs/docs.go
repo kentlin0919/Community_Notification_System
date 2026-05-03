@@ -55,19 +55,19 @@ const docTemplate = `{
                     "400": {
                         "description": "請求參數錯誤",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response400Error"
                         }
                     },
                     "401": {
                         "description": "無法取得登入資訊",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response401Error"
                         }
                     },
                     "403": {
                         "description": "權限不足",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response403Error"
                         }
                     },
                     "409": {
@@ -119,19 +119,19 @@ const docTemplate = `{
                     "400": {
                         "description": "請求參數錯誤",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response400Error"
                         }
                     },
                     "401": {
                         "description": "無法取得登入資訊",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response401Error"
                         }
                     },
                     "403": {
                         "description": "這不是允許您管理的社區",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response403Error"
                         }
                     }
                 }
@@ -203,19 +203,19 @@ const docTemplate = `{
                     "400": {
                         "description": "請求參數錯誤",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response400Error"
                         }
                     },
                     "401": {
                         "description": "未授權",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response401Error"
                         }
                     },
                     "500": {
                         "description": "系統錯誤",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response500Error"
                         }
                     }
                 }
@@ -256,13 +256,13 @@ const docTemplate = `{
                     "400": {
                         "description": "請求參數錯誤",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response400Error"
                         }
                     },
                     "500": {
                         "description": "系統錯誤",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response500Error"
                         }
                     }
                 }
@@ -306,19 +306,19 @@ const docTemplate = `{
                     "400": {
                         "description": "請求錯誤或無此申請單",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response400Error"
                         }
                     },
                     "403": {
                         "description": "權限不足",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response403Error"
                         }
                     },
                     "500": {
                         "description": "核可流程失敗",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response500Error"
                         }
                     }
                 }
@@ -371,19 +371,19 @@ const docTemplate = `{
                     "400": {
                         "description": "請求錯誤或無此申請單",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response400Error"
                         }
                     },
                     "403": {
                         "description": "權限不足",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response403Error"
                         }
                     },
                     "500": {
                         "description": "駁回流程失敗",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response500Error"
                         }
                     }
                 }
@@ -440,7 +440,7 @@ const docTemplate = `{
                     "404": {
                         "description": "使用者不存在",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response404Error"
                         }
                     },
                     "500": {
@@ -486,25 +486,204 @@ const docTemplate = `{
                     "400": {
                         "description": "無效的輸入資料",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response400Error"
                         }
                     },
                     "401": {
                         "description": "密碼錯誤",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response401Error"
                         }
                     },
                     "404": {
                         "description": "使用者不存在",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response404Error"
                         }
                     },
                     "500": {
                         "description": "系統錯誤或 JWT 簽發失敗",
                         "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/parcels": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "查詢指定社區的包裹列表，可透過 home_id 與 status 篩選",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parcel Management"
+                ],
+                "summary": "查詢包裹列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "住戶 ID",
+                        "name": "home_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "狀態 (1=待領取, 2=已領取)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查詢成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "無法取得登入資訊",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "500": {
+                        "description": "伺服器錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "管理員登錄代收包裹資訊，系統自動發送 FCM 推播通知給該住戶所有成員",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parcel Management"
+                ],
+                "summary": "代收登錄包裹",
+                "parameters": [
+                    {
+                        "description": "包裹資料",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/parcel.CreateParcelRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "包裹登錄成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "請求參數錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "401": {
+                        "description": "無法取得登入資訊",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "409": {
+                        "description": "重複單號",
+                        "schema": {
                             "$ref": "#/definitions/model.ErrorRequest"
+                        }
+                    },
+                    "500": {
+                        "description": "伺服器錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/parcels/{id}/pickup": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "管理員確認住戶領取包裹後，將包裹狀態更新為「已領取」",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parcel Management"
+                ],
+                "summary": "標記包裹已領取",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "包裹 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "包裹領取成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "請求參數錯誤或重複領取",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "401": {
+                        "description": "無法取得登入資訊",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "404": {
+                        "description": "找不到包裹",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response404Error"
+                        }
+                    },
+                    "500": {
+                        "description": "伺服器錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
                         }
                     }
                 }
@@ -536,7 +715,7 @@ const docTemplate = `{
                     "401": {
                         "description": "無法取得登入資訊",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response401Error"
                         }
                     }
                 }
@@ -565,7 +744,7 @@ const docTemplate = `{
                     "500": {
                         "description": "取得平台資料失敗",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response500Error"
                         }
                     }
                 }
@@ -605,13 +784,13 @@ const docTemplate = `{
                     "400": {
                         "description": "無效的輸入資料或帳號已存在",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response400Error"
                         }
                     },
                     "500": {
                         "description": "系統錯誤或 JWT 簽發失敗",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response500Error"
                         }
                     }
                 }
@@ -656,19 +835,19 @@ const docTemplate = `{
                     "400": {
                         "description": "輸入資料格式錯誤",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response400Error"
                         }
                     },
                     "401": {
                         "description": "未授權，缺少或無效的 JWT Token",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response401Error"
                         }
                     },
                     "500": {
                         "description": "伺服器內部錯誤",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response500Error"
                         }
                     }
                 }
@@ -1024,6 +1203,113 @@ const docTemplate = `{
                 "Message": {
                     "type": "string",
                     "example": "message"
+                }
+            }
+        },
+        "model.Response400Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "error": {
+                    "type": "string",
+                    "example": "Invalid input data"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "Bad Request"
+                }
+            }
+        },
+        "model.Response401Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 401
+                },
+                "error": {
+                    "type": "string",
+                    "example": "Invalid or missing JWT token"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "Unauthorized"
+                }
+            }
+        },
+        "model.Response403Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 403
+                },
+                "error": {
+                    "type": "string",
+                    "example": "Permission denied"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "Forbidden"
+                }
+            }
+        },
+        "model.Response404Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 404
+                },
+                "error": {
+                    "type": "string",
+                    "example": "Resource not found"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "Not Found"
+                }
+            }
+        },
+        "model.Response500Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 500
+                },
+                "error": {
+                    "type": "string",
+                    "example": "Internal server error"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "Internal Server Error"
+                }
+            }
+        },
+        "parcel.CreateParcelRequest": {
+            "type": "object",
+            "required": [
+                "courier_company",
+                "home_id",
+                "tracking_number"
+            ],
+            "properties": {
+                "courier_company": {
+                    "type": "string"
+                },
+                "home_id": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "tracking_number": {
+                    "type": "string"
                 }
             }
         },

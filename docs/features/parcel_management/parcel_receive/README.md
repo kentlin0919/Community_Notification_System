@@ -4,9 +4,11 @@
 當物業管理員（保全）收到外部快遞公司送達的包裹時，需登錄包裹資訊。系統將自動根據住戶資訊，向該戶所有成員發送 FCM 推播通知。
 
 ## 角色視角：管理員
-1.  **收貨**：確認包裹上的收件人地址（樓層、房號）。
-2.  **登錄**：開啟管理後台，輸入物流公司、單號與選擇住戶。
-3.  **確認**：系統顯示「登錄成功並已發送通知」。
+1.  **輸入門牌**：確認包裹上的地址，在系統輸入門牌號碼。
+2.  **載入成員**：系統自動根據門牌（家庭群組）載入該戶所有註冊成員。
+3.  **選擇收件人**：透過下拉選單選擇包裹所屬的成員（或選擇「全家」）。
+4.  **登錄**：輸入物流公司、單號與備註。
+5.  **確認**：提交後，系統針對特定成員（或全家）發送推播通知。
 
 ## 流程圖
 
@@ -15,20 +17,22 @@
 ```mermaid
 stateDiagram-v2
     state "管理員操作" as AdminPart {
-        A[收到實體包裹] --> B[於系統輸入物流資訊 (公司、單號)]
-        B --> C: 選擇所屬住戶
-        C --> D: 提交登錄
+        A[收到實體包裹] --> B[輸入門牌號碼]
+        B --> C: 自動載入家庭成員清單
+        C --> D: 從下拉選單選擇特定收件人
+        D --> E: 輸入物流資訊 (公司、單號)
+        E --> F: 提交登錄
     }
 
     state "系統後台" as SystemPart {
-        D --> E: 驗證資訊並寫入資料庫 (ParcelInfo)
-        E --> F: 狀態標記為 "待領取"
-        F --> G: 查詢該住戶所有裝置的 FcmToken
+        F --> G: 驗證並寫入資料庫 (ParcelInfo)
+        G --> H: 狀態標記為 "待領取"
+        H --> I: 根據選擇對象獲取 FcmToken
     }
 
     state "通知服務" as NotificationPart {
-        G --> H: 發送包裹通知 (FCM)
-        H --> I: 住戶手機顯示通知
+        I --> J: 發送精準通知 (FCM)
+        J --> K: 住戶手機顯示個人化通知
     }
 ```
 
@@ -42,16 +46,25 @@ sequenceDiagram
     participant FCM as Firebase (FCM)
     participant User as 住戶裝置
 
-    Admin->>API: POST /api/v1/parcels (Token, Courier, TrackingNo, HomeID)
+    Admin->>API: GET /api/v1/homes/:home_id/members (查詢住戶成員)
+    API->>DB: SELECT id, name FROM user_infos WHERE home_id = ?
+    DB-->>API: 返回成員清單
+    API-->>Admin: 顯示下拉選單
+
+    Admin->>API: POST /api/v1/parcels (Token, Courier, HomeID, TargetUserID)
     Note over API: 解析 CommunityID (Middleware)
-    API->>DB: INSERT INTO parcel_infos (Status: 1)
+    API->>DB: INSERT INTO parcel_infos (TargetUserID, Status: 1)
     DB-->>API: Success (ParcelID)
     
-    API->>DB: SELECT fcm_tokens FROM user_infos WHERE home_id = ?
-    DB-->>API: List of Tokens
+    alt 指定特定成員
+        API->>DB: SELECT fcmtoken FROM user_infos WHERE id = TargetUserID
+    else 指定全家 (預設)
+        API->>DB: SELECT fcmtoken FROM user_infos WHERE home_id = HomeID
+    end
+    DB-->>API: 取得代送 Token 清單
     
     loop 對每個 Token
-        API->>FCM: 發送推播 (標題: 包裹到府, 內容: 您的包裹已由管理室代收)
+        API->>FCM: 發送推播 (標題: 包裹到府, 內容: [姓名] 您有包裹已由管理室代收)
         FCM-->>User: 顯示通知
     end
     

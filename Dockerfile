@@ -6,9 +6,10 @@ ARG DLV_VERSION=v1.24.2
 # 安裝必要套件與工具
 RUN apk add --no-cache git build-base libc6-compat
 
-# 安裝 Air 與 Delve
-RUN go install github.com/air-verse/air@${AIR_VERSION}
-RUN go install github.com/go-delve/delve/cmd/dlv@${DLV_VERSION}
+# 安裝 Air, Delve 與 Swag
+RUN go install github.com/air-verse/air@${AIR_VERSION} \
+    && go install github.com/go-delve/delve/cmd/dlv@${DLV_VERSION} \
+    && go install github.com/swaggo/swag/cmd/swag@latest
 
 WORKDIR /app
 

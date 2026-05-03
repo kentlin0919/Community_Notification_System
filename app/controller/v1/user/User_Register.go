@@ -28,8 +28,8 @@ import (
 // @Produce json
 // @Param Register body accountModel.Register true "註冊資料（Email、Password、Name、Birthday、Permission、Platform）"
 // @Success 200 {object} accountModel.UserRequest "註冊成功，返回 JWT Token 和成功訊息"
-// @Failure 400 {object} model.ErrorRequest "無效的輸入資料或帳號已存在"
-// @Failure 500 {object} model.ErrorRequest "系統錯誤或 JWT 簽發失敗"
+// @Failure 400 {object} model.Response400Error "無效的輸入資料或帳號已存在"
+// @Failure 500 {object} model.Response500Error "系統錯誤或 JWT 簽發失敗"
 // @Router /api/v1/register [post]
 func (u *UserController) UserRegister(ctx *gin.Context) {
 	// registerModel 充當請求本文的映射容器，對應 Swagger 中宣告的註冊欄位

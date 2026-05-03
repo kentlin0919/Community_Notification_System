@@ -24,9 +24,9 @@ func NewCommunityPermissionController() *CommunityPermissionController {
 // @Produce json
 // @Param body body permissionModel.UpdatePermissionProfileRequest true "更新請求"
 // @Success 200 {object} map[string]interface{} "更新成功"
-// @Failure 400 {object} model.ErrorRequest "請求參數錯誤"
-// @Failure 401 {object} model.ErrorRequest "無法取得登入資訊"
-// @Failure 403 {object} model.ErrorRequest "這不是允許您管理的社區"
+// @Failure 400 {object} model.Response400Error "請求參數錯誤"
+// @Failure 401 {object} model.Response401Error "無法取得登入資訊"
+// @Failure 403 {object} model.Response403Error "這不是允許您管理的社區"
 // @Security BearerAuth
 // @Router /api/v1/admin/permissions/profile [put]
 func (c *CommunityPermissionController) UpdateCommunityPermissionProfile(ctx *gin.Context) {
@@ -80,7 +80,7 @@ func (c *CommunityPermissionController) UpdateCommunityPermissionProfile(ctx *gi
 // @Tags Permission Management
 // @Produce json
 // @Success 200 {object} map[string]interface{} "成功回傳"
-// @Failure 401 {object} model.ErrorRequest "無法取得登入資訊"
+// @Failure 401 {object} model.Response401Error "無法取得登入資訊"
 // @Security BearerAuth
 // @Router /api/v1/permissions/profile [get]
 func (c *CommunityPermissionController) GetCommunityPermissionProfiles(ctx *gin.Context) {

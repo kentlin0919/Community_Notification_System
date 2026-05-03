@@ -23,10 +23,10 @@ import (
 // @Produce json
 // @Param body body parcelModel.CreateParcelRequest true "包裹資料"
 // @Success 201 {object} map[string]interface{} "包裹登錄成功"
-// @Failure 400 {object} model.ErrorRequest "請求參數錯誤"
-// @Failure 401 {object} model.ErrorRequest "無法取得登入資訊"
+// @Failure 400 {object} model.Response400Error "請求參數錯誤"
+// @Failure 401 {object} model.Response401Error "無法取得登入資訊"
 // @Failure 409 {object} model.ErrorRequest "重複單號"
-// @Failure 500 {object} model.ErrorRequest "伺服器錯誤"
+// @Failure 500 {object} model.Response500Error "伺服器錯誤"
 // @Security BearerAuth
 // @Router /api/v1/parcels [post]
 func (c *ParcelController) CreateParcel(ctx *gin.Context) {

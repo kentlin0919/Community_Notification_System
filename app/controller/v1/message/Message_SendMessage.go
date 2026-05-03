@@ -23,9 +23,9 @@ import (
 // @Produce json
 // @Param message body message_model.FCMNotificationRequest true "訊息資料"
 // @Success 200 {object} message_model.MessageRequest "訊息送出成功"
-// @Failure 400 {object} model.ErrorRequest "輸入資料格式錯誤"
-// @Failure 401 {object} model.ErrorRequest "未授權，缺少或無效的 JWT Token"
-// @Failure 500 {object} model.ErrorRequest "伺服器內部錯誤"
+// @Failure 400 {object} model.Response400Error "輸入資料格式錯誤"
+// @Failure 401 {object} model.Response401Error "未授權，缺少或無效的 JWT Token"
+// @Failure 500 {object} model.Response500Error "伺服器內部錯誤"
 // @Router /api/v1/sendmessage [post]
 func (m *MessageController) SendMessage(ctx *gin.Context) {
 

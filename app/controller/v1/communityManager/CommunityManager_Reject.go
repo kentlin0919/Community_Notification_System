@@ -22,9 +22,9 @@ import (
 // @Param id path int true "Application ID"
 // @Param body body communityModel.RejectApplicationRequest true "駁回原因"
 // @Success 200 {object} map[string]interface{} "已駁回申請"
-// @Failure 400 {object} model.ErrorRequest "請求錯誤或無此申請單"
-// @Failure 403 {object} model.ErrorRequest "權限不足"
-// @Failure 500 {object} model.ErrorRequest "駁回流程失敗"
+// @Failure 400 {object} model.Response400Error "請求錯誤或無此申請單"
+// @Failure 403 {object} model.Response403Error "權限不足"
+// @Failure 500 {object} model.Response500Error "駁回流程失敗"
 // @Security BearerAuth
 // @Router /api/v1/community/register/{id}/reject [patch]
 func (c *CommunityManagerController) CommunityManager_Reject(ctx *gin.Context) {

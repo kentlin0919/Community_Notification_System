@@ -14,7 +14,8 @@
 - [訊息推播](skills/skill_notification_dispatch.md)：標準化訊息分發與 Firebase FCM 整合工作流。
 
 ### `analysis/`
-- `project_analysis.md`：專案整體分析，包含架架構盤點 ... (含 IOT 未來規劃)。
+- `project_analysis.md`：專案整體分析，包含架構盤點 ... (含 IOT 未來規劃)。
+- `PRD_Family_Group.md`：家庭群組與包裹通知優化規格。
 
 ### `features/`
 - `README.md`：功能文件索引，說明功能資料夾命名與維護規範。
