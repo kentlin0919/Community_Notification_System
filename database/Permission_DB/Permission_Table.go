@@ -36,6 +36,7 @@ func seedDefaultPermissions(db *gorm.DB) error {
 		{PermissionID: "5", Name: "自訂角色 C (如: 委員)"},
 		{PermissionID: "6", Name: "自訂角色 D (如: 櫃台)"},
 		{PermissionID: "7", Name: "自訂角色 E (如: 財務)"},
+		{PermissionID: "8", Name: "住戶 (Resident)"},
 	}
 
 	for _, perm := range defaultPermissions {

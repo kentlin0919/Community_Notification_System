@@ -1,7 +1,6 @@
 package user_db
 
 import (
-	"Community_Notification_System/app/models/model"
 	"Community_Notification_System/pkg/common"
 	"errors"
 	"fmt"
@@ -23,47 +22,82 @@ func (u *UserTablesController) UserTable(DB *gorm.DB) {
 	// 檢查是否存在 UserInfo 表
 
 	common.NewCreateTableController().Base_Create_Table(DB, &UserInfo{}, "user_info")
-	if err := seedDefaultAdminUser(DB); err != nil {
+	if err := seedDefaultUsers(DB); err != nil {
 		log.Printf("初始化 UserInfo 預設資料失敗: %v", err)
 	}
 }
 
-func seedDefaultAdminUser(db *gorm.DB) error {
+func seedDefaultUsers(db *gorm.DB) error {
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("09190919"), bcrypt.DefaultCost)
 
-	hashedPassword, errHashedPassword := bcrypt.GenerateFromPassword([]byte("09190919"), bcrypt.DefaultCost)
-	if errHashedPassword != nil {
-		var errorModel model.ErrorRequest
-		errorModel.Error = "密碼加密失敗"
-
+	defaultUsers := []UserInfo{
+		{
+			ID:           uuid.New().String(),
+			Email:        "kent900919@gmail.com",
+			Password:     string(hashedPassword),
+			Name:         "系統管理員",
+			PermissionId: 1,
+			Platform:     3,
+			Community_id: 0,
+			Birthdaytime: time.Now(),
+			Registertime: time.Now(),
+		},
+		{
+			ID:           uuid.New().String(),
+			Email:        "super@example.com",
+			Password:     string(hashedPassword),
+			Name:         "超級管理員",
+			PermissionId: 1,
+			Platform:     3,
+			Community_id: 0,
+			Birthdaytime: time.Now(),
+			Registertime: time.Now(),
+		},
+		{
+			ID:           uuid.New().String(),
+			Email:        "admin@example.com",
+			Password:     string(hashedPassword),
+			Name:         "社區管理員",
+			PermissionId: 2,
+			Platform:     3,
+			Community_id: 1,
+			Birthdaytime: time.Now(),
+			Registertime: time.Now(),
+		},
+		{
+			ID:           uuid.New().String(),
+			Email:        "staff@example.com",
+			Password:     string(hashedPassword),
+			Name:         "保全人員",
+			PermissionId: 3,
+			Platform:     3,
+			Community_id: 1,
+			Birthdaytime: time.Now(),
+			Registertime: time.Now(),
+		},
+		{
+			ID:           uuid.New().String(),
+			Email:        "resident@example.com",
+			Password:     string(hashedPassword),
+			Name:         "測試住戶",
+			PermissionId: 8,
+			Platform:     2, // App
+			Community_id: 1,
+			Home_id:      "1",
+			Birthdaytime: time.Now(),
+			Registertime: time.Now(),
+		},
 	}
 
-	uuidString := uuid.New()
-	defaultUser := UserInfo{
-		ID:           uuidString.String(),
-		Email:        "kent900919@gmail.com",
-		Password:     string(hashedPassword), // 存儲加密後的密碼
-		Birthdaytime: time.Now(),
-		Registertime: time.Now(),
-		PermissionId: 1,
-		Name:         "系統管理員",
-		Platform:     3,
-		Community_id: 0,
-	}
-
-	var existing UserInfo
-	err := db.Where("Email = ?", defaultUser.Email).First(&existing).Error
-
-	switch {
-	case err == nil:
-
-	case errors.Is(err, gorm.ErrRecordNotFound):
-
-		if createErr := db.Create(&defaultUser).Error; createErr != nil {
-			return fmt.Errorf("新增預設Admin %s 失敗: %w", defaultUser.Email, createErr)
+	for _, user := range defaultUsers {
+		var existing UserInfo
+		err := db.Where("Email = ?", user.Email).First(&existing).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			if createErr := db.Create(&user).Error; createErr != nil {
+				return fmt.Errorf("新增預設使用者 %s 失敗: %w", user.Email, createErr)
+			}
+			log.Printf("新增預設使用者：%s - %s (權限: %d)", user.Email, user.Name, user.PermissionId)
 		}
-		log.Printf("新增預設系統管理員：%s - %s", defaultUser.Email, defaultUser.Name)
-	default:
-		return fmt.Errorf("查詢權限 %s 失敗: %w", defaultUser.Name, err)
 	}
 
 	return nil

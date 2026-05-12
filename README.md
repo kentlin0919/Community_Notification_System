@@ -320,6 +320,7 @@ sequenceDiagram
 - `docs/analysis/Business_Analysis.md`：專案整體業務邏輯與流程分析。
 - `docs/management/Smart_Community_Roadmap.md`：智慧社區功能矩陣與未來發展藍圖。
 - `docs/system/Database_Schema_Extended.md`：智慧社區 2.0 擴展資料庫設計 (門禁、維修、能耗) [未來規劃]。
+- `docs/architecture/Activity_Diagram_Visitor_Pass.md`：智慧訪客系統流程圖。
 - `docs/architecture/`：存放 UML、時序圖與類別圖。
 - `docs/README.md`：`docs` 目錄總索引。
 

@@ -6,7 +6,7 @@
       "type": "go",
       "request": "attach",
       "mode": "remote",
-      "debugAdapter": "dlv-dap",
+      "debugAdapter": "legacy",
       "host": "127.0.0.1",
       "port": 40000,
       "remotePath": "/app",
@@ -19,7 +19,12 @@
           "from": "${workspaceFolder}",
           "to": "/app"
         }
-      ]
+      ],
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "listening on",
+        "uriFormat": "http://localhost:9080/swagger/index.html"
+      }
     }
   ]
 }

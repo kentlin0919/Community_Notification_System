@@ -1,8 +1,8 @@
 package parcel
 
 import (
-	parcelModel "Community_Notification_System/app/models/parcel"
 	"Community_Notification_System/app/models/model"
+	parcelModel "Community_Notification_System/app/models/parcel"
 	repository "Community_Notification_System/app/repositories/parcel"
 	parcel_db "Community_Notification_System/database/Parcel_DB"
 	"Community_Notification_System/pkg/firebase"
@@ -22,10 +22,10 @@ import (
 // @Accept json
 // @Produce json
 // @Param body body parcelModel.CreateParcelRequest true "包裹資料"
-// @Success 201 {object} map[string]interface{} "包裹登錄成功"
+// @Success 201 {object} parcelModel.ParcelListResponse "包裹登錄成功"
 // @Failure 400 {object} model.Response400Error "請求參數錯誤"
 // @Failure 401 {object} model.Response401Error "無法取得登入資訊"
-// @Failure 409 {object} model.ErrorRequest "重複單號"
+// @Failure 409 {object} model.Response409Error "重複單號"
 // @Failure 500 {object} model.Response500Error "伺服器錯誤"
 // @Security BearerAuth
 // @Router /api/v1/parcels [post]

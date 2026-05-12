@@ -82,6 +82,8 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 	user_info.Registertime = time.Now()
 	user_info.PermissionId = registerModel.Permission
 	user_info.Platform = registerModel.Platform
+	user_info.Community_id = registerModel.CommunityID
+	user_info.Home_id = registerModel.Home_id
 	user_info.Session_id = uuid.New().String()
 	// 為新使用者簽發 JWT，後續前端登入流程可直接沿用此 Token
 	token, err := utils.GenerateJWT(user_info.Email, user_info.ID, user_info.PermissionId, user_info.Community_id)
@@ -99,9 +101,10 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 	re := repository.RegisterRepository(user_info)
 
 	if !re.Result {
-		log.Fatalf("建立失敗")
-		errorModel := model.NewErrorRequest(http.StatusBadRequest, "Register error")
-		ctx.JSON(http.StatusBadRequest, errorModel)
+		log.Printf("建立失敗: %v", re.Statue.Error)
+		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "Register error")
+		ctx.JSON(http.StatusInternalServerError, errorModel)
+		return
 	}
 
 	var userRequest accountModel.UserRequest

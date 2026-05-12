@@ -18,6 +18,9 @@ func V1Routes(rg *gin.RouterGroup) {
 
 	//處理送通知
 	rg.POST("/sendmessage", v1.Message().SendMessage)
+	rg.GET("/messages", v1.Message().GetMessageList)
+	rg.PATCH("/messages/:id/read", v1.Message().MarkMessageRead)
+	rg.PATCH("/messages/read-all", v1.Message().MarkAllMessagesRead)
 
 	// 取得社區列表
 	rg.GET("/community/getlist", v1.CommunityManager().CommunityManager_GetList)

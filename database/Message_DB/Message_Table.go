@@ -13,7 +13,11 @@ func NewUserDBController() *MessageInfoTablesController {
 }
 
 func (u *MessageInfoTablesController) MessageInfoTable(DB *gorm.DB) {
-	// 檢查是否存在 UserInfo 表
+	// 確保 message_info 表存在，並同步新增欄位
+	if err := DB.AutoMigrate(&MessageInfo{}); err != nil {
+		return
+	}
+
 	common.NewCreateTableController().Base_Create_Table(DB, &MessageInfo{}, "message_info")
 
 }

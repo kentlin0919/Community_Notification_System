@@ -2,7 +2,7 @@ package permission
 
 // UpdatePermissionProfileRequest 讓社區 Admin 更改該社區的自訂職等顯示名稱
 type UpdatePermissionProfileRequest struct {
-	PermissionID int    `json:"permission_id" binding:"required,min=3,max=7"`
-	DisplayName  string `json:"display_name" binding:"required,max=50"`
-	Description  string `json:"description"`
+	PermissionID int    `json:"permission_id" binding:"required,min=3,max=7" example:"3"`
+	DisplayName  string `json:"display_name" binding:"required,max=50" example:"社區主委"`
+	Description  string `json:"description" example:"負責社區重大決策與管理"`
 }

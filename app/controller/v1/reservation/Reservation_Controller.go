@@ -18,6 +18,22 @@ func NewReservationController() *ReservationController {
 	return &ReservationController{}
 }
 
+// CreateReservation 建立設施預約
+// @Summary 建立設施預約
+// @Description 住戶針對特定社區設施進行預約。系統會根據設施規則（如黑名單、預約時段重疊等）進行驗證。
+// @Tags Reservation
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param community_id header string true "社區 ID"
+// @Param facility_id path uint64 true "設施 ID"
+// @Param reservation body reservationModel.CreateReservationRequest true "預約詳細資料"
+// @Success 201 {object} models.RequestMessage "預約建立成功"
+// @Failure 400 {object} model.Response400Error "無效的設施 ID 或輸入資料"
+// @Failure 403 {object} model.Response403Error "設施不開放或權限不足"
+// @Failure 404 {object} model.Response404Error "設施不存在"
+// @Failure 409 {object} model.Response409Error "時段衝突或違反設施規則"
+// @Router /api/v1/reservation/{facility_id} [post]
 func (c *ReservationController) CreateReservation(ctx *gin.Context) {
 	communityID, _ := ctx.Get("community_id")
 	userID, _ := ctx.Get("user_id")
@@ -73,6 +89,18 @@ func (c *ReservationController) CreateReservation(ctx *gin.Context) {
 	})
 }
 
+// CancelReservation 取消預約
+// @Summary 取消預約
+// @Description 住戶主動取消已建立的設施預約。需提供取消原因。
+// @Tags Reservation
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path uint64 true "預約紀錄 ID"
+// @Param cancel body reservationModel.CancelReservationRequest true "取消原因"
+// @Success 200 {object} models.RequestMessage "預約已成功取消"
+// @Failure 400 {object} model.Response400Error "無效的 ID 或取消失敗"
+// @Router /api/v1/reservation/{id}/cancel [post]
 func (c *ReservationController) CancelReservation(ctx *gin.Context) {
 	resIDStr := ctx.Param("id")
 	resID, err := strconv.ParseUint(resIDStr, 10, 64)
@@ -97,6 +125,20 @@ func (c *ReservationController) CancelReservation(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "預約已成功取消"})
 }
 
+// Reschedule 申請預約改期
+// @Summary 申請預約改期
+// @Description 住戶針對現有的預約申請變更日期或時段。申請後需經由管理員審核。
+// @Tags Reservation
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path uint64 true "預約紀錄 ID"
+// @Param reschedule body reservationModel.RescheduleRequest true "新的預約時段與原因"
+// @Success 201 {object} models.RequestMessage "改期申請已送出"
+// @Failure 400 {object} model.Response400Error "無效的 ID 或輸入資料"
+// @Failure 404 {object} model.Response404Error "找不到預約紀錄"
+// @Failure 409 {object} model.Response409Error "改期衝突或處理失敗"
+// @Router /api/v1/reservation/{id}/reschedule [post]
 func (c *ReservationController) Reschedule(ctx *gin.Context) {
 	resIDStr := ctx.Param("id")
 	resID, err := strconv.ParseUint(resIDStr, 10, 64)
@@ -136,6 +178,19 @@ func (c *ReservationController) Reschedule(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "改期申請已送出，等待審核"})
 }
 
+// AdminApproveReschedule 管理員審核改期申請
+// @Summary 審核預約改期 (管理員)
+// @Description 管理員針對住戶提出的改期申請進行核准或拒絕。
+// @Tags Reservation
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path uint64 true "改期申請紀錄 ID"
+// @Param approve body reservationModel.ApproveRescheduleRequest true "審核結果與意見"
+// @Success 200 {object} models.RequestMessage "改期申請處理完成"
+// @Failure 400 {object} model.Response400Error "無效的 ID 或輸入資料"
+// @Failure 500 {object} model.Response500Error "審核處理失敗"
+// @Router /api/v1/reservation/admin/reschedule/{id} [post]
 func (c *ReservationController) AdminApproveReschedule(ctx *gin.Context) {
 	reqIDStr := ctx.Param("id")
 	reqID, err := strconv.ParseUint(reqIDStr, 10, 64)

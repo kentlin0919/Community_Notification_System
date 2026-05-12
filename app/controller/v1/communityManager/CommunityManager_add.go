@@ -20,7 +20,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param application body communityModel.RegisterApplicationRequest true "社區申請資料"
-// @Success 200 {object} map[string]interface{} "社區申請已送出"
+// @Success 200 {object} communityModel.RegisterApplicationResponse "社區申請已送出"
 // @Failure 400 {object} model.Response400Error "請求參數錯誤"
 // @Failure 500 {object} model.Response500Error "系統錯誤"
 // @Router /api/v1/community/register [post]

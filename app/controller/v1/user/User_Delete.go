@@ -10,19 +10,19 @@ import (
 	"gorm.io/gorm"
 )
 
-// UserLogin 處理刪除使用者
-// @Summary 使用者刪除
-// @Description 使用者提供帳號與密碼後刪除使用者
+// UserDelete 處理刪除使用者
+// @Summary 刪除使用者帳號
+// @Description 使用者提供帳號與密碼後進行帳號刪除。此操作為實體刪除且不可逆，執行前請務必確認。
 // @Tags User
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param login body accountModel.User true "使用者資料（Email & Password ＆ Platform）"
-// @Success 200 {object} models.RequestMessage "登入成功，返回 JWT Token 和成功訊息"
-// @Failure 400 {object} models.ErrorRequest "無效的輸入資料"
-// @Failure 401 {object} models.ErrorRequest "密碼錯誤"
-// @Failure 404 {object} model.Response404Error "使用者不存在"
-// @Failure 500 {object} models.ErrorRequest "系統錯誤或 JWT 簽發失敗"
+// @Param login body accountModel.User true "刪除驗證資料（Email, Password, Platform）"
+// @Success 202 {object} models.RequestMessage "帳號刪除成功"
+// @Failure 400 {object} models.Response400Error "請求格式錯誤或無效輸入"
+// @Failure 401 {object} models.Response401Error "認證失敗或密碼錯誤"
+// @Failure 404 {object} models.Response404Error "找不到該使用者"
+// @Failure 500 {object} models.Response500Error "系統執行刪除時發生錯誤"
 // @Router /api/v1/deleteUser [post]
 func (u *UserController) UserDelete(ctx *gin.Context) {
 	var UserDeleteModel accountModel.User

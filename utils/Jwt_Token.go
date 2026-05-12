@@ -7,9 +7,8 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-var JwtKey = []byte(os.Getenv("JWTPASSWORD"))
-
 func GenerateJWT(email string, userID string, permissionID int, communityID uint64) (string, error) {
+	var JwtKey = []byte(os.Getenv("JWTPASSWORD"))
 	// payload 欄位
 	claims := jwt.MapClaims{
 		"username":      email,

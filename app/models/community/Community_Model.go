@@ -30,13 +30,22 @@ type CommunityListResponse struct {
 }
 
 type CommunityRegister struct {
-	PermissionID  string `gorm:"uniqueIndex;not null" json:"permission_id"`
-	PostalCode    int    `json:"postal_code" gorm:"type:int;not null;comment:郵遞區號"`
-	Municipality  string `json:"municipality" gorm:"type:varchar(10);not null;comment:縣市"`
-	District      string `json:"district" gorm:"type:varchar(10);not null;comment:鄉鎮市區"`
-	RoadName      string `json:"road_name" gorm:"type:varchar(50);not null;comment:路名"`
-	LaneNumber    int    `json:"lane_number" gorm:"type:int;not null;comment:巷弄號碼"`
-	AlleyNumber   int    `json:"alley_number" gorm:"type:int;not null;comment:巷弄號碼"`
-	CommunityName string `json:"community_name" gorm:"type:varchar(50);not null;comment:社區名稱"`
-	Address       string `json:"address" gorm:"type:varchar(100);not null;comment:地址"`
+	PermissionID  string `gorm:"uniqueIndex;not null" json:"permission_id" example:"1"`
+	PostalCode    int    `json:"postal_code" gorm:"type:int;not null;comment:郵遞區號" example:"251"`
+	Municipality  string `json:"municipality" gorm:"type:varchar(10);not null;comment:縣市" example:"新北市"`
+	District      string `json:"district" gorm:"type:varchar(10);not null;comment:鄉鎮市區" example:"淡水區"`
+	RoadName      string `json:"road_name" gorm:"type:varchar(50);not null;comment:路名" example:"濱海路一段"`
+	LaneNumber    int    `json:"lane_number" gorm:"type:int;not null;comment:巷弄號碼" example:"306"`
+	AlleyNumber   int    `json:"alley_number" gorm:"type:int;not null;comment:巷弄號碼" example:"0"`
+	CommunityName string `json:"community_name" gorm:"type:varchar(50);not null;comment:社區名稱" example:"甜水郡社區"`
+	Address       string `json:"address" gorm:"type:varchar(100);not null;comment:地址" example:"251新北市淡水區濱海路一段306巷"`
+}
+
+// RegisterApplicationResponse 描述社區申請成功的響應
+type RegisterApplicationResponse struct {
+	Message string `json:"message" example:"社區申請已送出"`
+	Data    struct {
+		ApplicationID uint64 `json:"application_id" example:"1"`
+		Status        string `json:"status" example:"pending"`
+	} `json:"data"`
 }

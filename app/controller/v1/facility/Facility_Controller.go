@@ -18,17 +18,18 @@ func NewFacilityController() *FacilityController {
 
 // CreateFacility 新增預約設施
 // @Summary 新增預約設施
-// @Description 社區管理員新增公用設施與預設預約條件
+// @Description 社區管理員新增公用設施與預設預約條件。系統會同時建立一筆預設的設施規則。
 // @Tags Facility Management
 // @Accept json
 // @Produce json
-// @Param body body facilityModel.CreateFacilityRequest true "設施資料"
-// @Success 201 {object} map[string]interface{} "設施新增成功"
-// @Failure 400 {object} model.Response400Error "請求參數錯誤"
-// @Failure 401 {object} model.Response401Error "無法取得登入資訊"
-// @Failure 403 {object} model.Response403Error "權限不足"
-// @Failure 409 {object} model.ErrorRequest "該社區已存在相同名稱的設施"
 // @Security BearerAuth
+// @Param body body facilityModel.CreateFacilityRequest true "設施基本資料"
+// @Success 201 {object} models.RequestMessage "設施新增成功"
+// @Failure 400 {object} model.Response400Error "請求參數錯誤"
+// @Failure 401 {object} model.Response401Error "無法取得登入資訊或認證失敗"
+// @Failure 403 {object} model.Response403Error "權限不足，僅限管理員"
+// @Failure 409 {object} model.Response409Error "該社區已存在相同名稱的設施"
+// @Failure 500 {object} model.Response500Error "系統建立設施失敗"
 // @Router /api/v1/admin/facilities [post]
 func (c *FacilityController) CreateFacility(ctx *gin.Context) {
 	communityID, exists := ctx.Get("community_id")

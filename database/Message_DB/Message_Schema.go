@@ -9,5 +9,6 @@ type MessageInfo struct {
 	Title      string    `json:"Title"`
 	Subtile    string    `json:"Subtile" example:"Subtile"`
 	Detail     string    `json:"Detail" example:"Detail"`
+	IsRead     bool      `json:"is_read"`
 	CreateTime time.Time `json:"CreateTime" example:"2025-03-23T15:04:05Z"`
 }

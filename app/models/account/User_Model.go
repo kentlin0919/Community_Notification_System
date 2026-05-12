@@ -27,12 +27,12 @@ type UserRequest struct {
 }
 
 type UserInfo struct {
-	PermissionId int       `json:"PermissionId"`
-	Name         string    `json:"name"`
-	Email        string    `json:"email"`
-	Home_id      string    `json:"Home_id"`
+	PermissionId int       `json:"PermissionId" example:"1"`
+	Name         string    `json:"name" example:"kent"`
+	Email        string    `json:"email" example:"user@example.com"`
+	Home_id      string    `json:"Home_id" example:"H001"`
 	Birthdaytime time.Time `json:"Birthdaytime" example:"2025-03-23T15:04:05Z"`
-	PlatformID   int       `json:"Platform"`
-	Session_id   string    `json:"Session_id"`
-	Community_id uint64    `json:"community_id"`
+	PlatformID   int       `json:"Platform" example:"1"`
+	Session_id   string    `json:"Session_id" example:"uuid-string"`
+	Community_id uint64    `json:"community_id" example:"1"`
 }

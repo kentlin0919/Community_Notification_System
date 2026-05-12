@@ -10,8 +10,6 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-var JwtKey = []byte(os.Getenv("JWTPASSWORD"))
-
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -25,13 +23,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			"/swagger/*any":            true,
 		}
 
-		if skipPaths[c.FullPath()] {
-			c.Next()
-			return
-		}
-
-		//從 map 中撈出對應的路徑確定是否跳過
-		if skipPaths[c.Request.RequestURI] {
+		if skipPaths[c.Request.URL.Path] || skipPaths[c.FullPath()] {
 			c.Next()
 			return
 		}
@@ -58,11 +50,12 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		}
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return JwtKey, nil
+			return []byte(os.Getenv("JWTPASSWORD")), nil
 		})
 
 		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "無效的 token"})
+			// fmt.Printf("Token validation failed: %v\n", err)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "無效的 token", "details": err.Error()})
 			c.Abort()
 			return
 		}
@@ -71,14 +64,14 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			c.Set("username", claims["username"])
 			c.Set("user_id", claims["user_id"])
-			
+
 			// 支援從 float64/int 轉換
 			if pid, ok := claims["permission_id"].(float64); ok {
 				c.Set("permission_id", int(pid))
 			} else {
 				c.Set("permission_id", claims["permission_id"])
 			}
-			
+
 			if cid, ok := claims["community_id"].(float64); ok {
 				c.Set("community_id", uint64(cid))
 			} else {

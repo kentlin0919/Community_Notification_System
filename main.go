@@ -21,24 +21,26 @@ import (
 	_ "Community_Notification_System/docs" // swagger 產生的 docs package
 )
 
-// @title           Community_Notification_System
+// @title           社區通知系統 API 文件 (Community Notification System)
 // @version         1.0
-// @description     Community_Notification_System
+// @description     此 API 文件提供社區通知系統的後端介面說明，包含使用者管理、設施預約、社區申請及訊息通知等功能。使用 JWT Bearer 進行認證。
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
 // @host      localhost:9080
 // @BasePath  /api/v1
 func main() {
+	//env 初始化
+	configs.InitConfig()
+
 	// 初始化 Gin
 	router := gin.Default()
 
 	//跨域的 Middleware
+	router.Use(middlewares.RequestIDMiddleware())
 	router.Use(middlewares.CORSMiddleware())
 	router.Use(middlewares.JWTAuthMiddleware())
 	router.Use(middlewares.CookieMiddleware())
-	//env 初始化
-	configs.InitConfig()
 
 	//DB 初始化
 	database.InitDB()

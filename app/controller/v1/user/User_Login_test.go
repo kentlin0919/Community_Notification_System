@@ -19,7 +19,6 @@ import (
 	"Community_Notification_System/database"
 	userlog_db "Community_Notification_System/database/UserLog_DB"
 	user_db "Community_Notification_System/database/User_DB"
-	"Community_Notification_System/utils"
 )
 
 func init() {
@@ -29,17 +28,13 @@ func init() {
 func setupTestJWT(t *testing.T) {
 	t.Helper()
 
-	previousKey := make([]byte, len(utils.JwtKey))
-	copy(previousKey, utils.JwtKey)
 	previousPassword, hasPrevious := os.LookupEnv("JWTPASSWORD")
 
 	if err := os.Setenv("JWTPASSWORD", "testsecret"); err != nil {
 		t.Fatalf("設定 JWTPASSWORD 環境變數失敗: %v", err)
 	}
-	utils.JwtKey = []byte("testsecret")
 
 	t.Cleanup(func() {
-		utils.JwtKey = previousKey
 		if hasPrevious {
 			if err := os.Setenv("JWTPASSWORD", previousPassword); err != nil {
 				t.Fatalf("恢復 JWTPASSWORD 失敗: %v", err)
