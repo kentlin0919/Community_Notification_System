@@ -95,6 +95,21 @@ func UserInfoListRepository(userList []string) repositoryModels.RepositoryModel[
 	return repositoryModels
 }
 
+func UpdateUserLoginStateRepository(email string, token string, sessionID string, fcmToken string) repositoryModels.RepositoryModel[bool] {
+	var repositoryModel repositoryModels.RepositoryModel[bool]
+	
+	err := database.DB.Model(&user_db.UserInfo{}).Where("email = ?", email).Updates(map[string]interface{}{
+		"Token":      token,
+		"Session_id": sessionID,
+		"Fcmtoken":   fcmToken,
+	})
+
+	repositoryModel.Statue = *err
+	repositoryModel.Result = err.Error == nil
+
+	return repositoryModel
+}
+
 func UpdateUserInfoRepository(user_info *user_db.UserInfo) repositoryModels.RepositoryModel[bool] {
 
 	var repositoryModel repositoryModels.RepositoryModel[bool]

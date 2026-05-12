@@ -37,7 +37,7 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	// 綁定 JSON 資料並驗證輸入格式
 	// 使用 ShouldBindJSON 可以自動驗證 JSON 格式是否符合結構體定義
 	if err := ctx.ShouldBindJSON(&loginData); err != nil {
-		errorModel := model.NewGlobalErrorRequestWithMsg(http.StatusBadRequest, errors.ErrInvalidParams, "無效的輸入資料")
+		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, errors.ErrInvalidParams, "無效的輸入資料")
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
@@ -52,11 +52,11 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	// 3. 處理其他可能的資料庫錯誤
 	if result.Statue.Error != nil {
 		if result.Statue.Error == gorm.ErrRecordNotFound {
-			errorModel := model.NewGlobalErrorRequestWithMsg(http.StatusNotFound, errors.ErrUserNotFound, "使用者不存在")
+			errorModel := model.NewErrorResponse(ctx, http.StatusNotFound, errors.ErrUserNotFound, "使用者不存在")
 			ctx.JSON(http.StatusNotFound, errorModel)
 			return
 		}
-		errorModel := model.NewGlobalErrorRequestWithMsg(http.StatusInternalServerError, errors.ErrDatabase, "系統錯誤")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, errors.ErrDatabase, "系統錯誤")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -66,7 +66,7 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	// 2. 防止時序攻擊
 	// 3. 符合安全最佳實踐
 	if err := bcrypt.CompareHashAndPassword([]byte(result.Result.Password), []byte(loginData.Password)); err != nil {
-		errorModel := model.NewGlobalErrorRequestWithMsg(http.StatusUnauthorized, errors.ErrPasswordWrong, "帳號或密碼錯誤")
+		errorModel := model.NewErrorResponse(ctx, http.StatusUnauthorized, errors.ErrPasswordWrong, "帳號或密碼錯誤")
 		ctx.JSON(http.StatusUnauthorized, errorModel)
 		return
 	}
@@ -75,7 +75,7 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	// 密碼一致，為使用者簽發 JWT，儲存狀態與授權資訊
 	token, err := utils.GenerateJWT(result.Result.Email, result.Result.ID, result.Result.PermissionId, result.Result.Community_id)
 	if err != nil {
-		errorModel := model.NewGlobalErrorRequestWithMsg(http.StatusInternalServerError, errors.ErrInternal, "JWT 簽發失敗")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, errors.ErrInternal, "JWT 簽發失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -89,14 +89,10 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 
 	// 更新用戶的 Token 和 Session ID 到資料庫
 	// 確保用戶的最新登入狀態被記錄
-	updateUserToken := database.DB.Model(&result.Result).Where("email = ?", result.Result.Email).Updates(map[string]interface{}{
-		"Token":      result.Result.Token,
-		"Session_id": result.Result.Session_id,
-		"Fcmtoken":   loginData.Fcmtoken,
-	})
+	updateUserToken := repository.UpdateUserLoginStateRepository(result.Result.Email, token, sessionID, loginData.Fcmtoken)
 
-	if updateUserToken.Error != nil {
-		errorModel := model.NewGlobalErrorRequestWithMsg(http.StatusInternalServerError, errors.ErrDatabase, "更新用戶登入狀態失敗")
+	if updateUserToken.Statue.Error != nil {
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, errors.ErrDatabase, "更新用戶登入狀態失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -119,7 +115,7 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	// 用於追蹤用戶活動和安全性監控
 	logResult := repository.UserLogRepository(&result.Result)
 	if logResult.Statue.Error != nil {
-		errorModel := model.NewGlobalErrorRequestWithMsg(http.StatusInternalServerError, errors.ErrDatabase, "更新用戶最後登入時間失敗")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, errors.ErrDatabase, "更新用戶最後登入時間失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}

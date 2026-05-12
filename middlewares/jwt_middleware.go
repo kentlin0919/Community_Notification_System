@@ -13,21 +13,6 @@ import (
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		//需要跳過的路由
-		skipPaths := map[string]bool{
-
-			"/":                        true,
-			"/api/v1/login":            true,
-			"/api/v1/platform/getlist": true,
-			"/api/v1/register":         true,
-			"/swagger/*any":            true,
-		}
-
-		if skipPaths[c.Request.URL.Path] || skipPaths[c.FullPath()] {
-			c.Next()
-			return
-		}
-
 		//從key中撈出value
 		authHeader := c.GetHeader("Authorization")
 
@@ -79,5 +64,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			}
 		}
 
+		c.Next()
 	}
 }
+

@@ -6,9 +6,9 @@ import (
 	repository "Community_Notification_System/app/repositories/user"
 	"Community_Notification_System/pkg/firebase"
 	"context"
-	"fmt"
 	"log"
 	"net/http"
+	"Community_Notification_System/utils/errors"
 
 	"firebase.google.com/go/v4/messaging"
 	"github.com/gin-gonic/gin"
@@ -34,17 +34,15 @@ func (m *MessageController) SendMessage(ctx *gin.Context) {
 	// 綁定 JSON 資料並驗證輸入格式
 	// 使用 ShouldBindJSON 可以自動驗證 JSON 格式是否符合結構體定義
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		errorModel := model.NewErrorRequest(http.StatusBadRequest, "無效的輸入資料")
+		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, errors.ErrInvalidParams, "無效的輸入資料")
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
 
-	UserInfoList := repository.UserInfoListRepository(req.Userselect)
-
-	fmt.Print(UserInfoList)
+	_ = repository.UserInfoListRepository(req.Userselect) // TODO: refactor to use message domain interface
 
 	if firebase.FcmClient == nil {
-		errorModel := model.NewErrorRequest(http.StatusServiceUnavailable, "Firebase 推播服務尚未初始化")
+		errorModel := model.NewErrorResponse(ctx, http.StatusServiceUnavailable, errors.ErrInternal, "Firebase 推播服務尚未初始化")
 		ctx.JSON(http.StatusServiceUnavailable, errorModel)
 		return
 	}
@@ -62,7 +60,8 @@ func (m *MessageController) SendMessage(ctx *gin.Context) {
 	response, err := firebase.FcmClient.Send(context.Background(), message)
 	if err != nil {
 		log.Printf("error sending message: %v\n", err)
-		ctx.JSON(500, gin.H{"error": "Failed to send message"})
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, errors.ErrInternal, "Failed to send message")
+		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
 
