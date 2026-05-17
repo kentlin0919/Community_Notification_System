@@ -36,12 +36,6 @@ func TestJWTAuthMiddleware(t *testing.T) {
 			expectedStatus: http.StatusOK,
 		},
 		{
-			name: "跳過路徑 - Login",
-			path: "/api/v1/login",
-			setupAuth: func(req *http.Request) {},
-			expectedStatus: http.StatusOK,
-		},
-		{
 			name:           "缺少 Authorization Header",
 			path:           "/api/v1/protected",
 			setupAuth:      func(req *http.Request) {},

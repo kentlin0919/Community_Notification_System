@@ -3,3 +3,4 @@ serviceAccountKey.jsontmp/
 firebase-debug.log
 main
 *.log
+serviceAccountKey.json

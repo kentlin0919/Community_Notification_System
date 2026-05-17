@@ -3,6 +3,7 @@ package database
 import (
 	homedb "Community_Notification_System/database/Home_DB"
 	platform_db "Community_Notification_System/database/Platform_DB"
+	"time"
 
 	message_db "Community_Notification_System/database/Message_DB"
 	permission_db "Community_Notification_System/database/Permission_DB"
@@ -38,21 +39,29 @@ func InitDB() {
 	// 建立 DSN 連線字串
 	dsn := buildDSN(dbHost, dbUser, dbPassword, dbName, dbPort, dbTimezone)
 
-	DB, err = gorm.Open(postgres.New(postgres.Config{
-		DSN:                  dsn,
-		PreferSimpleProtocol: true,
-	}), &gorm.Config{
-		NamingStrategy: schema.NamingStrategy{
-			SingularTable: true,
-		},
-	})
+	var maxRetries = 10
+	var retryDelay = 2 * time.Second
 
-	if err != nil {
+	for i := 0; i < maxRetries; i++ {
+		DB, err = gorm.Open(postgres.New(postgres.Config{
+			DSN:                  dsn,
+			PreferSimpleProtocol: true,
+		}), &gorm.Config{
+			NamingStrategy: schema.NamingStrategy{
+				SingularTable: true,
+			},
+		})
+
+		if err == nil {
+			break
+		}
+
 		if isMissingDatabaseError(err) {
 			log.Printf("偵測到資料庫 %s 不存在，嘗試自動建立...", dbName)
 			if createErr := createDatabaseIfNotExists(dbHost, dbUser, dbPassword, dbName, dbPort, dbTimezone); createErr != nil {
 				log.Fatalf("建立資料庫 %s 失敗: %v", dbName, createErr)
 			}
+			// Retry immediately after creating the database
 			DB, err = gorm.Open(postgres.New(postgres.Config{
 				DSN:                  dsn,
 				PreferSimpleProtocol: true,
@@ -61,11 +70,19 @@ func InitDB() {
 					SingularTable: true,
 				},
 			})
+			if err == nil {
+				break
+			}
 		}
-		if err != nil {
-			log.Fatalf("資料庫連線失敗: %v", err)
-		}
+
+		log.Printf("資料庫連線失敗，等待重試 (%d/%d): %v", i+1, maxRetries, err)
+		time.Sleep(retryDelay)
 	}
+
+	if err != nil {
+		log.Fatalf("資料庫連線失敗，已達最大重試次數: %v", err)
+	}
+
 	log.Println("資料庫連線成功")
 	CreateTable()
 }

@@ -2,10 +2,11 @@ package middlewares
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
-	"os"
-
+	"Community_Notification_System/app/models/model"
+	"Community_Notification_System/utils/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
@@ -18,9 +19,8 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 
 		//確定是否要包含
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "缺少 Authorization header",
-			})
+			errorModel := model.NewErrorResponse(c, http.StatusUnauthorized, errors.ErrUnauthorized, "缺少 Authorization header")
+			c.JSON(http.StatusUnauthorized, errorModel)
 			c.Abort()
 			return
 		}
@@ -29,7 +29,8 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 		if tokenString == authHeader {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "格式錯誤，應為 Bearer token"})
+			errorModel := model.NewErrorResponse(c, http.StatusUnauthorized, errors.ErrTokenInvalid, "格式錯誤，應為 Bearer token")
+			c.JSON(http.StatusUnauthorized, errorModel)
 			c.Abort()
 			return
 		}
@@ -39,8 +40,8 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			// fmt.Printf("Token validation failed: %v\n", err)
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "無效的 token", "details": err.Error()})
+			errorModel := model.NewErrorResponse(c, http.StatusUnauthorized, errors.ErrTokenInvalid, "無效的 token")
+			c.JSON(http.StatusUnauthorized, errorModel)
 			c.Abort()
 			return
 		}

@@ -39,7 +39,6 @@ func main() {
 	//跨域的 Middleware
 	router.Use(middlewares.RequestIDMiddleware())
 	router.Use(middlewares.CORSMiddleware())
-	router.Use(middlewares.JWTAuthMiddleware())
 	router.Use(middlewares.CookieMiddleware())
 
 	//DB 初始化

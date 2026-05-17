@@ -6,13 +6,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func V1Routes(rg *gin.RouterGroup) {
-
-	// 處理登入請求
+func V1PublicRoutes(rg *gin.RouterGroup) {
+	// 公開路由
 	rg.POST("/login", v1.User().UserLogin)
-	/// 處理註冊請求
 	rg.POST("/register", v1.User().UserRegister)
+	rg.GET("/platform/getlist", v1.Platform().Platform_GetList)
+}
 
+func V1PrivateRoutes(rg *gin.RouterGroup) {
 	/// 刪除使用者
 	rg.POST("/deleteUser", v1.User().UserDelete)
 
@@ -46,12 +47,8 @@ func V1Routes(rg *gin.RouterGroup) {
 	rg.POST("/reservations/:id/reschedule", v1.Reservation().Reschedule)
 	rg.PATCH("/admin/reschedule/:id/approve", v1.Reservation().AdminApproveReschedule)
 
-	// 取得平台列表
-	rg.GET("/platform/getlist", v1.Platform().Platform_GetList)
-
 	// 包裹管理
 	rg.POST("/parcels", v1.Parcel().CreateParcel)
 	rg.GET("/parcels", v1.Parcel().GetParcelList)
 	rg.PUT("/parcels/:id/pickup", v1.Parcel().PickupParcel)
-
 }

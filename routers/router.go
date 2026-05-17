@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"Community_Notification_System/middlewares"
 	"github.com/gin-gonic/gin"
 
 	//引入v1 的router
@@ -9,11 +10,17 @@ import (
 )
 
 func RegisterRoutes(rg *gin.RouterGroup) {
-	// 創建 v1 路由組
+	// v1
 	v1Group := rg.Group("/v1")
-	v1.V1Routes(v1Group) // 引入 v1.go 的路由
+	v1.V1PublicRoutes(v1Group)
+	v1PrivateGroup := rg.Group("/v1")
+	v1PrivateGroup.Use(middlewares.JWTAuthMiddleware())
+	v1.V1PrivateRoutes(v1PrivateGroup)
 
+	// v2
 	v2Group := rg.Group("/v2")
-
-	v2.V2Routes(v2Group)
+	v2.V2PublicRoutes(v2Group)
+	v2PrivateGroup := rg.Group("/v2")
+	v2PrivateGroup.Use(middlewares.JWTAuthMiddleware())
+	v2.V2PrivateRoutes(v2PrivateGroup)
 }

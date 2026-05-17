@@ -6,17 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func V2Routes(rg *gin.RouterGroup) {
-
-	// 處理登入請求
+func V2PublicRoutes(rg *gin.RouterGroup) {
 	rg.POST("/login", v1.User().UserLogin)
-	/// 處理註冊請求
 	rg.POST("/register", v1.User().UserRegister)
+}
 
-	/// 刪除使用者
+func V2PrivateRoutes(rg *gin.RouterGroup) {
 	rg.POST("/deleteUser", v1.User().UserDelete)
-
-	//處理送通知
 	rg.POST("/sendmessage", v1.Message().SendMessage)
-
 }
