@@ -8,6 +8,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
+
+	utilsErr "Community_Notification_System/utils/errors"
 )
 
 // GetMessageList 取得當前使用者通知列表
@@ -28,21 +31,21 @@ import (
 func (m *MessageController) GetMessageList(ctx *gin.Context) {
 	userID, ok := getUserIDFromContext(ctx)
 	if !ok {
-		errorModel := model.NewErrorRequest(http.StatusUnauthorized, "未授權")
+		errorModel := model.NewErrorResponse(ctx, http.StatusUnauthorized, utilsErr.ErrUnauthorized, "未授權")
 		ctx.JSON(http.StatusUnauthorized, errorModel)
 		return
 	}
 
 	var query message_model.MessageListQuery
 	if err := ctx.ShouldBindQuery(&query); err != nil {
-		errorModel := model.NewErrorRequest(http.StatusBadRequest, "請求參數錯誤")
+		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "請求參數錯誤")
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
 
 	repoResult := repository.GetUserMessagesRepository(userID, &query)
 	if repoResult.Statue.Error != nil {
-		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "取得通知失敗")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "取得通知失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -82,7 +85,7 @@ func (m *MessageController) GetMessageList(ctx *gin.Context) {
 func (m *MessageController) MarkMessageRead(ctx *gin.Context) {
 	userID, ok := getUserIDFromContext(ctx)
 	if !ok {
-		errorModel := model.NewErrorRequest(http.StatusUnauthorized, "未授權")
+		errorModel := model.NewErrorResponse(ctx, http.StatusUnauthorized, utilsErr.ErrUnauthorized, "未授權")
 		ctx.JSON(http.StatusUnauthorized, errorModel)
 		return
 	}
@@ -90,12 +93,12 @@ func (m *MessageController) MarkMessageRead(ctx *gin.Context) {
 	messageID := ctx.Param("id")
 	repoResult := repository.MarkMessageReadRepository(userID, messageID)
 	if repoResult.Statue.Error != nil {
-		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "標記已讀失敗")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "標記已讀失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
 	if !repoResult.Result {
-		errorModel := model.NewErrorRequest(http.StatusNotFound, "通知不存在")
+		errorModel := model.NewErrorResponse(ctx, http.StatusNotFound, utilsErr.ErrNotFound, "通知不存在")
 		ctx.JSON(http.StatusNotFound, errorModel)
 		return
 	}
@@ -117,14 +120,14 @@ func (m *MessageController) MarkMessageRead(ctx *gin.Context) {
 func (m *MessageController) MarkAllMessagesRead(ctx *gin.Context) {
 	userID, ok := getUserIDFromContext(ctx)
 	if !ok {
-		errorModel := model.NewErrorRequest(http.StatusUnauthorized, "未授權")
+		errorModel := model.NewErrorResponse(ctx, http.StatusUnauthorized, utilsErr.ErrUnauthorized, "未授權")
 		ctx.JSON(http.StatusUnauthorized, errorModel)
 		return
 	}
 
 	repoResult := repository.MarkAllMessagesReadRepository(userID)
 	if repoResult.Statue.Error != nil {
-		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "全部標記已讀失敗")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "全部標記已讀失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}

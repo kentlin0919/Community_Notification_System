@@ -8,6 +8,9 @@ import (
 	repository "Community_Notification_System/app/repositories/platform"
 
 	"github.com/gin-gonic/gin"
+
+
+	utilsErr "Community_Notification_System/utils/errors"
 )
 
 // Platform_GetList 取得平台列表
@@ -23,7 +26,7 @@ func (p *PlatformController) Platform_GetList(ctx *gin.Context) {
 	repoResult := repository.PlatformRepository()
 
 	if repoResult.Statue.Error != nil {
-		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "取得平台資料失敗")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "取得平台資料失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}

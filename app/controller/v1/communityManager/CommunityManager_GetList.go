@@ -8,6 +8,9 @@ import (
 	repository "Community_Notification_System/app/repositories/community"
 
 	"github.com/gin-gonic/gin"
+
+
+	utilsErr "Community_Notification_System/utils/errors"
 )
 
 // CommunityManager_GetList 取得社區基本資料清單
@@ -31,7 +34,7 @@ import (
 func (c *CommunityManagerController) CommunityManager_GetList(ctx *gin.Context) {
 	var query communityModel.CommunityListQuery
 	if err := ctx.ShouldBindQuery(&query); err != nil {
-		errorModel := model.NewErrorRequest(http.StatusBadRequest, "請求參數錯誤")
+		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "請求參數錯誤")
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
@@ -47,7 +50,7 @@ func (c *CommunityManagerController) CommunityManager_GetList(ctx *gin.Context) 
 
 	repoResult := repository.CommunityListRepository(&query)
 	if repoResult.Statue.Error != nil {
-		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "取得社區資料失敗")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "取得社區資料失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}

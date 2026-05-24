@@ -72,7 +72,8 @@ Controllers are registered via factory functions in `app/controller/v1/v1.go`.
 | `utils/` | JWT generation helpers |
 | `pkg/firebase/` | Firebase Cloud Messaging (FCM) initialization — optional at startup |
 | `configs/` | `godotenv` loader |
-| `docs/` | PRD, architecture docs, feature specs, monthly commit summaries |
+| `docs/` | Swagger generated API docs only (`docs.go`, `swagger.json`, `swagger.yaml`) |
+| `/Users/kent/project/Community_Notification_System/Community_Notification_System_docs` | PRD, architecture docs, feature specs, monthly commit summaries. **MUST BE REFERENCED BEFORE IMPLEMENTATION** |
 
 ### Environment variables (`.env`)
 
@@ -101,7 +102,7 @@ Swagger annotations live on controller handler functions. Run `swag init -g main
 
 ### Commit convention
 
-Follow conventional commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, etc. Update `docs/commit_summaries/commit_summary_YYYY_MM.md` when adding major features.
+Follow conventional commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, etc. Update `/Users/kent/project/Community_Notification_System/Community_Notification_System_docs/commit_summaries/commit_summary_YYYY_MM.md` when adding major features.
 
 
 # CLAUDE.md

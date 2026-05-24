@@ -7,6 +7,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+
+
+	utilsErr "Community_Notification_System/utils/errors"
 )
 
 // GetParcelList 查詢包裹列表
@@ -25,7 +28,7 @@ import (
 func (c *ParcelController) GetParcelList(ctx *gin.Context) {
 	communityID, exists := ctx.Get("community_id")
 	if !exists {
-		ctx.JSON(http.StatusUnauthorized, model.NewErrorRequest(http.StatusUnauthorized, "無法存取社區資訊，請重新登入"))
+		ctx.JSON(http.StatusUnauthorized, model.NewErrorResponse(ctx, http.StatusUnauthorized, utilsErr.ErrUnauthorized, "無法存取社區資訊，請重新登入"))
 		return
 	}
 
@@ -38,7 +41,7 @@ func (c *ParcelController) GetParcelList(ctx *gin.Context) {
 	if homeIDStr := ctx.Query("home_id"); homeIDStr != "" {
 		parsed, err := strconv.ParseUint(homeIDStr, 10, 64)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, model.NewErrorRequest(http.StatusBadRequest, "home_id 格式錯誤"))
+			ctx.JSON(http.StatusBadRequest, model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "home_id 格式錯誤"))
 			return
 		}
 		homeID = parsed
@@ -47,7 +50,7 @@ func (c *ParcelController) GetParcelList(ctx *gin.Context) {
 	if statusStr := ctx.Query("status"); statusStr != "" {
 		parsed, err := strconv.Atoi(statusStr)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, model.NewErrorRequest(http.StatusBadRequest, "status 格式錯誤"))
+			ctx.JSON(http.StatusBadRequest, model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "status 格式錯誤"))
 			return
 		}
 		status = parsed
@@ -55,7 +58,7 @@ func (c *ParcelController) GetParcelList(ctx *gin.Context) {
 
 	res := repository.GetParcelListRepository(cID, homeID, status)
 	if res.Statue.Error != nil {
-		ctx.JSON(http.StatusInternalServerError, model.NewErrorRequest(http.StatusInternalServerError, "查詢包裹列表失敗"))
+		ctx.JSON(http.StatusInternalServerError, model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "查詢包裹列表失敗"))
 		return
 	}
 

@@ -3,10 +3,12 @@
 Community Notification System 是以 Gin + GORM 打造的 RESTful 服務，提供社區使用者帳號管理與推播通知能力，並內建 JWT、Cookie Session、CORS 等安全與體驗需求。主程式位於 `main.go`，啟動時會載入環境變數、初始化資料庫、註冊版本化路由與 Swagger 介面。
 
 ## 專案亮點
-- 採 `controller / repository / model` 分層，降低路由、商業邏輯與資料存取耦合度。
-- 透過環境變數配置 PostgreSQL 連線，啟動時自動檢查並建立必要資料表。
+- 採 `controller / repository / model` 分層，降低路由、商業邏輯與資料存取耦合度.
+- 透過環境變數配置 PostgreSQL 連線，啟動時自動檢查並建立必要資料表.
 - 中介層覆蓋 JWT 驗證、CORS、Cookie 解析，可快速擴充額外安全策略。
-- 將新增 `CommunityContextMiddleware`，把登入者所屬 `community_id` 寫入請求上下文，讓後續查詢與異動都受社區範圍限制。
+- `CommunityContextMiddleware` 會把登入者所屬 `community_id` 與權限資訊寫入請求上下文，設施、預約、訊息與包裹等 API 皆受社區範圍限制。
+- **設施查詢安全升級**：`/api/v1/facilities` 與 `/api/v1/facilities/:id` 支援 Query 參數 `community_id` 與 JWT Fallback 雙重校驗，並實作了防越權檢驗 (Horizontal Privilege Escalation Prevention)。
+- **強型別 API 契約**：設施查詢 API 引入強型別 `FacilityListResponse` 與 `FacilityDetailResponse` 回應模型，在 Swagger 中完整展示欄位細節。
 - Swagger (`/swagger/index.html`) 自動反映註解變更，方便檢視與測試 API。
 - 內建登入整合測試，範例化 SQLite in-memory + Gin 測試流程。
 
@@ -62,7 +64,9 @@ Community_Notification_System/
 │  │     │  └─ Platform_GetList.go
 │  │     ├─ message/
 │  │     │  ├─ Message_Controller.go
-│  │     │  └─ Message_SendMessage.go
+│  │     │  ├─ Message_SendMessage.go
+│  │     │  ├─ Message_SendMessage_test.go
+│  │     │  └─ Message_ListAndRead.go
 │  │     └─ user/
 │  │        ├─ User_Controller.go
 │  │        ├─ User_Login.go
@@ -115,13 +119,14 @@ Community_Notification_System/
 ├─ utils/
 │  └─ Jwt_Token.go                 # JWT 簽發工具
 ├─ docs/
-│  ├─ api/                 # API 相關 (Swagger, JSON Schema, docs.go)
-│  ├─ analysis/            # 業務分析與需求規格 (PRD, Business Analysis)
-│  ├─ architecture/        # 架構流程與 UML 圖 (UML, Sequence) [含 IOT 未來規劃]
-│  ├─ design/              # UI/UX 設計與 Stitch 生成紀錄
-│  ├─ system/              # 系統環境與資料庫設計 (Security, Schema)
-│  ├─ features/            # 功能細部設計 (Parcel Management, Facility Booking, etc.)
-│  └─ README.md            # 文件總索引
+│  ├─ docs.go / swagger.json / swagger.yaml # swag init 產生之 Swagger 文件
+│  └─ api/                         # Swagger 輔助模型與 API 相關文件
+├─ ../Community_Notification_System_docs/
+│  ├─ README.md                    # 文件中心總索引
+│  ├─ facility/                    # 設施 CRUD、預約設計，含 [facility_get_list_update.md]
+│  ├─ message/                     # 訊息、FCM 與已讀狀態文件
+│  ├─ system_architecture/         # 全域架構、權限與路由契約
+│  └─ planning/                    # 規劃、稽核、commit summary 與歷史紀錄
 ├─ pkg/
 │  ├─ common/                      # 共用建表工具
 │  └─ firebase/                    # Firebase FCM 初始化
@@ -206,7 +211,7 @@ sequenceDiagram
     Ctrl-->>Client: 202 Accepted + 刪除成功訊息
 ```
 
-### 傳送訊息 (`POST /api/v1/sendmessage`)
+### 傳送訊息 (`POST /api/v1/messages/send`、相容 `POST /api/v1/sendmessage`)
 
 ```mermaid
 sequenceDiagram
@@ -214,23 +219,84 @@ sequenceDiagram
     participant Gin as Gin Router
     participant JWTmw as JWT 中介層
     participant Ctrl as MessageController
-    participant Repo as UserRepository
+    participant Repo as MessageRepository
     participant DB as PostgreSQL
     participant FCM as Firebase FCM
-    Client->>Gin: Authorization: Bearer token\nPOST /api/v1/sendmessage
+    Client->>Gin: Authorization: Bearer *** /api/v1/messages/send
     Gin->>JWTmw: 驗證 JWT
-    JWTmw-->>Gin: 驗證通過
+    JWTmw-->>Gin: 寫入 user_id, community_id
     Gin->>Ctrl: SendMessage(ctx)
-    Ctrl->>Ctrl: 驗證訊息負載
-    Ctrl->>Repo: UserInfoListRepository(userList)
-    loop 每位收件者
-        Repo->>DB: SELECT user WHERE email = ?
-        DB-->>Repo: UserInfo (含 FcmToken)
-    end
+    Ctrl->>Ctrl: 驗證 title/body/target_type
+    Ctrl->>Repo: FindMessageRecipientsRepository(community_id, target)
+    Repo->>DB: SELECT user_info WHERE community_id = ? AND target 條件
+    DB-->>Repo: 同社區收件者清單
     Repo-->>Ctrl: 收件者清單
-    Ctrl->>FCM: 呼叫 FcmClient.Send()
-    FCM-->>Ctrl: Success/Fail
-    Ctrl-->>Client: 200 OK + 收件結果摘要
+    Ctrl->>Repo: CreateMessageRecordsRepository(batch_id)
+    Repo->>DB: INSERT message_info (每位收件者一筆)
+    loop 每位收件者
+        alt Firebase 可用且收件者有 Fcmtoken
+            Ctrl->>FCM: FcmClient.Send(notification + data)
+            FCM-->>Ctrl: fcm_message_id / error
+            Ctrl->>Repo: UpdateMessageFCMResultRepository(sent/failed)
+        else Firebase 未初始化或無 Fcmtoken
+            Ctrl->>Repo: UpdateMessageFCMResultRepository(skipped)
+        end
+    end
+    Ctrl-->>Client: 200 OK + target/success/failure 統計
+```
+
+#### 傳送訊息 Request 範例
+```json
+{
+  "title": "社區公告",
+  "subtitle": "電梯維修通知",
+  "body": "本週三下午 1:00 至 4:00 將進行電梯例行維護。",
+  "target_type": "selected_users",
+  "recipient_user_ids": ["user-uuid-1", "user-uuid-2"],
+  "recipient_emails": ["user1@example.com"],
+  "metadata": {
+    "category": "announcement",
+    "entity_type": "community",
+    "entity_id": "notice-1",
+    "click_action": "FLUTTER_NOTIFICATION_CLICK"
+  }
+}
+```
+
+支援的 `target_type`：
+- `selected_users`：依 `recipient_user_ids` / `recipient_emails` / 舊欄位 `Userselect` 選取同社區收件者。
+- `community`：發送給 JWT 所屬 `community_id` 的所有使用者。
+
+#### 傳送訊息 Response 範例
+```json
+{
+  "message": "訊息發送完成",
+  "data": {
+    "message_batch_id": "batch-uuid",
+    "target_count": 2,
+    "success_count": 1,
+    "failure_count": 1,
+    "created_message_ids": ["message-id-1", "message-id-2"],
+    "fcm_results": [
+      {
+        "message_id": "message-id-1",
+        "user_id": "user-uuid-1",
+        "email": "user1@example.com",
+        "success": true,
+        "fcm_status": "sent",
+        "fcm_message_id": "projects/demo/messages/xxx"
+      },
+      {
+        "message_id": "message-id-2",
+        "user_id": "user-uuid-2",
+        "email": "user2@example.com",
+        "success": false,
+        "fcm_status": "skipped",
+        "error": "收件者未註冊 FCM token"
+      }
+    ]
+  }
+}
 ```
 
 ### 社區註冊審核 (`PATCH /api/v1/community/register/:id/approve`)
@@ -258,26 +324,119 @@ sequenceDiagram
     Ctrl-->>Admin: 200 OK (社區與管理員資訊)
 ```
 
-### 設施預約 (`POST /api/v1/facilities/:id/reservations`)
+### 設施與預約 CRUD API 契約
+
+| Method | Path | 權限範圍 | Controller | 說明 |
+| --- | --- | --- | --- | --- |
+| `POST` | `/api/v1/admin/facilities` | Admin Level 2 | `FacilityController.CreateFacility` | 建立設施與預設預約規則 |
+| `GET` | `/api/v1/facilities` | Resident+ | `FacilityController.GetFacilityList` | 設施列表；住戶僅看 `active`，管理員可看同社區全部未刪除設施 |
+| `GET` | `/api/v1/facilities/:id` | Resident+ | `FacilityController.GetFacilityDetail` | 設施詳情，受 `community_id` 隔離 |
+| `PUT` | `/api/v1/admin/facilities/:id` | Admin Level 2 | `FacilityController.UpdateFacility` | 更新設施基本資料並同步更新 `facility_rule` |
+| `DELETE` | `/api/v1/admin/facilities/:id` | Admin Level 2 | `FacilityController.DeleteFacility` | 以 `gorm.DeletedAt` 軟刪除設施 |
+| `POST` | `/api/v1/facilities/:facility_id/reservations` | Resident+ | `ReservationController.CreateReservation` | 建立預約並檢查設施狀態、規則與時段衝突 |
+| `GET` | `/api/v1/reservations` | Resident+ | `ReservationController.GetReservationList` | 預約列表；住戶僅看自己的預約，管理員可看同社區全部未刪除預約 |
+| `GET` | `/api/v1/reservations/:id` | Resident+ | `ReservationController.GetReservationDetail` | 預約詳情；住戶需符合 `user_id`，管理員只受社區隔離 |
+| `PATCH` | `/api/v1/reservations/:id/cancel` | Resident+ | `ReservationController.CancelReservation` | 住戶取消自己的預約並紀錄原因 |
+| `POST` | `/api/v1/reservations/:id/reschedule` | Resident+ | `ReservationController.Reschedule` | 住戶送出改期申請 |
+| `PATCH` | `/api/v1/admin/reservations/:id/delete` | Admin Level 2 | `ReservationController.AdminDeleteReservation` | 管理員強制取消/軟刪除同社區預約 |
+| `PATCH` | `/api/v1/admin/reschedule/:id/approve` | Admin Level 2 | `ReservationController.AdminApproveReschedule` | 管理員核准或拒絕改期申請 |
+
+### 設施管理 CRUD (`GET /api/v1/facilities`、`PUT/DELETE /api/v1/admin/facilities/:id`)
+
+#### 取得設施列表與安全防禦流程 (`GET /api/v1/facilities`)
+```mermaid
+sequenceDiagram
+    participant User as 客戶端 (住戶/管理員)
+    participant MW as JWT 中介層
+    participant Ctrl as FacilityController
+    participant Repo as FacilityRepository
+    participant DB as PostgreSQL
+
+    User->>MW: GET /api/v1/facilities?community_id=123 (帶有 JWT)
+    MW->>MW: 驗證 JWT 並注入 user_id, community_id, permission_id 到 Context
+    MW->>Ctrl: GetFacilityList(ctx)
+    Ctrl->>Ctrl: 優先讀取 Query community_id，Fallback 到 JWT Context
+    alt 權限 ID > 1 且 查詢 community_id != JWT community_id
+        Ctrl-->>User: 403 Forbidden (無權越權查詢其他社區)
+    else 驗證通過
+        Ctrl->>Repo: GetFacilityListRepository(community_id, onlyActive)
+        Repo->>DB: SELECT * FROM facility_infos WHERE community_id = ?
+        DB-->>Repo: 設施列表資料
+        Repo-->>Ctrl: 返回結果
+        Ctrl-->>User: 200 OK + FacilityListResponse (強型別欄位 JSON)
+    end
+```
+
+#### 設施新增、更新與刪除流程
+```mermaid
+sequenceDiagram
+    participant Admin as 社區管理員
+    participant MW as JWT + CommunityContextMW
+    participant Ctrl as FacilityController
+    participant Repo as FacilityRepository
+    participant DB as PostgreSQL
+
+    Admin->>MW: POST /api/v1/admin/facilities
+    MW->>MW: 驗證 JWT、permission_id <= 2、community_id
+    MW->>Ctrl: CreateFacility(ctx)
+    Ctrl->>Repo: CreateFacilityWithRuleTransactionRepository(facility)
+    Repo->>DB: INSERT facility_info + facility_rule
+    DB-->>Repo: 建立成功
+    Repo-->>Ctrl: RepositoryModel
+    Ctrl-->>Admin: 201 Created
+
+    Admin->>MW: PUT /api/v1/admin/facilities/{id}
+    MW->>Ctrl: UpdateFacility(ctx)
+    Ctrl->>Repo: UpdateFacilityWithRuleRepository(facility, rule)
+    Repo->>DB: UPDATE facility_info + facility_rule
+    Ctrl-->>Admin: 200 OK
+
+    Admin->>MW: DELETE /api/v1/admin/facilities/{id}
+    MW->>Ctrl: DeleteFacility(ctx)
+    Ctrl->>Repo: DeleteFacilityRepository(id, community_id)
+    Repo->>DB: UPDATE facility_info SET deleted_at = now()
+    Ctrl-->>Admin: 200 OK
+```
+
+### 設施預約與預約管理 (`POST /api/v1/facilities/:facility_id/reservations`、`GET /api/v1/reservations`)
 
 ```mermaid
 sequenceDiagram
     participant User as 住戶
-    participant MW as CommunityContextMW
-    participant Ctrl as ReservationCtrl
-    participant Repo as ReservationRepo
+    participant Admin as 社區管理員
+    participant MW as JWT + CommunityContextMW
+    participant Ctrl as ReservationController
+    participant Repo as ReservationRepository
     participant DB as PostgreSQL
-    User->>MW: POST /facilities/{id}/reservations
-    MW->>MW: 解析 community_id 並驗證
+
+    User->>MW: POST /api/v1/facilities/{facility_id}/reservations
     MW->>Ctrl: CreateReservation(ctx)
-    Ctrl->>DB: SELECT facility & rules
-    Ctrl->>Repo: CreateReservationRepository(...)
-    Repo->>Repo: CheckConflict (檢查時段重疊)
-    Repo->>DB: INSERT facility_reservation
+    Ctrl->>DB: SELECT facility_info + facility_rule by facility_id/community_id
+    Ctrl->>Repo: CreateReservationRepository(reservation, rule)
+    Repo->>Repo: CheckConflict(status NOT IN cancelled/rejected)
+    Repo->>DB: INSERT facility_reservation(status=pending/approved)
     Ctrl-->>User: 201 Created
+
+    User->>MW: GET /api/v1/reservations
+    MW->>Ctrl: GetReservationList(ctx)
+    Ctrl->>Repo: GetReservationListRepository(community_id, user_id, filterByUserID=true)
+    Repo->>DB: SELECT reservations WHERE community_id=? AND user_id=? AND deleted_at IS NULL
+    Ctrl-->>User: 200 OK + 自己的預約
+
+    Admin->>MW: GET /api/v1/reservations
+    MW->>Ctrl: GetReservationList(ctx)
+    Ctrl->>Repo: GetReservationListRepository(community_id, user_id, filterByUserID=false)
+    Repo->>DB: SELECT reservations WHERE community_id=? AND deleted_at IS NULL
+    Ctrl-->>Admin: 200 OK + 全社區預約
+
+    Admin->>MW: PATCH /api/v1/admin/reservations/{id}/delete
+    MW->>Ctrl: AdminDeleteReservation(ctx)
+    Ctrl->>Repo: DeleteReservationRepository(id, community_id)
+    Repo->>DB: UPDATE facility_reservation SET deleted_at = now()
+    Ctrl-->>Admin: 200 OK
 ```
 
-### 預約改期申請 (`POST /api/v1/reservations/:id/reschedule`)
+### 預約改期申請 (`POST /api/v1/reservations/:id/reschedule`、`PATCH /api/v1/admin/reschedule/:id/approve`)
 
 ```mermaid
 sequenceDiagram
@@ -286,17 +445,19 @@ sequenceDiagram
     participant Ctrl as ReservationCtrl
     participant Repo as ReservationRepo
     participant DB as PostgreSQL
-    User->>Ctrl: Reschedule(req)
+    User->>Ctrl: POST /api/v1/reservations/{id}/reschedule
+    Ctrl->>DB: SELECT reservation WHERE id=? AND user_id=?
     Ctrl->>Repo: CreateRescheduleRequest(...)
+    Repo->>Repo: CheckConflict(new date/time)
     Repo->>DB: INSERT reschedule_request (status=pending)
-    User-->>Admin: (等待審核通知)
-    Admin->>Ctrl: AdminApproveReschedule(id, isApprove=true)
+    User-->>Admin: 等待審核
+    Admin->>Ctrl: PATCH /api/v1/admin/reschedule/{id}/approve
     Ctrl->>Repo: ApproveRescheduleRequestRepo(...)
     Note over Repo, DB: 啟動 Transaction
-    Repo->>DB: UPDATE facility_reservation (Time)
-    Repo->>DB: UPDATE reschedule_request (approved)
+    Repo->>DB: UPDATE facility_reservation (date/time)
+    Repo->>DB: UPDATE reschedule_request (approved/rejected)
     Note over Repo, DB: Commit Transaction
-    Ctrl-->>Admin: 200 OK (改期成功)
+    Ctrl-->>Admin: 200 OK
 ```
 
 ### 權限角色自定義 (`PUT /api/v1/admin/permissions/profile`)
@@ -492,9 +653,9 @@ docker run --name postgres \
 - `go test ./...`：執行全部測試套件。
 
 ## 文件資源
-- **文件索引**：`docs/README.md` 提供所有子目錄分類與新增文件指引。
-- **架構流程**：`docs/architecture/router_flow.md` 描述路由註冊、請求處理步驟與登入時序圖。
-- **Commit 摘要**：`docs/commit_summaries/commit_summary_2025_10.md` 維護逐月變更紀錄，請依新→舊排序更新，舊月份（例如 2025-09）位於同資料夾。
+- **文件中心總索引**：`../Community_Notification_System_docs/README.md` 提供所有子目錄分類與新增文件指引。
+- **設施模組開發文件**：`../Community_Notification_System_docs/facility/facility_get_list_update.md` 詳細分析了設施列表的動態社區 ID 查詢與強型別 DTO 設計。
+- **Commit 摘要**：`../Community_Notification_System_docs/commit_summaries/commit_summary_2026_05.md` 維護逐月變更紀錄（按時間新到舊排序），記錄了最新的 `feat(facility)` 逐行分析。
 
 ## 測試與品質保證
 - `app/controller/v1/user/User_Login_test.go` 展示使用 Gin 測試環境、SQLite in-memory 與 JWT mock 進行整合測試。
@@ -510,10 +671,12 @@ docker run --name postgres \
 ## 資料庫表格概觀
 - `user_info`：基本使用者資料（Email、加密密碼、權限、平台、Session）。
 - `user_log`：記錄登入等操作行為，包含時間戳與動作描述。
-- `message_info`、`home_info`：預留表格，啟動時若不存在將自動建立。
-- 後續 `community/register` 建議以 transaction 同步建立 `community_info` 與該社區的初始 `admin user_info`。
-- 設施預約功能目前已完成文件設計，資料表規劃詳見 `docs/features/facility_booking/facility_reservation/README.md`，尚未實作至 `database/`。IOT 相關模組資料表 (IoT_DB) 已預留設計，但目前不在第一階段開發範圍。
+- `message_info`：所有寄出訊息都會留下每位收件者一筆紀錄；核心欄位包含 `user_id`、`email`、`sender_id`、`community_id`、`batch_id`、`target_type`、`title`、`subtile`、`detail`、`category`、`entity_type`、`entity_id`、`fcm_status`、`fcm_message_id` , `fcm_error` , `is_read`, `create_time`。
+- `home_info`：住戶資料表，啟動時若不存在將自動建立。
+- `community_info` 與 `community_register_application`：社區基礎資料表與註冊審核表。
+- `facility_infos`、`facility_rules`、`facility_reservations` 與 `reschedule_requests`：位於 `database/Facility_DB`，完整定義公用設施主檔、預約規則、預約紀錄與改期申請 Schema，啟動時透過 GORM 自動建表。
 - 建表邏輯集中於 `database/`，調整 schema 時請同步更新對應模型與自動遷移流程。
+
 
 ## 中介層與安全性
 - `middlewares/jwt_middleware.go`：預設保護除登入/註冊/Swagger 外之 API，驗證失敗回傳 401。

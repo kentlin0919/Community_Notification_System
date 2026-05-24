@@ -51,6 +51,15 @@ type Response404Error struct {
 	Error        string `json:"error" example:"Resource not found"`
 }
 
+// Response409Error 代表 409 錯誤回應
+type Response409Error struct {
+	RequestID    string `json:"request_id,omitempty" example:"uuid-string"`
+	Code         int    `json:"code" example:"409"`
+	InternalCode int    `json:"internal_code,omitempty" example:"1005"`
+	Status       string `json:"status" example:"Conflict"`
+	Error        string `json:"error" example:"Resource conflict"`
+}
+
 // Response500Error 代表 500 錯誤回應
 type Response500Error struct {
 	RequestID    string `json:"request_id,omitempty" example:"uuid-string"`

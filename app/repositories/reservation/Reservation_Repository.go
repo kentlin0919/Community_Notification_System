@@ -18,7 +18,7 @@ func CheckConflict(tx *gorm.DB, facilityID uint64, date string, start string, en
 	err := tx.Model(&facilitydb.FacilityReservation{}).
 		Where("facility_id = ?", facilityID).
 		Where("reservation_date = ?", date).
-		Where("status IN ?", []string{"pending", "approved"}).
+		Where("status NOT IN ?", []string{"cancelled", "rejected"}).
 		Where("start_time < ? AND end_time > ?", end, start).
 		Count(&count).Error
 	if err != nil {
@@ -96,7 +96,7 @@ func CreateRescheduleRequestRepository(req *facilitydb.RescheduleRequest, userID
 		if err := tx.First(&res, req.ReservationID).Error; err != nil {
 			return err
 		}
-		
+
 		if res.UserID != userID || res.FacilityID != facilityID {
 			return errors.New("無效的預約操作")
 		}
@@ -154,4 +154,56 @@ func ApproveRescheduleRequestRepository(reqID uint64, isApprove bool, comment st
 			"updated_at":    time.Now(),
 		}).Error
 	})
+}
+
+// GetReservationListRepository 依社區取得預約列表；住戶視角只回傳自己的預約。
+func GetReservationListRepository(communityID uint64, userID string, filterByUserID bool) repositoryModels.RepositoryModel[[]facilitydb.FacilityReservation] {
+	var result repositoryModels.RepositoryModel[[]facilitydb.FacilityReservation]
+	var reservations []facilitydb.FacilityReservation
+
+	query := database.DB.Where("community_id = ?", communityID)
+	if filterByUserID {
+		query = query.Where("user_id = ?", userID)
+	}
+
+	if err := query.Order("reservation_date DESC, start_time DESC, id DESC").Find(&reservations).Error; err != nil {
+		result.Statue.Error = err
+		return result
+	}
+
+	result.Result = reservations
+	result.Statue.RowsAffected = int64(len(reservations))
+	return result
+}
+
+// GetReservationDetailRepository 依社區與角色範圍取得單一預約。
+func GetReservationDetailRepository(id uint64, communityID uint64, userID string, filterByUserID bool) repositoryModels.RepositoryModel[facilitydb.FacilityReservation] {
+	var result repositoryModels.RepositoryModel[facilitydb.FacilityReservation]
+	var reservation facilitydb.FacilityReservation
+
+	query := database.DB.Where("id = ? AND community_id = ?", id, communityID)
+	if filterByUserID {
+		query = query.Where("user_id = ?", userID)
+	}
+
+	if err := query.First(&reservation).Error; err != nil {
+		result.Statue.Error = err
+		return result
+	}
+
+	result.Result = reservation
+	result.Statue.RowsAffected = 1
+	return result
+}
+
+// DeleteReservationRepository 軟刪除同社區預約，供管理員強制取消/刪除使用。
+func DeleteReservationRepository(id uint64, communityID uint64) error {
+	res := database.DB.Where("id = ? AND community_id = ?", id, communityID).Delete(&facilitydb.FacilityReservation{})
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }

@@ -3,6 +3,7 @@ package v1
 import (
 	"Community_Notification_System/app/controller/v1/communityManager"
 	"Community_Notification_System/app/controller/v1/facility"
+	"Community_Notification_System/app/controller/v1/home"
 	"Community_Notification_System/app/controller/v1/message"
 	"Community_Notification_System/app/controller/v1/parcel"
 	"Community_Notification_System/app/controller/v1/permission"
@@ -49,3 +50,9 @@ func Reservation() *reservation.ReservationController {
 func Parcel() *parcel.ParcelController {
 	return parcel.NewParcelController()
 }
+
+// Home 回傳首頁控制器
+func Home() *home.HomeController {
+	return home.NewHomeController()
+}
+

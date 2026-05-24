@@ -8,6 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+
+
+	utilsErr "Community_Notification_System/utils/errors"
 )
 
 // UserDelete 處理刪除使用者
@@ -29,7 +32,7 @@ func (u *UserController) UserDelete(ctx *gin.Context) {
 
 	// 綁定 JSON 資料
 	if err := ctx.ShouldBindJSON(&UserDeleteModel); err != nil {
-		errorModel := models.NewErrorRequest(http.StatusBadRequest, "Invalid input")
+		errorModel := models.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "Invalid input")
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
@@ -39,12 +42,12 @@ func (u *UserController) UserDelete(ctx *gin.Context) {
 
 	if result.Statue.Error != nil {
 		if result.Statue.Error == gorm.ErrRecordNotFound {
-			errorModel := models.NewErrorRequest(http.StatusNotFound, "User Not Found")
+			errorModel := models.NewErrorResponse(ctx, http.StatusNotFound, utilsErr.ErrNotFound, "User Not Found")
 			ctx.JSON(http.StatusNotFound, errorModel)
 			return
 		}
 
-		errorModel := models.NewErrorRequest(http.StatusInternalServerError, "System Error")
+		errorModel := models.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "System Error")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -52,7 +55,7 @@ func (u *UserController) UserDelete(ctx *gin.Context) {
 	deleteResult := repository.UserDeleteRepository(&result.Result)
 
 	if deleteResult.Statue.Error != nil {
-		errorModel := models.NewErrorRequest(http.StatusInternalServerError, "Delete Error")
+		errorModel := models.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "Delete Error")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}

@@ -13,6 +13,9 @@ import (
 
 	"firebase.google.com/go/v4/messaging"
 	"github.com/gin-gonic/gin"
+
+
+	utilsErr "Community_Notification_System/utils/errors"
 )
 
 // CreateParcel 管理員代收登錄包裹
@@ -34,13 +37,13 @@ func (c *ParcelController) CreateParcel(ctx *gin.Context) {
 	userID, userExists := ctx.Get("user_id")
 
 	if !exists || !userExists {
-		ctx.JSON(http.StatusUnauthorized, model.NewErrorRequest(http.StatusUnauthorized, "無法存取社區資訊，請重新登入"))
+		ctx.JSON(http.StatusUnauthorized, model.NewErrorResponse(ctx, http.StatusUnauthorized, utilsErr.ErrUnauthorized, "無法存取社區資訊，請重新登入"))
 		return
 	}
 
 	var req parcelModel.CreateParcelRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, model.NewErrorRequest(http.StatusBadRequest, "無效的輸入資料: "+err.Error()))
+		ctx.JSON(http.StatusBadRequest, model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "無效的輸入資料: "+err.Error()))
 		return
 	}
 
@@ -60,10 +63,10 @@ func (c *ParcelController) CreateParcel(ctx *gin.Context) {
 	res := repository.CreateParcelRepository(newParcel)
 	if res.Statue.Error != nil {
 		if res.Statue.Error.Error() == "該社區已存在相同單號的待領包裹" {
-			ctx.JSON(http.StatusConflict, model.NewErrorRequest(http.StatusConflict, res.Statue.Error.Error()))
+			ctx.JSON(http.StatusConflict, model.NewErrorResponse(ctx, http.StatusConflict, utilsErr.ErrConflict, res.Statue.Error.Error()))
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, model.NewErrorRequest(http.StatusInternalServerError, "建立包裹紀錄失敗"))
+		ctx.JSON(http.StatusInternalServerError, model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "建立包裹紀錄失敗"))
 		return
 	}
 

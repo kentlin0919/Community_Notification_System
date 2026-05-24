@@ -6,7 +6,6 @@ import (
 	repository "Community_Notification_System/app/repositories/user"
 	user_db "Community_Notification_System/database/User_DB"
 	"Community_Notification_System/utils"
-	"Community_Notification_System/utils/errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,6 +16,8 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+
+	utilsErr "Community_Notification_System/utils/errors"
 )
 
 // UserRegister 處理使用者註冊
@@ -40,14 +41,14 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 
 	// 綁定 JSON 資料，若結構無法對應或缺欄位則直接回傳 400
 	if err := ctx.ShouldBindJSON(&registerModel); err != nil {
-		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, errors.ErrInvalidParams, "無效的輸入資料")
+		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "無效的輸入資料")
 		fmt.Print(err)
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
 
 	if utf8.RuneCountInString(registerModel.Password) < 8 {
-		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, errors.ErrInvalidParams, "密碼長度至少需 8 碼")
+		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "密碼長度至少需 8 碼")
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
@@ -58,7 +59,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 	checkaccountStatue := checkAccount(&loginData)
 
 	if !checkaccountStatue {
-		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, errors.ErrConflict, "已經註冊過了")
+		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrConflict, "已經註冊過了")
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
@@ -66,7 +67,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 	// 加密密碼：即使資料庫外洩，亦可藉由單向雜湊降低密碼被破解的風險
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerModel.Password), bcrypt.DefaultCost)
 	if err != nil {
-		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, errors.ErrInternal, "密碼加密失敗")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "密碼加密失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -89,7 +90,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 
 	// 確認 JWT 是否成功簽發，避免回傳未簽名的憑證造成安全風險
 	if err != nil {
-		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, errors.ErrInternal, "JWT 簽發失敗")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "JWT 簽發失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -101,7 +102,7 @@ func (u *UserController) UserRegister(ctx *gin.Context) {
 
 	if !re.Result {
 		log.Printf("建立失敗: %v", re.Statue.Error)
-		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, errors.ErrDatabase, "註冊失敗")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrDatabase, "註冊失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}

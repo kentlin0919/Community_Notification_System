@@ -1,14 +1,17 @@
 package middlewares
 
 import (
-	"net/http"
+		"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"Community_Notification_System/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
+
 )
 
 func TestJWTAuthMiddleware(t *testing.T) {
@@ -81,7 +84,38 @@ func TestJWTAuthMiddleware(t *testing.T) {
 
 func TestJWTAuthMiddlewareExpiredToken(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	// 此處需要模擬過期 Token，但因為 utils.GenerateJWT 目前沒有過期時間參數，
-	// 若要測試過期，通常會手動簽發一個已過期的 Token。
-	// 這裡先測試基本解析邏輯。
+	secret := "test-secret"
+	os.Setenv("JWTPASSWORD", secret)
+	defer os.Unsetenv("JWTPASSWORD")
+
+	w := httptest.NewRecorder()
+	_, r := gin.CreateTestContext(w)
+
+	r.Use(JWTAuthMiddleware())
+	r.GET("/api/v1/protected", func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+
+	req, _ := http.NewRequest(http.MethodGet, "/api/v1/protected", nil)
+
+	// 手動簽發已過期的 Token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"username":      "test@example.com",
+		"user_id":       "user-123",
+		"permission_id": 1,
+		"community_id":  100,
+		"exp":           time.Now().Add(-1 * time.Hour).Unix(), // 1 小時前過期
+		"iat":           time.Now().Add(-2 * time.Hour).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(secret))
+	if err != nil {
+		t.Fatalf("簽發過期 Token 失敗: %v", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code, "過期 Token 應回傳 401")
 }
+

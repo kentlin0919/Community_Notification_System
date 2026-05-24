@@ -7,6 +7,9 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+
+
+	utilsErr "Community_Notification_System/utils/errors"
 )
 
 // PickupParcel 標記包裹為已領取
@@ -26,7 +29,7 @@ import (
 func (c *ParcelController) PickupParcel(ctx *gin.Context) {
 	communityID, exists := ctx.Get("community_id")
 	if !exists {
-		ctx.JSON(http.StatusUnauthorized, model.NewErrorRequest(http.StatusUnauthorized, "無法存取社區資訊，請重新登入"))
+		ctx.JSON(http.StatusUnauthorized, model.NewErrorResponse(ctx, http.StatusUnauthorized, utilsErr.ErrUnauthorized, "無法存取社區資訊，請重新登入"))
 		return
 	}
 
@@ -36,7 +39,7 @@ func (c *ParcelController) PickupParcel(ctx *gin.Context) {
 	parcelIDStr := ctx.Param("id")
 	parcelID, err := strconv.ParseUint(parcelIDStr, 10, 64)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, model.NewErrorRequest(http.StatusBadRequest, "包裹 ID 格式錯誤"))
+		ctx.JSON(http.StatusBadRequest, model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "包裹 ID 格式錯誤"))
 		return
 	}
 
@@ -45,11 +48,11 @@ func (c *ParcelController) PickupParcel(ctx *gin.Context) {
 		errMsg := res.Statue.Error.Error()
 		switch errMsg {
 		case "找不到該包裹紀錄":
-			ctx.JSON(http.StatusNotFound, model.NewErrorRequest(http.StatusNotFound, errMsg))
+			ctx.JSON(http.StatusNotFound, model.NewErrorResponse(ctx, http.StatusNotFound, utilsErr.ErrNotFound, errMsg))
 		case "該包裹已被領取":
-			ctx.JSON(http.StatusBadRequest, model.NewErrorRequest(http.StatusBadRequest, errMsg))
+			ctx.JSON(http.StatusBadRequest, model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, errMsg))
 		default:
-			ctx.JSON(http.StatusInternalServerError, model.NewErrorRequest(http.StatusInternalServerError, "更新包裹狀態失敗"))
+			ctx.JSON(http.StatusInternalServerError, model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "更新包裹狀態失敗"))
 		}
 		return
 	}

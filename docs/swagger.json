@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Community_Notification_System",
-        "title": "Community_Notification_System",
+        "description": "此 API 文件提供社區通知系統的後端介面說明，包含使用者管理、設施預約、社區申請及訊息通知等功能。使用 JWT Bearer 進行認證。",
+        "title": "社區通知系統 API 文件 (Community Notification System)",
         "contact": {},
         "version": "1.0"
     },
@@ -14,7 +14,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "社區管理員新增公用設施與預設預約條件",
+                "description": "社區管理員新增公用設施與預設預約條件。系統會同時建立一筆預設的設施規則。",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,7 +27,7 @@
                 "summary": "新增預約設施",
                 "parameters": [
                     {
-                        "description": "設施資料",
+                        "description": "設施基本資料",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -40,12 +40,87 @@
                     "201": {
                         "description": "設施新增成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/model.RequestMessage"
                         }
                     },
                     "400": {
                         "description": "請求參數錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "401": {
+                        "description": "無法取得登入資訊或認證失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "403": {
+                        "description": "權限不足，僅限管理員",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response403Error"
+                        }
+                    },
+                    "409": {
+                        "description": "該社區已存在相同名稱的設施",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response409Error"
+                        }
+                    },
+                    "500": {
+                        "description": "系統建立設施失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/facilities/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "社區管理員更新設施基本資訊與預約規則。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Facility Management"
+                ],
+                "summary": "更新設施",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "設施 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "設施更新資料",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/facility.UpdateFacilityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "設施更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "無效輸入",
                         "schema": {
                             "$ref": "#/definitions/model.Response400Error"
                         }
@@ -62,10 +137,72 @@
                             "$ref": "#/definitions/model.Response403Error"
                         }
                     },
-                    "409": {
-                        "description": "該社區已存在相同名稱的設施",
+                    "404": {
+                        "description": "找不到設施",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response404Error"
+                        }
+                    },
+                    "409": {
+                        "description": "設施名稱衝突",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response409Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "社區管理員軟刪除設施，既有預約歷史保留。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Facility Management"
+                ],
+                "summary": "軟刪除設施",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "設施 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "設施刪除成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的設施 ID",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "401": {
+                        "description": "無法取得登入資訊",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "403": {
+                        "description": "權限不足",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response403Error"
+                        }
+                    },
+                    "404": {
+                        "description": "找不到設施",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response404Error"
                         }
                     }
                 }
@@ -78,7 +215,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "社區 Admin (或 Super admin) 可修改 PermissionID = 3~7 的顯示名稱。",
+                "description": "社區 Admin (或 Super admin) 可修改 PermissionID = 3~7 的顯示名稱。用於客製化不同社區對同一權限等級的稱呼。",
                 "consumes": [
                     "application/json"
                 ],
@@ -91,7 +228,14 @@
                 "summary": "管理社區專屬角色名稱",
                 "parameters": [
                     {
-                        "description": "更新請求",
+                        "type": "string",
+                        "description": "社區 ID",
+                        "name": "community_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "更新請求內容",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -102,14 +246,129 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "更新成功",
+                        "description": "權限名稱更新成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/model.RequestMessage"
                         }
                     },
                     "400": {
-                        "description": "請求參數錯誤",
+                        "description": "請求參數錯誤或 ID 範圍不符",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "401": {
+                        "description": "認證失敗或無法取得社區資訊",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "403": {
+                        "description": "權限不足",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response403Error"
+                        }
+                    },
+                    "500": {
+                        "description": "系統更新失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/reschedule/{id}/approve": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "管理員針對住戶提出的改期申請進行核准或拒絕。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "審核預約改期 (管理員)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "改期申請紀錄 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "審核結果與意見",
+                        "name": "approve",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/reservation.ApproveRescheduleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "改期申請處理完成",
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的 ID 或輸入資料",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "500": {
+                        "description": "審核處理失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/reservations/{id}/delete": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "管理員軟刪除同社區預約，住戶列表將不再顯示該預約。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "管理員強制取消預約",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "預約 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "預約刪除成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的預約 ID",
                         "schema": {
                             "$ref": "#/definitions/model.Response400Error"
                         }
@@ -121,9 +380,15 @@
                         }
                     },
                     "403": {
-                        "description": "這不是允許您管理的社區",
+                        "description": "權限不足",
                         "schema": {
                             "$ref": "#/definitions/model.Response403Error"
+                        }
+                    },
+                    "404": {
+                        "description": "找不到預約",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response404Error"
                         }
                     }
                 }
@@ -241,8 +506,7 @@
                     "200": {
                         "description": "社區申請已送出",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/community.RegisterApplicationResponse"
                         }
                     },
                     "400": {
@@ -388,7 +652,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "使用者提供帳號與密碼後刪除使用者",
+                "description": "使用者提供帳號與密碼後進行帳號刪除。此操作為實體刪除且不可逆，執行前請務必確認。",
                 "consumes": [
                     "application/json"
                 ],
@@ -398,10 +662,10 @@
                 "tags": [
                     "User"
                 ],
-                "summary": "使用者刪除",
+                "summary": "刪除使用者帳號",
                 "parameters": [
                     {
-                        "description": "使用者資料（Email \u0026 Password ＆ Platform）",
+                        "description": "刪除驗證資料（Email, Password, Platform）",
                         "name": "login",
                         "in": "body",
                         "required": true,
@@ -411,34 +675,257 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "登入成功，返回 JWT Token 和成功訊息",
+                    "202": {
+                        "description": "帳號刪除成功",
                         "schema": {
                             "$ref": "#/definitions/model.RequestMessage"
                         }
                     },
                     "400": {
-                        "description": "無效的輸入資料",
+                        "description": "請求格式錯誤或無效輸入",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response400Error"
                         }
                     },
                     "401": {
-                        "description": "密碼錯誤",
+                        "description": "認證失敗或密碼錯誤",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response401Error"
                         }
                     },
                     "404": {
-                        "description": "使用者不存在",
+                        "description": "找不到該使用者",
                         "schema": {
                             "$ref": "#/definitions/model.Response404Error"
                         }
                     },
                     "500": {
-                        "description": "系統錯誤或 JWT 簽發失敗",
+                        "description": "系統執行刪除時發生錯誤",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/facilities": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "取得設施列表。可經由 Query 參數指定社區 ID；若未指定，則從 JWT Token 中自動提取。住戶只會看到 active 設施；管理員可看到同社區全部未刪除設施。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Facility Management"
+                ],
+                "summary": "取得設施列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "社區 ID",
+                        "name": "community_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "設施列表",
+                        "schema": {
+                            "$ref": "#/definitions/facility.FacilityListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "請求參數錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "401": {
+                        "description": "無法取得登入資訊",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "403": {
+                        "description": "權限不足",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response403Error"
+                        }
+                    },
+                    "500": {
+                        "description": "查詢設施列表失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/facilities/{facility_id}/reservations": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "住戶針對特定社區設施進行預約。系統會根據設施規則（如黑名單、預約時段重疊等）進行驗證。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "建立設施預約",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "社區 ID",
+                        "name": "community_id",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "設施 ID",
+                        "name": "facility_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "預約詳細資料",
+                        "name": "reservation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/reservation.CreateReservationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "預約建立成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的設施 ID 或輸入資料",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "403": {
+                        "description": "設施不開放或權限不足",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response403Error"
+                        }
+                    },
+                    "404": {
+                        "description": "設施不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response404Error"
+                        }
+                    },
+                    "409": {
+                        "description": "時段衝突或違反設施規則",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response409Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/facilities/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "依 JWT 社區取得單一設施詳情。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Facility Management"
+                ],
+                "summary": "取得單一設施詳情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "設施 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "設施詳情",
+                        "schema": {
+                            "$ref": "#/definitions/facility.FacilityDetailResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的設施 ID",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "401": {
+                        "description": "無法取得登入資訊",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "404": {
+                        "description": "找不到設施",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response404Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/home": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根據目前登入者的權限，聚合回傳對應的統計數據、預約清單與訊息。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Home"
+                ],
+                "summary": "取得首頁儀表板資訊",
+                "responses": {
+                    "200": {
+                        "description": "成功返回儀表板數據",
+                        "schema": {
+                            "$ref": "#/definitions/home.HomeResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授權",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "500": {
+                        "description": "伺服器錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
                         }
                     }
                 }
@@ -459,7 +946,7 @@
                 "summary": "使用者登入",
                 "parameters": [
                     {
-                        "description": "登入資料（Email \u0026 Password）",
+                        "description": "登入資料（Email, Password, Fcmtoken）",
                         "name": "login",
                         "in": "body",
                         "required": true,
@@ -470,7 +957,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "登入成功，返回 JWT Token 和成功訊息",
+                        "description": "登入成功，返回 JWT Token 和使用者詳細資訊",
                         "schema": {
                             "$ref": "#/definitions/account.UserRequest"
                         }
@@ -482,7 +969,7 @@
                         }
                     },
                     "401": {
-                        "description": "密碼錯誤",
+                        "description": "帳號或密碼錯誤",
                         "schema": {
                             "$ref": "#/definitions/model.Response401Error"
                         }
@@ -494,7 +981,231 @@
                         }
                     },
                     "500": {
-                        "description": "系統錯誤或 JWT 簽發失敗",
+                        "description": "系統錯誤、JWT 簽發失敗或更新登入狀態失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/messages": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "依登入使用者取得通知列表，支援分頁與已讀篩選。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Message"
+                ],
+                "summary": "取得通知列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "頁碼（預設 1）",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每頁筆數（預設 20，最大 100）",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "已讀篩選",
+                        "name": "is_read",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功取得通知列表",
+                        "schema": {
+                            "$ref": "#/definitions/message_model.MessageListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "請求參數錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "401": {
+                        "description": "未授權",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/messages/read-all": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "將登入使用者所有未讀通知標記為已讀。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Message"
+                ],
+                "summary": "全部標記已讀",
+                "responses": {
+                    "200": {
+                        "description": "成功全部標記已讀",
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "未授權",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/messages/send": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "管理者傳送社區訊息。系統會先為每位收件者建立 message_info 寄送紀錄，再嘗試透過 FCM 推播；Firebase 未初始化或部分推播失敗時仍會保留寄送紀錄並於回應中標示失敗數量。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Message"
+                ],
+                "summary": "傳送訊息",
+                "parameters": [
+                    {
+                        "description": "訊息資料",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/message_model.SendMessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "訊息送出完成",
+                        "schema": {
+                            "$ref": "#/definitions/message_model.SendMessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "輸入資料格式錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "401": {
+                        "description": "未授權，缺少或無效的 JWT Token",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "404": {
+                        "description": "找不到符合條件的收件者",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response404Error"
+                        }
+                    },
+                    "500": {
+                        "description": "伺服器內部錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/messages/{id}/read": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "將登入使用者的指定通知標記為已讀。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Message"
+                ],
+                "summary": "標記通知為已讀",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "通知 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功標記已讀",
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestMessage"
+                        }
+                    },
+                    "401": {
+                        "description": "未授權",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "404": {
+                        "description": "通知不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response404Error"
+                        }
+                    },
+                    "500": {
+                        "description": "系統錯誤",
                         "schema": {
                             "$ref": "#/definitions/model.Response500Error"
                         }
@@ -588,8 +1299,7 @@
                     "201": {
                         "description": "包裹登錄成功",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/parcel.ParcelListResponse"
                         }
                     },
                     "400": {
@@ -607,7 +1317,7 @@
                     "409": {
                         "description": "重複單號",
                         "schema": {
-                            "$ref": "#/definitions/model.ErrorRequest"
+                            "$ref": "#/definitions/model.Response409Error"
                         }
                     },
                     "500": {
@@ -688,7 +1398,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "取得社區客製化的 3~7 等級角色。",
+                "description": "取得社區客製化的 3~7 等級角色名稱與描述。",
                 "produces": [
                     "application/json"
                 ],
@@ -696,18 +1406,32 @@
                     "Permission Management"
                 ],
                 "summary": "查詢社區角色列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "社區 ID",
+                        "name": "community_id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "成功回傳",
+                        "description": "成功回傳角色對照表",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/model.RequestMessage"
                         }
                     },
                     "401": {
-                        "description": "無法取得登入資訊",
+                        "description": "認證失敗",
                         "schema": {
                             "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "500": {
+                        "description": "查詢失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
                         }
                     }
                 }
@@ -788,6 +1512,213 @@
                 }
             }
         },
+        "/api/v1/reservations": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "依 JWT 社區取得預約列表。住戶只會看到自己的預約；管理員可看到同社區全部未刪除預約。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "取得預約列表",
+                "responses": {
+                    "200": {
+                        "description": "預約列表",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "無法取得登入資訊",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "500": {
+                        "description": "查詢預約列表失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/reservations/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "依 JWT 社區與角色範圍取得單一預約詳情。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "取得預約詳情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "預約 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "預約詳情",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "無效的預約 ID",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "401": {
+                        "description": "無法取得登入資訊",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "404": {
+                        "description": "找不到預約",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response404Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/reservations/{id}/cancel": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "住戶主動取消已建立的設施預約。需提供取消原因。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "取消預約",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "預約紀錄 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "取消原因",
+                        "name": "cancel",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/reservation.CancelReservationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "預約已成功取消",
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的 ID 或取消失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/reservations/{id}/reschedule": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "住戶針對現有的預約申請變更日期或時段。申請後需經由管理員審核。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reservation"
+                ],
+                "summary": "申請預約改期",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "預約紀錄 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "新的預約時段與原因",
+                        "name": "reschedule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/reservation.RescheduleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "改期申請已送出",
+                        "schema": {
+                            "$ref": "#/definitions/model.RequestMessage"
+                        }
+                    },
+                    "400": {
+                        "description": "無效的 ID 或輸入資料",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response400Error"
+                        }
+                    },
+                    "404": {
+                        "description": "找不到預約紀錄",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response404Error"
+                        }
+                    },
+                    "409": {
+                        "description": "改期衝突或處理失敗",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response409Error"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/sendmessage": {
             "post": {
                 "security": [
@@ -795,7 +1726,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "使用者傳送訊息，需要 JWT Token 驗證",
+                "description": "管理者傳送社區訊息。系統會先為每位收件者建立 message_info 寄送紀錄，再嘗試透過 FCM 推播；Firebase 未初始化或部分推播失敗時仍會保留寄送紀錄並於回應中標示失敗數量。",
                 "consumes": [
                     "application/json"
                 ],
@@ -813,15 +1744,15 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/message_model.FCMNotificationRequest"
+                            "$ref": "#/definitions/message_model.SendMessageRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "訊息送出成功",
+                        "description": "訊息送出完成",
                         "schema": {
-                            "$ref": "#/definitions/message_model.MessageRequest"
+                            "$ref": "#/definitions/message_model.SendMessageResponse"
                         }
                     },
                     "400": {
@@ -834,6 +1765,12 @@
                         "description": "未授權，缺少或無效的 JWT Token",
                         "schema": {
                             "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "404": {
+                        "description": "找不到符合條件的收件者",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response404Error"
                         }
                     },
                     "500": {
@@ -913,25 +1850,32 @@
                     "example": "2025-03-23T15:04:05Z"
                 },
                 "Home_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "H001"
                 },
                 "PermissionId": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "Platform": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "Session_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "uuid-string"
                 },
                 "community_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@example.com"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "kent"
                 }
             }
         },
@@ -1090,6 +2034,28 @@
                 }
             }
         },
+        "community.RegisterApplicationResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "application_id": {
+                            "type": "integer",
+                            "example": 1
+                        },
+                        "status": {
+                            "type": "string",
+                            "example": "pending"
+                        }
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "社區申請已送出"
+                }
+            }
+        },
         "community.RejectApplicationRequest": {
             "type": "object",
             "properties": {
@@ -1108,24 +2074,30 @@
             ],
             "properties": {
                 "community_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "cover_image": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "https://example.com/facility.jpg"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "提供跑步機、啞鈴等健身設備。"
                 },
                 "facility_type": {
                     "type": "string",
-                    "maxLength": 50
+                    "maxLength": 50,
+                    "example": "運動設施"
                 },
                 "location": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "B1 棟"
                 },
                 "name": {
                     "type": "string",
-                    "maxLength": 100
+                    "maxLength": 100,
+                    "example": "健身房"
                 },
                 "status": {
                     "type": "string",
@@ -1134,28 +2106,175 @@
                         "active",
                         "inactive",
                         "maintenance"
-                    ]
+                    ],
+                    "example": "active"
                 }
             }
         },
-        "message_model.FCMNotificationRequest": {
+        "facility.FacilityDetailResponse": {
             "type": "object",
-            "required": [
-                "body",
-                "deviceToken",
-                "title"
-            ],
             "properties": {
-                "Userselect": {
+                "data": {
+                    "$ref": "#/definitions/facility_db.FacilityInfo"
+                }
+            }
+        },
+        "facility.FacilityListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/facility_db.FacilityInfo"
                     }
+                }
+            }
+        },
+        "facility.UpdateFacilityRequest": {
+            "type": "object",
+            "required": [
+                "facility_type",
+                "name"
+            ],
+            "properties": {
+                "auto_approve": {
+                    "type": "boolean",
+                    "example": false
                 },
-                "body": {
+                "cancel_before_hours": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "example": 24
+                },
+                "cover_image": {
+                    "type": "string",
+                    "example": "https://example.com/facility.jpg"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "提供跑步機、啞鈴等健身設備。"
+                },
+                "facility_type": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "example": "運動設施"
+                },
+                "location": {
+                    "type": "string",
+                    "example": "B1 棟"
+                },
+                "max_advance_days": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "example": 7
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "example": "健身房"
+                },
+                "reservation_rule_open": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "slot_minutes": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 60
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "draft",
+                        "active",
+                        "inactive",
+                        "maintenance"
+                    ],
+                    "example": "active"
+                }
+            }
+        },
+        "facility_db.FacilityInfo": {
+            "type": "object",
+            "properties": {
+                "community_id": {
+                    "type": "integer"
+                },
+                "cover_image": {
                     "type": "string"
                 },
-                "deviceToken": {
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "description": "user_id UUID",
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "facility_type": {
+                    "description": "e.g., gym, pool, meeting_room",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "draft, active, inactive, maintenance",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "home.HomeResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "role": {
+                    "type": "string",
+                    "example": "resident"
+                }
+            }
+        },
+        "message_model.MessageListResponse": {
+            "type": "object",
+            "properties": {
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/message_model.MessageSummary"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "message_model.MessageSummary": {
+            "type": "object",
+            "properties": {
+                "create_time": {
+                    "type": "string"
+                },
+                "detail": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_read": {
+                    "type": "boolean"
+                },
+                "subtile": {
                     "type": "string"
                 },
                 "title": {
@@ -1163,29 +2282,152 @@
                 }
             }
         },
-        "message_model.MessageRequest": {
+        "message_model.SendMessageMetadata": {
             "type": "object",
             "properties": {
-                "Message": {
+                "category": {
                     "type": "string",
-                    "example": "Sucessful send Message"
+                    "example": "announcement"
+                },
+                "click_action": {
+                    "type": "string",
+                    "example": "FLUTTER_NOTIFICATION_CLICK"
+                },
+                "entity_id": {
+                    "type": "string",
+                    "example": "notice-1"
+                },
+                "entity_type": {
+                    "type": "string",
+                    "example": "community"
                 }
             }
         },
-        "model.ErrorRequest": {
+        "message_model.SendMessageRequest": {
+            "type": "object",
+            "required": [
+                "body",
+                "title"
+            ],
+            "properties": {
+                "Userselect": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "user1@example.com",
+                        "user2@example.com"
+                    ]
+                },
+                "body": {
+                    "type": "string",
+                    "example": "您的包裹已抵達管理室，請抽空領取。"
+                },
+                "deviceToken": {
+                    "type": "string",
+                    "example": "fcm-device-token"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/message_model.SendMessageMetadata"
+                },
+                "recipient_emails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "user1@example.com",
+                        "user2@example.com"
+                    ]
+                },
+                "recipient_user_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "user-uuid-1",
+                        "user-uuid-2"
+                    ]
+                },
+                "subtitle": {
+                    "type": "string",
+                    "example": "包裹到達通知"
+                },
+                "target_type": {
+                    "type": "string",
+                    "example": "selected_users"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "您有新的包裹"
+                }
+            }
+        },
+        "message_model.SendMessageResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "integer",
-                    "example": 400
+                "data": {
+                    "$ref": "#/definitions/message_model.SendMessageResponseData"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "message_model.SendMessageResponseData": {
+            "type": "object",
+            "properties": {
+                "created_message_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "failure_count": {
+                    "type": "integer"
+                },
+                "fcm_results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/message_model.SendMessageResult"
+                    }
+                },
+                "message_batch_id": {
+                    "type": "string"
+                },
+                "success_count": {
+                    "type": "integer"
+                },
+                "target_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "message_model.SendMessageResult": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
                 },
                 "error": {
-                    "type": "string",
-                    "example": "error"
+                    "type": "string"
                 },
-                "status": {
-                    "type": "string",
-                    "example": "Bad Request"
+                "fcm_message_id": {
+                    "type": "string"
+                },
+                "fcm_status": {
+                    "type": "string"
+                },
+                "message_id": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },
@@ -1209,6 +2451,14 @@
                     "type": "string",
                     "example": "Invalid input data"
                 },
+                "internal_code": {
+                    "type": "integer",
+                    "example": 1001
+                },
+                "request_id": {
+                    "type": "string",
+                    "example": "uuid-string"
+                },
                 "status": {
                     "type": "string",
                     "example": "Bad Request"
@@ -1225,6 +2475,14 @@
                 "error": {
                     "type": "string",
                     "example": "Invalid or missing JWT token"
+                },
+                "internal_code": {
+                    "type": "integer",
+                    "example": 1002
+                },
+                "request_id": {
+                    "type": "string",
+                    "example": "uuid-string"
                 },
                 "status": {
                     "type": "string",
@@ -1243,6 +2501,14 @@
                     "type": "string",
                     "example": "Permission denied"
                 },
+                "internal_code": {
+                    "type": "integer",
+                    "example": 1003
+                },
+                "request_id": {
+                    "type": "string",
+                    "example": "uuid-string"
+                },
                 "status": {
                     "type": "string",
                     "example": "Forbidden"
@@ -1260,9 +2526,42 @@
                     "type": "string",
                     "example": "Resource not found"
                 },
+                "internal_code": {
+                    "type": "integer",
+                    "example": 1004
+                },
+                "request_id": {
+                    "type": "string",
+                    "example": "uuid-string"
+                },
                 "status": {
                     "type": "string",
                     "example": "Not Found"
+                }
+            }
+        },
+        "model.Response409Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 409
+                },
+                "error": {
+                    "type": "string",
+                    "example": "Resource conflict"
+                },
+                "internal_code": {
+                    "type": "integer",
+                    "example": 1005
+                },
+                "request_id": {
+                    "type": "string",
+                    "example": "uuid-string"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "Conflict"
                 }
             }
         },
@@ -1276,6 +2575,14 @@
                 "error": {
                     "type": "string",
                     "example": "Internal server error"
+                },
+                "internal_code": {
+                    "type": "integer",
+                    "example": 1000
+                },
+                "request_id": {
+                    "type": "string",
+                    "example": "uuid-string"
                 },
                 "status": {
                     "type": "string",
@@ -1292,16 +2599,66 @@
             ],
             "properties": {
                 "courier_company": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "黑貓宅急便"
                 },
                 "home_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "remark": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "貴重物品"
                 },
                 "tracking_number": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "1234567890"
+                }
+            }
+        },
+        "parcel.ParcelListResponse": {
+            "type": "object",
+            "properties": {
+                "community_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "courier_company": {
+                    "type": "string",
+                    "example": "黑貓宅急便"
+                },
+                "created_by": {
+                    "type": "string",
+                    "example": "admin-uuid"
+                },
+                "home_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "picked_up_at": {
+                    "type": "string",
+                    "example": "2025-05-10T10:00:00Z"
+                },
+                "received_at": {
+                    "type": "string",
+                    "example": "2025-05-10T08:00:00Z"
+                },
+                "remark": {
+                    "type": "string",
+                    "example": "貴重物品"
+                },
+                "status": {
+                    "description": "0: 待領取, 1: 已領取",
+                    "type": "integer",
+                    "example": 0
+                },
+                "tracking_number": {
+                    "type": "string",
+                    "example": "1234567890"
                 }
             }
         },
@@ -1313,16 +2670,19 @@
             ],
             "properties": {
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "負責社區重大決策與管理"
                 },
                 "display_name": {
                     "type": "string",
-                    "maxLength": 50
+                    "maxLength": 50,
+                    "example": "社區主委"
                 },
                 "permission_id": {
                     "type": "integer",
                     "maximum": 7,
-                    "minimum": 3
+                    "minimum": 3,
+                    "example": 3
                 }
             }
         },
@@ -1345,6 +2705,95 @@
             "properties": {
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "reservation.ApproveRescheduleRequest": {
+            "type": "object",
+            "properties": {
+                "admin_comment": {
+                    "type": "string",
+                    "example": "已核准改期申請"
+                },
+                "is_approve": {
+                    "description": "true: 核准, false: 拒絕",
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "reservation.CancelReservationRequest": {
+            "type": "object",
+            "properties": {
+                "cancel_reason": {
+                    "type": "string",
+                    "example": "臨時有事無法前往"
+                }
+            }
+        },
+        "reservation.CreateReservationRequest": {
+            "type": "object",
+            "required": [
+                "end_time",
+                "people_count",
+                "reservation_date",
+                "start_time"
+            ],
+            "properties": {
+                "end_time": {
+                    "description": "HH:mm",
+                    "type": "string",
+                    "example": "15:00"
+                },
+                "home_id": {
+                    "description": "可選，看業務邏輯",
+                    "type": "integer",
+                    "example": 1
+                },
+                "people_count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "example": 2
+                },
+                "remark": {
+                    "type": "string",
+                    "example": "使用跑步機"
+                },
+                "reservation_date": {
+                    "description": "YYYY-MM-DD",
+                    "type": "string",
+                    "example": "2025-05-20"
+                },
+                "start_time": {
+                    "description": "HH:mm",
+                    "type": "string",
+                    "example": "14:00"
+                }
+            }
+        },
+        "reservation.RescheduleRequest": {
+            "type": "object",
+            "required": [
+                "new_date",
+                "new_end_time",
+                "new_start_time"
+            ],
+            "properties": {
+                "new_date": {
+                    "type": "string",
+                    "example": "2025-05-21"
+                },
+                "new_end_time": {
+                    "type": "string",
+                    "example": "11:00"
+                },
+                "new_start_time": {
+                    "type": "string",
+                    "example": "10:00"
+                },
+                "reason": {
+                    "type": "string",
+                    "example": "原本時段突然要開會"
                 }
             }
         }

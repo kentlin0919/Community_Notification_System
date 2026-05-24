@@ -47,18 +47,25 @@ definitions:
         example: "2025-03-23T15:04:05Z"
         type: string
       Home_id:
+        example: H001
         type: string
       PermissionId:
+        example: 1
         type: integer
       Platform:
+        example: 1
         type: integer
       Session_id:
+        example: uuid-string
         type: string
       community_id:
+        example: 1
         type: integer
       email:
+        example: user@example.com
         type: string
       name:
+        example: kent
         type: string
     type: object
   account.UserRequest:
@@ -176,6 +183,21 @@ definitions:
     - postal_code
     - road_name
     type: object
+  community.RegisterApplicationResponse:
+    properties:
+      data:
+        properties:
+          application_id:
+            example: 1
+            type: integer
+          status:
+            example: pending
+            type: string
+        type: object
+      message:
+        example: 社區申請已送出
+        type: string
+    type: object
   community.RejectApplicationRequest:
     properties:
       reject_reason:
@@ -185,17 +207,23 @@ definitions:
   facility.CreateFacilityRequest:
     properties:
       community_id:
+        example: 1
         type: integer
       cover_image:
+        example: https://example.com/facility.jpg
         type: string
       description:
+        example: 提供跑步機、啞鈴等健身設備。
         type: string
       facility_type:
+        example: 運動設施
         maxLength: 50
         type: string
       location:
+        example: B1 棟
         type: string
       name:
+        example: 健身房
         maxLength: 100
         type: string
       status:
@@ -204,45 +232,233 @@ definitions:
         - active
         - inactive
         - maintenance
+        example: active
         type: string
     required:
     - community_id
     - facility_type
     - name
     type: object
-  message_model.FCMNotificationRequest:
+  facility.FacilityDetailResponse:
+    properties:
+      data:
+        $ref: '#/definitions/facility_db.FacilityInfo'
+    type: object
+  facility.FacilityListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/facility_db.FacilityInfo'
+        type: array
+    type: object
+  facility.UpdateFacilityRequest:
+    properties:
+      auto_approve:
+        example: false
+        type: boolean
+      cancel_before_hours:
+        example: 24
+        minimum: 0
+        type: integer
+      cover_image:
+        example: https://example.com/facility.jpg
+        type: string
+      description:
+        example: 提供跑步機、啞鈴等健身設備。
+        type: string
+      facility_type:
+        example: 運動設施
+        maxLength: 50
+        type: string
+      location:
+        example: B1 棟
+        type: string
+      max_advance_days:
+        example: 7
+        minimum: 0
+        type: integer
+      name:
+        example: 健身房
+        maxLength: 100
+        type: string
+      reservation_rule_open:
+        example: true
+        type: boolean
+      slot_minutes:
+        example: 60
+        minimum: 1
+        type: integer
+      status:
+        enum:
+        - draft
+        - active
+        - inactive
+        - maintenance
+        example: active
+        type: string
+    required:
+    - facility_type
+    - name
+    type: object
+  facility_db.FacilityInfo:
+    properties:
+      community_id:
+        type: integer
+      cover_image:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        description: user_id UUID
+        type: string
+      description:
+        type: string
+      facility_type:
+        description: e.g., gym, pool, meeting_room
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      name:
+        type: string
+      status:
+        description: draft, active, inactive, maintenance
+        type: string
+      updated_at:
+        type: string
+    type: object
+  home.HomeResponse:
+    properties:
+      data: {}
+      role:
+        example: resident
+        type: string
+    type: object
+  message_model.MessageListResponse:
+    properties:
+      messages:
+        items:
+          $ref: '#/definitions/message_model.MessageSummary'
+        type: array
+      total:
+        type: integer
+    type: object
+  message_model.MessageSummary:
+    properties:
+      create_time:
+        type: string
+      detail:
+        type: string
+      id:
+        type: string
+      is_read:
+        type: boolean
+      subtile:
+        type: string
+      title:
+        type: string
+    type: object
+  message_model.SendMessageMetadata:
+    properties:
+      category:
+        example: announcement
+        type: string
+      click_action:
+        example: FLUTTER_NOTIFICATION_CLICK
+        type: string
+      entity_id:
+        example: notice-1
+        type: string
+      entity_type:
+        example: community
+        type: string
+    type: object
+  message_model.SendMessageRequest:
     properties:
       Userselect:
+        example:
+        - user1@example.com
+        - user2@example.com
         items:
           type: string
         type: array
       body:
+        example: 您的包裹已抵達管理室，請抽空領取。
         type: string
       deviceToken:
+        example: fcm-device-token
+        type: string
+      metadata:
+        $ref: '#/definitions/message_model.SendMessageMetadata'
+      recipient_emails:
+        example:
+        - user1@example.com
+        - user2@example.com
+        items:
+          type: string
+        type: array
+      recipient_user_ids:
+        example:
+        - user-uuid-1
+        - user-uuid-2
+        items:
+          type: string
+        type: array
+      subtitle:
+        example: 包裹到達通知
+        type: string
+      target_type:
+        example: selected_users
         type: string
       title:
+        example: 您有新的包裹
         type: string
     required:
     - body
-    - deviceToken
     - title
     type: object
-  message_model.MessageRequest:
+  message_model.SendMessageResponse:
     properties:
-      Message:
-        example: Sucessful send Message
+      data:
+        $ref: '#/definitions/message_model.SendMessageResponseData'
+      message:
         type: string
     type: object
-  model.ErrorRequest:
+  message_model.SendMessageResponseData:
     properties:
-      code:
-        example: 400
+      created_message_ids:
+        items:
+          type: string
+        type: array
+      failure_count:
         type: integer
-      error:
-        example: error
+      fcm_results:
+        items:
+          $ref: '#/definitions/message_model.SendMessageResult'
+        type: array
+      message_batch_id:
         type: string
-      status:
-        example: Bad Request
+      success_count:
+        type: integer
+      target_count:
+        type: integer
+    type: object
+  message_model.SendMessageResult:
+    properties:
+      email:
+        type: string
+      error:
+        type: string
+      fcm_message_id:
+        type: string
+      fcm_status:
+        type: string
+      message_id:
+        type: string
+      success:
+        type: boolean
+      user_id:
         type: string
     type: object
   model.RequestMessage:
@@ -259,6 +475,12 @@ definitions:
       error:
         example: Invalid input data
         type: string
+      internal_code:
+        example: 1001
+        type: integer
+      request_id:
+        example: uuid-string
+        type: string
       status:
         example: Bad Request
         type: string
@@ -270,6 +492,12 @@ definitions:
         type: integer
       error:
         example: Invalid or missing JWT token
+        type: string
+      internal_code:
+        example: 1002
+        type: integer
+      request_id:
+        example: uuid-string
         type: string
       status:
         example: Unauthorized
@@ -283,6 +511,12 @@ definitions:
       error:
         example: Permission denied
         type: string
+      internal_code:
+        example: 1003
+        type: integer
+      request_id:
+        example: uuid-string
+        type: string
       status:
         example: Forbidden
         type: string
@@ -295,8 +529,32 @@ definitions:
       error:
         example: Resource not found
         type: string
+      internal_code:
+        example: 1004
+        type: integer
+      request_id:
+        example: uuid-string
+        type: string
       status:
         example: Not Found
+        type: string
+    type: object
+  model.Response409Error:
+    properties:
+      code:
+        example: 409
+        type: integer
+      error:
+        example: Resource conflict
+        type: string
+      internal_code:
+        example: 1005
+        type: integer
+      request_id:
+        example: uuid-string
+        type: string
+      status:
+        example: Conflict
         type: string
     type: object
   model.Response500Error:
@@ -307,6 +565,12 @@ definitions:
       error:
         example: Internal server error
         type: string
+      internal_code:
+        example: 1000
+        type: integer
+      request_id:
+        example: uuid-string
+        type: string
       status:
         example: Internal Server Error
         type: string
@@ -314,26 +578,67 @@ definitions:
   parcel.CreateParcelRequest:
     properties:
       courier_company:
+        example: 黑貓宅急便
         type: string
       home_id:
+        example: 1
         type: integer
       remark:
+        example: 貴重物品
         type: string
       tracking_number:
+        example: "1234567890"
         type: string
     required:
     - courier_company
     - home_id
     - tracking_number
     type: object
+  parcel.ParcelListResponse:
+    properties:
+      community_id:
+        example: 1
+        type: integer
+      courier_company:
+        example: 黑貓宅急便
+        type: string
+      created_by:
+        example: admin-uuid
+        type: string
+      home_id:
+        example: 1
+        type: integer
+      id:
+        example: 1
+        type: integer
+      picked_up_at:
+        example: "2025-05-10T10:00:00Z"
+        type: string
+      received_at:
+        example: "2025-05-10T08:00:00Z"
+        type: string
+      remark:
+        example: 貴重物品
+        type: string
+      status:
+        description: '0: 待領取, 1: 已領取'
+        example: 0
+        type: integer
+      tracking_number:
+        example: "1234567890"
+        type: string
+    type: object
   permission.UpdatePermissionProfileRequest:
     properties:
       description:
+        example: 負責社區重大決策與管理
         type: string
       display_name:
+        example: 社區主委
         maxLength: 50
         type: string
       permission_id:
+        example: 3
         maximum: 7
         minimum: 3
         type: integer
@@ -355,19 +660,85 @@ definitions:
       name:
         type: string
     type: object
+  reservation.ApproveRescheduleRequest:
+    properties:
+      admin_comment:
+        example: 已核准改期申請
+        type: string
+      is_approve:
+        description: 'true: 核准, false: 拒絕'
+        example: true
+        type: boolean
+    type: object
+  reservation.CancelReservationRequest:
+    properties:
+      cancel_reason:
+        example: 臨時有事無法前往
+        type: string
+    type: object
+  reservation.CreateReservationRequest:
+    properties:
+      end_time:
+        description: HH:mm
+        example: "15:00"
+        type: string
+      home_id:
+        description: 可選，看業務邏輯
+        example: 1
+        type: integer
+      people_count:
+        example: 2
+        minimum: 1
+        type: integer
+      remark:
+        example: 使用跑步機
+        type: string
+      reservation_date:
+        description: YYYY-MM-DD
+        example: "2025-05-20"
+        type: string
+      start_time:
+        description: HH:mm
+        example: "14:00"
+        type: string
+    required:
+    - end_time
+    - people_count
+    - reservation_date
+    - start_time
+    type: object
+  reservation.RescheduleRequest:
+    properties:
+      new_date:
+        example: "2025-05-21"
+        type: string
+      new_end_time:
+        example: "11:00"
+        type: string
+      new_start_time:
+        example: "10:00"
+        type: string
+      reason:
+        example: 原本時段突然要開會
+        type: string
+    required:
+    - new_date
+    - new_end_time
+    - new_start_time
+    type: object
 info:
   contact: {}
-  description: Community_Notification_System
-  title: Community_Notification_System
+  description: 此 API 文件提供社區通知系統的後端介面說明，包含使用者管理、設施預約、社區申請及訊息通知等功能。使用 JWT Bearer 進行認證。
+  title: 社區通知系統 API 文件 (Community Notification System)
   version: "1.0"
 paths:
   /api/v1/admin/facilities:
     post:
       consumes:
       - application/json
-      description: 社區管理員新增公用設施與預設預約條件
+      description: 社區管理員新增公用設施與預設預約條件。系統會同時建立一筆預設的設施規則。
       parameters:
-      - description: 設施資料
+      - description: 設施基本資料
         in: body
         name: body
         required: true
@@ -379,10 +750,50 @@ paths:
         "201":
           description: 設施新增成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/model.RequestMessage'
         "400":
           description: 請求參數錯誤
+          schema:
+            $ref: '#/definitions/model.Response400Error'
+        "401":
+          description: 無法取得登入資訊或認證失敗
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "403":
+          description: 權限不足，僅限管理員
+          schema:
+            $ref: '#/definitions/model.Response403Error'
+        "409":
+          description: 該社區已存在相同名稱的設施
+          schema:
+            $ref: '#/definitions/model.Response409Error'
+        "500":
+          description: 系統建立設施失敗
+          schema:
+            $ref: '#/definitions/model.Response500Error'
+      security:
+      - BearerAuth: []
+      summary: 新增預約設施
+      tags:
+      - Facility Management
+  /api/v1/admin/facilities/{id}:
+    delete:
+      description: 社區管理員軟刪除設施，既有預約歷史保留。
+      parameters:
+      - description: 設施 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 設施刪除成功
+          schema:
+            $ref: '#/definitions/model.RequestMessage'
+        "400":
+          description: 無效的設施 ID
           schema:
             $ref: '#/definitions/model.Response400Error'
         "401":
@@ -393,22 +804,75 @@ paths:
           description: 權限不足
           schema:
             $ref: '#/definitions/model.Response403Error'
-        "409":
-          description: 該社區已存在相同名稱的設施
+        "404":
+          description: 找不到設施
           schema:
-            $ref: '#/definitions/model.ErrorRequest'
+            $ref: '#/definitions/model.Response404Error'
       security:
       - BearerAuth: []
-      summary: 新增預約設施
+      summary: 軟刪除設施
+      tags:
+      - Facility Management
+    put:
+      consumes:
+      - application/json
+      description: 社區管理員更新設施基本資訊與預約規則。
+      parameters:
+      - description: 設施 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 設施更新資料
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/facility.UpdateFacilityRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 設施更新成功
+          schema:
+            $ref: '#/definitions/model.RequestMessage'
+        "400":
+          description: 無效輸入
+          schema:
+            $ref: '#/definitions/model.Response400Error'
+        "401":
+          description: 無法取得登入資訊
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "403":
+          description: 權限不足
+          schema:
+            $ref: '#/definitions/model.Response403Error'
+        "404":
+          description: 找不到設施
+          schema:
+            $ref: '#/definitions/model.Response404Error'
+        "409":
+          description: 設施名稱衝突
+          schema:
+            $ref: '#/definitions/model.Response409Error'
+      security:
+      - BearerAuth: []
+      summary: 更新設施
       tags:
       - Facility Management
   /api/v1/admin/permissions/profile:
     put:
       consumes:
       - application/json
-      description: 社區 Admin (或 Super admin) 可修改 PermissionID = 3~7 的顯示名稱。
+      description: 社區 Admin (或 Super admin) 可修改 PermissionID = 3~7 的顯示名稱。用於客製化不同社區對同一權限等級的稱呼。
       parameters:
-      - description: 更新請求
+      - description: 社區 ID
+        in: header
+        name: community_id
+        required: true
+        type: string
+      - description: 更新請求內容
         in: body
         name: body
         required: true
@@ -418,12 +882,85 @@ paths:
       - application/json
       responses:
         "200":
-          description: 更新成功
+          description: 權限名稱更新成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/model.RequestMessage'
         "400":
-          description: 請求參數錯誤
+          description: 請求參數錯誤或 ID 範圍不符
+          schema:
+            $ref: '#/definitions/model.Response400Error'
+        "401":
+          description: 認證失敗或無法取得社區資訊
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "403":
+          description: 權限不足
+          schema:
+            $ref: '#/definitions/model.Response403Error'
+        "500":
+          description: 系統更新失敗
+          schema:
+            $ref: '#/definitions/model.Response500Error'
+      security:
+      - BearerAuth: []
+      summary: 管理社區專屬角色名稱
+      tags:
+      - Permission Management
+  /api/v1/admin/reschedule/{id}/approve:
+    patch:
+      consumes:
+      - application/json
+      description: 管理員針對住戶提出的改期申請進行核准或拒絕。
+      parameters:
+      - description: 改期申請紀錄 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 審核結果與意見
+        in: body
+        name: approve
+        required: true
+        schema:
+          $ref: '#/definitions/reservation.ApproveRescheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 改期申請處理完成
+          schema:
+            $ref: '#/definitions/model.RequestMessage'
+        "400":
+          description: 無效的 ID 或輸入資料
+          schema:
+            $ref: '#/definitions/model.Response400Error'
+        "500":
+          description: 審核處理失敗
+          schema:
+            $ref: '#/definitions/model.Response500Error'
+      security:
+      - BearerAuth: []
+      summary: 審核預約改期 (管理員)
+      tags:
+      - Reservation
+  /api/v1/admin/reservations/{id}/delete:
+    patch:
+      description: 管理員軟刪除同社區預約，住戶列表將不再顯示該預約。
+      parameters:
+      - description: 預約 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 預約刪除成功
+          schema:
+            $ref: '#/definitions/model.RequestMessage'
+        "400":
+          description: 無效的預約 ID
           schema:
             $ref: '#/definitions/model.Response400Error'
         "401":
@@ -431,14 +968,18 @@ paths:
           schema:
             $ref: '#/definitions/model.Response401Error'
         "403":
-          description: 這不是允許您管理的社區
+          description: 權限不足
           schema:
             $ref: '#/definitions/model.Response403Error'
+        "404":
+          description: 找不到預約
+          schema:
+            $ref: '#/definitions/model.Response404Error'
       security:
       - BearerAuth: []
-      summary: 管理社區專屬角色名稱
+      summary: 管理員強制取消預約
       tags:
-      - Permission Management
+      - Reservation
   /api/v1/community/getlist:
     get:
       consumes:
@@ -511,8 +1052,7 @@ paths:
         "200":
           description: 社區申請已送出
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/community.RegisterApplicationResponse'
         "400":
           description: 請求參數錯誤
           schema:
@@ -606,9 +1146,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: 使用者提供帳號與密碼後刪除使用者
+      description: 使用者提供帳號與密碼後進行帳號刪除。此操作為實體刪除且不可逆，執行前請務必確認。
       parameters:
-      - description: 使用者資料（Email & Password ＆ Platform）
+      - description: 刪除驗證資料（Email, Password, Platform）
         in: body
         name: login
         required: true
@@ -617,38 +1157,181 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: 登入成功，返回 JWT Token 和成功訊息
+        "202":
+          description: 帳號刪除成功
           schema:
             $ref: '#/definitions/model.RequestMessage'
         "400":
-          description: 無效的輸入資料
+          description: 請求格式錯誤或無效輸入
           schema:
-            $ref: '#/definitions/model.ErrorRequest'
+            $ref: '#/definitions/model.Response400Error'
         "401":
-          description: 密碼錯誤
+          description: 認證失敗或密碼錯誤
           schema:
-            $ref: '#/definitions/model.ErrorRequest'
+            $ref: '#/definitions/model.Response401Error'
         "404":
-          description: 使用者不存在
+          description: 找不到該使用者
           schema:
             $ref: '#/definitions/model.Response404Error'
         "500":
-          description: 系統錯誤或 JWT 簽發失敗
+          description: 系統執行刪除時發生錯誤
           schema:
-            $ref: '#/definitions/model.ErrorRequest'
+            $ref: '#/definitions/model.Response500Error'
       security:
       - BearerAuth: []
-      summary: 使用者刪除
+      summary: 刪除使用者帳號
       tags:
       - User
+  /api/v1/facilities:
+    get:
+      description: 取得設施列表。可經由 Query 參數指定社區 ID；若未指定，則從 JWT Token 中自動提取。住戶只會看到 active
+        設施；管理員可看到同社區全部未刪除設施。
+      parameters:
+      - description: 社區 ID
+        in: query
+        name: community_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 設施列表
+          schema:
+            $ref: '#/definitions/facility.FacilityListResponse'
+        "400":
+          description: 請求參數錯誤
+          schema:
+            $ref: '#/definitions/model.Response400Error'
+        "401":
+          description: 無法取得登入資訊
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "403":
+          description: 權限不足
+          schema:
+            $ref: '#/definitions/model.Response403Error'
+        "500":
+          description: 查詢設施列表失敗
+          schema:
+            $ref: '#/definitions/model.Response500Error'
+      security:
+      - BearerAuth: []
+      summary: 取得設施列表
+      tags:
+      - Facility Management
+  /api/v1/facilities/{facility_id}/reservations:
+    post:
+      consumes:
+      - application/json
+      description: 住戶針對特定社區設施進行預約。系統會根據設施規則（如黑名單、預約時段重疊等）進行驗證。
+      parameters:
+      - description: 社區 ID
+        in: header
+        name: community_id
+        required: true
+        type: string
+      - description: 設施 ID
+        in: path
+        name: facility_id
+        required: true
+        type: integer
+      - description: 預約詳細資料
+        in: body
+        name: reservation
+        required: true
+        schema:
+          $ref: '#/definitions/reservation.CreateReservationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 預約建立成功
+          schema:
+            $ref: '#/definitions/model.RequestMessage'
+        "400":
+          description: 無效的設施 ID 或輸入資料
+          schema:
+            $ref: '#/definitions/model.Response400Error'
+        "403":
+          description: 設施不開放或權限不足
+          schema:
+            $ref: '#/definitions/model.Response403Error'
+        "404":
+          description: 設施不存在
+          schema:
+            $ref: '#/definitions/model.Response404Error'
+        "409":
+          description: 時段衝突或違反設施規則
+          schema:
+            $ref: '#/definitions/model.Response409Error'
+      security:
+      - BearerAuth: []
+      summary: 建立設施預約
+      tags:
+      - Reservation
+  /api/v1/facilities/{id}:
+    get:
+      description: 依 JWT 社區取得單一設施詳情。
+      parameters:
+      - description: 設施 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 設施詳情
+          schema:
+            $ref: '#/definitions/facility.FacilityDetailResponse'
+        "400":
+          description: 無效的設施 ID
+          schema:
+            $ref: '#/definitions/model.Response400Error'
+        "401":
+          description: 無法取得登入資訊
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "404":
+          description: 找不到設施
+          schema:
+            $ref: '#/definitions/model.Response404Error'
+      security:
+      - BearerAuth: []
+      summary: 取得單一設施詳情
+      tags:
+      - Facility Management
+  /api/v1/home:
+    get:
+      description: 根據目前登入者的權限，聚合回傳對應的統計數據、預約清單與訊息。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回儀表板數據
+          schema:
+            $ref: '#/definitions/home.HomeResponse'
+        "401":
+          description: 未授權
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "500":
+          description: 伺服器錯誤
+          schema:
+            $ref: '#/definitions/model.Response500Error'
+      security:
+      - BearerAuth: []
+      summary: 取得首頁儀表板資訊
+      tags:
+      - Home
   /api/v1/login:
     post:
       consumes:
       - application/json
       description: 使用者提供帳號與密碼後登入系統，並取得 JWT Token。登入成功後會設置 session cookie 並返回 JWT token。
       parameters:
-      - description: 登入資料（Email & Password）
+      - description: 登入資料（Email, Password, Fcmtoken）
         in: body
         name: login
         required: true
@@ -658,7 +1341,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 登入成功，返回 JWT Token 和成功訊息
+          description: 登入成功，返回 JWT Token 和使用者詳細資訊
           schema:
             $ref: '#/definitions/account.UserRequest'
         "400":
@@ -666,7 +1349,7 @@ paths:
           schema:
             $ref: '#/definitions/model.Response400Error'
         "401":
-          description: 密碼錯誤
+          description: 帳號或密碼錯誤
           schema:
             $ref: '#/definitions/model.Response401Error'
         "404":
@@ -674,12 +1357,155 @@ paths:
           schema:
             $ref: '#/definitions/model.Response404Error'
         "500":
-          description: 系統錯誤或 JWT 簽發失敗
+          description: 系統錯誤、JWT 簽發失敗或更新登入狀態失敗
           schema:
             $ref: '#/definitions/model.Response500Error'
       summary: 使用者登入
       tags:
       - User
+  /api/v1/messages:
+    get:
+      consumes:
+      - application/json
+      description: 依登入使用者取得通知列表，支援分頁與已讀篩選。
+      parameters:
+      - description: 頁碼（預設 1）
+        in: query
+        name: page
+        type: integer
+      - description: 每頁筆數（預設 20，最大 100）
+        in: query
+        name: page_size
+        type: integer
+      - description: 已讀篩選
+        in: query
+        name: is_read
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功取得通知列表
+          schema:
+            $ref: '#/definitions/message_model.MessageListResponse'
+        "400":
+          description: 請求參數錯誤
+          schema:
+            $ref: '#/definitions/model.Response400Error'
+        "401":
+          description: 未授權
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "500":
+          description: 系統錯誤
+          schema:
+            $ref: '#/definitions/model.Response500Error'
+      security:
+      - BearerAuth: []
+      summary: 取得通知列表
+      tags:
+      - Message
+  /api/v1/messages/{id}/read:
+    patch:
+      consumes:
+      - application/json
+      description: 將登入使用者的指定通知標記為已讀。
+      parameters:
+      - description: 通知 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功標記已讀
+          schema:
+            $ref: '#/definitions/model.RequestMessage'
+        "401":
+          description: 未授權
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "404":
+          description: 通知不存在
+          schema:
+            $ref: '#/definitions/model.Response404Error'
+        "500":
+          description: 系統錯誤
+          schema:
+            $ref: '#/definitions/model.Response500Error'
+      security:
+      - BearerAuth: []
+      summary: 標記通知為已讀
+      tags:
+      - Message
+  /api/v1/messages/read-all:
+    patch:
+      consumes:
+      - application/json
+      description: 將登入使用者所有未讀通知標記為已讀。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功全部標記已讀
+          schema:
+            $ref: '#/definitions/model.RequestMessage'
+        "401":
+          description: 未授權
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "500":
+          description: 系統錯誤
+          schema:
+            $ref: '#/definitions/model.Response500Error'
+      security:
+      - BearerAuth: []
+      summary: 全部標記已讀
+      tags:
+      - Message
+  /api/v1/messages/send:
+    post:
+      consumes:
+      - application/json
+      description: 管理者傳送社區訊息。系統會先為每位收件者建立 message_info 寄送紀錄，再嘗試透過 FCM 推播；Firebase
+        未初始化或部分推播失敗時仍會保留寄送紀錄並於回應中標示失敗數量。
+      parameters:
+      - description: 訊息資料
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/message_model.SendMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 訊息送出完成
+          schema:
+            $ref: '#/definitions/message_model.SendMessageResponse'
+        "400":
+          description: 輸入資料格式錯誤
+          schema:
+            $ref: '#/definitions/model.Response400Error'
+        "401":
+          description: 未授權，缺少或無效的 JWT Token
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "404":
+          description: 找不到符合條件的收件者
+          schema:
+            $ref: '#/definitions/model.Response404Error'
+        "500":
+          description: 伺服器內部錯誤
+          schema:
+            $ref: '#/definitions/model.Response500Error'
+      security:
+      - BearerAuth: []
+      summary: 傳送訊息
+      tags:
+      - Message
   /api/v1/parcels:
     get:
       consumes:
@@ -732,8 +1558,7 @@ paths:
         "201":
           description: 包裹登錄成功
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/parcel.ParcelListResponse'
         "400":
           description: 請求參數錯誤
           schema:
@@ -745,7 +1570,7 @@ paths:
         "409":
           description: 重複單號
           schema:
-            $ref: '#/definitions/model.ErrorRequest'
+            $ref: '#/definitions/model.Response409Error'
         "500":
           description: 伺服器錯誤
           schema:
@@ -797,19 +1622,28 @@ paths:
       - Parcel Management
   /api/v1/permissions/profile:
     get:
-      description: 取得社區客製化的 3~7 等級角色。
+      description: 取得社區客製化的 3~7 等級角色名稱與描述。
+      parameters:
+      - description: 社區 ID
+        in: header
+        name: community_id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: 成功回傳
+          description: 成功回傳角色對照表
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/model.RequestMessage'
         "401":
-          description: 無法取得登入資訊
+          description: 認證失敗
           schema:
             $ref: '#/definitions/model.Response401Error'
+        "500":
+          description: 查詢失敗
+          schema:
+            $ref: '#/definitions/model.Response500Error'
       security:
       - BearerAuth: []
       summary: 查詢社區角色列表
@@ -864,25 +1698,158 @@ paths:
       summary: 使用者註冊
       tags:
       - User
+  /api/v1/reservations:
+    get:
+      description: 依 JWT 社區取得預約列表。住戶只會看到自己的預約；管理員可看到同社區全部未刪除預約。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 預約列表
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 無法取得登入資訊
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "500":
+          description: 查詢預約列表失敗
+          schema:
+            $ref: '#/definitions/model.Response500Error'
+      security:
+      - BearerAuth: []
+      summary: 取得預約列表
+      tags:
+      - Reservation
+  /api/v1/reservations/{id}:
+    get:
+      description: 依 JWT 社區與角色範圍取得單一預約詳情。
+      parameters:
+      - description: 預約 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 預約詳情
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 無效的預約 ID
+          schema:
+            $ref: '#/definitions/model.Response400Error'
+        "401":
+          description: 無法取得登入資訊
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "404":
+          description: 找不到預約
+          schema:
+            $ref: '#/definitions/model.Response404Error'
+      security:
+      - BearerAuth: []
+      summary: 取得預約詳情
+      tags:
+      - Reservation
+  /api/v1/reservations/{id}/cancel:
+    patch:
+      consumes:
+      - application/json
+      description: 住戶主動取消已建立的設施預約。需提供取消原因。
+      parameters:
+      - description: 預約紀錄 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 取消原因
+        in: body
+        name: cancel
+        required: true
+        schema:
+          $ref: '#/definitions/reservation.CancelReservationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 預約已成功取消
+          schema:
+            $ref: '#/definitions/model.RequestMessage'
+        "400":
+          description: 無效的 ID 或取消失敗
+          schema:
+            $ref: '#/definitions/model.Response400Error'
+      security:
+      - BearerAuth: []
+      summary: 取消預約
+      tags:
+      - Reservation
+  /api/v1/reservations/{id}/reschedule:
+    post:
+      consumes:
+      - application/json
+      description: 住戶針對現有的預約申請變更日期或時段。申請後需經由管理員審核。
+      parameters:
+      - description: 預約紀錄 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 新的預約時段與原因
+        in: body
+        name: reschedule
+        required: true
+        schema:
+          $ref: '#/definitions/reservation.RescheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 改期申請已送出
+          schema:
+            $ref: '#/definitions/model.RequestMessage'
+        "400":
+          description: 無效的 ID 或輸入資料
+          schema:
+            $ref: '#/definitions/model.Response400Error'
+        "404":
+          description: 找不到預約紀錄
+          schema:
+            $ref: '#/definitions/model.Response404Error'
+        "409":
+          description: 改期衝突或處理失敗
+          schema:
+            $ref: '#/definitions/model.Response409Error'
+      security:
+      - BearerAuth: []
+      summary: 申請預約改期
+      tags:
+      - Reservation
   /api/v1/sendmessage:
     post:
       consumes:
       - application/json
-      description: 使用者傳送訊息，需要 JWT Token 驗證
+      description: 管理者傳送社區訊息。系統會先為每位收件者建立 message_info 寄送紀錄，再嘗試透過 FCM 推播；Firebase
+        未初始化或部分推播失敗時仍會保留寄送紀錄並於回應中標示失敗數量。
       parameters:
       - description: 訊息資料
         in: body
         name: message
         required: true
         schema:
-          $ref: '#/definitions/message_model.FCMNotificationRequest'
+          $ref: '#/definitions/message_model.SendMessageRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: 訊息送出成功
+          description: 訊息送出完成
           schema:
-            $ref: '#/definitions/message_model.MessageRequest'
+            $ref: '#/definitions/message_model.SendMessageResponse'
         "400":
           description: 輸入資料格式錯誤
           schema:
@@ -891,6 +1858,10 @@ paths:
           description: 未授權，缺少或無效的 JWT Token
           schema:
             $ref: '#/definitions/model.Response401Error'
+        "404":
+          description: 找不到符合條件的收件者
+          schema:
+            $ref: '#/definitions/model.Response404Error'
         "500":
           description: 伺服器內部錯誤
           schema:

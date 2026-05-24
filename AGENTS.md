@@ -62,14 +62,15 @@ Store secrets only in `.env`; never commit that file. Verify `JWTPASSWORD` and d
 
 ## 開發文件管理
 
-- 必須放在 /docs
+- 指令執行、架構設計或系統實作前，**必須**優先參考 `/Users/kent/project/Community_Notification_System/Community_Notification_System_docs` 資料夾內的文件與規範。
+- 開發文件必須放在 `/Users/kent/project/Community_Notification_System/Community_Notification_System_docs`
 - 必須依照種類及功能建立資料夾並依照種類存放
 - 除了 swagger 相關的不處理
 - 自動處理相關條件
 
 ## 產生開發文件
 
-- 放到 /docs
+- 放到 `/Users/kent/project/Community_Notification_System/Community_Notification_System_docs`
 - 每行程式碼逐一分析
 - 必須要產生時序圖
 - 必須產生 class 圖

@@ -6,8 +6,9 @@ import (
 	accountModel "Community_Notification_System/app/models/account"
 	"Community_Notification_System/app/models/model"
 	authUsecase "Community_Notification_System/app/usecase/auth"
-	"Community_Notification_System/utils/errors"
 	"github.com/gin-gonic/gin"
+
+	utilsErr "Community_Notification_System/utils/errors"
 )
 
 // UserLogin 處理使用者登入
@@ -29,7 +30,7 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	// 綁定 JSON 資料並驗證輸入格式
 	// 使用 ShouldBindJSON 可以自動驗證 JSON 格式是否符合結構體定義
 	if err := ctx.ShouldBindJSON(&loginData); err != nil {
-		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, errors.ErrInvalidParams, "無效的輸入資料")
+		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "無效的輸入資料")
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
@@ -38,19 +39,19 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 	if err != nil {
 		switch err {
 		case authUsecase.ErrUserNotFound:
-			errorModel := model.NewErrorResponse(ctx, http.StatusNotFound, errors.ErrUserNotFound, "使用者不存在")
+			errorModel := model.NewErrorResponse(ctx, http.StatusNotFound, utilsErr.ErrUserNotFound, "使用者不存在")
 			ctx.JSON(http.StatusNotFound, errorModel)
 			return
 		case authUsecase.ErrInvalidCredential:
-			errorModel := model.NewErrorResponse(ctx, http.StatusUnauthorized, errors.ErrPasswordWrong, "帳號或密碼錯誤")
+			errorModel := model.NewErrorResponse(ctx, http.StatusUnauthorized, utilsErr.ErrPasswordWrong, "帳號或密碼錯誤")
 			ctx.JSON(http.StatusUnauthorized, errorModel)
 			return
 		case authUsecase.ErrDatabase:
-			errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, errors.ErrDatabase, "系統錯誤")
+			errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrDatabase, "系統錯誤")
 			ctx.JSON(http.StatusInternalServerError, errorModel)
 			return
 		default:
-			errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, errors.ErrInternal, "JWT 簽發失敗")
+			errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "JWT 簽發失敗")
 			ctx.JSON(http.StatusInternalServerError, errorModel)
 			return
 		}

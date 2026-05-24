@@ -11,6 +11,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+
+
+	utilsErr "Community_Notification_System/utils/errors"
 )
 
 // CommunityManager_Register 社區送出申請
@@ -28,21 +31,21 @@ func (c *CommunityManagerController) CommunityManager_Register(ctx *gin.Context)
 	var req communityModel.RegisterApplicationRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		errorModel := model.NewErrorRequest(http.StatusBadRequest, "Invalid input")
+		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "Invalid input")
 		fmt.Print(err)
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
 
 	if utf8.RuneCountInString(req.AdminPassword) < 6 {
-		errorModel := model.NewErrorRequest(http.StatusBadRequest, "管理員密碼長度至少需 6 碼")
+		errorModel := model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "管理員密碼長度至少需 6 碼")
 		ctx.JSON(http.StatusBadRequest, errorModel)
 		return
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.AdminPassword), bcrypt.DefaultCost)
 	if err != nil {
-		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "密碼處理失敗")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "密碼處理失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
@@ -69,7 +72,7 @@ func (c *CommunityManagerController) CommunityManager_Register(ctx *gin.Context)
 
 	result := repository.CreateApplicationRepository(application)
 	if result.Statue.Error != nil {
-		errorModel := model.NewErrorRequest(http.StatusInternalServerError, "建立社區申請單失敗")
+		errorModel := model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "建立社區申請單失敗")
 		ctx.JSON(http.StatusInternalServerError, errorModel)
 		return
 	}
