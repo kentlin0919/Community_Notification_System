@@ -30,3 +30,7 @@ type TokenResponse struct {
 type ResetTokenResponse struct {
 	ResetToken string `json:"reset_token"`
 }
+
+type LogoutRequest struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}

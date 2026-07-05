@@ -31,6 +31,7 @@ func V1PrivateRoutes(rg *gin.RouterGroup) {
 	// 認證相關 (Private)
 	authCtrl := auth.NewAuthController()
 	rg.POST("/auth/switch-community", authCtrl.SwitchCommunity)
+	rg.POST("/auth/logout", authCtrl.Logout)
 
 	// ── 超級管理員專屬 (Super Admin Only, Level 1) ──
 	superAdmin := rg.Group("")

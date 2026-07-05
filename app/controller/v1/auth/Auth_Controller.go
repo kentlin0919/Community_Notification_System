@@ -60,6 +60,31 @@ func (a *AuthController) SwitchCommunity(ctx *gin.Context) {
 	ctx.JSON(http.StatusNotImplemented, gin.H{"error": "功能尚未實作"})
 }
 
+// Logout 登出並撤銷目前的 Refresh Token
+// @Summary 登出
+// @Description 撤銷目前這支 Refresh Token 對應的 session
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body authModel.LogoutRequest true "Refresh Token"
+// @Success 200 "登出成功"
+// @Security BearerAuth
+// @Router /api/v1/auth/logout [post]
+func (a *AuthController) Logout(ctx *gin.Context) {
+	var req authModel.LogoutRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "無效的輸入資料"))
+		return
+	}
+
+	if err := authUsecase.Logout(req.RefreshToken); err != nil {
+		ctx.JSON(http.StatusInternalServerError, model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "登出失敗"))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "登出成功"})
+}
+
 // ForgotPassword 忘記密碼發送 OTP
 // @Summary 忘記密碼發送 OTP
 // @Description 產生 6 位數 OTP，存入 Redis (TTL 10m)，並模擬 Email 發送
