@@ -95,7 +95,24 @@ func (a *AuthController) ForgotPassword(ctx *gin.Context) {
 // @Failure 401 {object} model.Response401Error "OTP 錯誤或過期"
 // @Router /api/v1/auth/verify-otp [post]
 func (a *AuthController) VerifyOTP(ctx *gin.Context) {
-	ctx.JSON(http.StatusNotImplemented, gin.H{"error": "功能尚未實作"})
+	var req authModel.VerifyOTPRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "無效的輸入資料"))
+		return
+	}
+
+	resetToken, err := authUsecase.VerifyOTP(req.Email, req.OTP)
+	if err != nil {
+		switch err {
+		case authUsecase.ErrOtpLocked:
+			ctx.JSON(http.StatusUnauthorized, model.NewErrorResponse(ctx, http.StatusUnauthorized, utilsErr.ErrOtpLocked, "嘗試次數過多，請重新申請驗證碼"))
+		default:
+			ctx.JSON(http.StatusUnauthorized, model.NewErrorResponse(ctx, http.StatusUnauthorized, utilsErr.ErrOtpInvalid, "驗證碼錯誤或已過期"))
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, authModel.ResetTokenResponse{ResetToken: resetToken})
 }
 
 // ResetPassword 重設密碼
