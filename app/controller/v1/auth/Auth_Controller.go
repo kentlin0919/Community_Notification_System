@@ -126,5 +126,16 @@ func (a *AuthController) VerifyOTP(ctx *gin.Context) {
 // @Failure 401 {object} model.Response401Error "ResetToken 無效"
 // @Router /api/v1/auth/reset-password [post]
 func (a *AuthController) ResetPassword(ctx *gin.Context) {
-	ctx.JSON(http.StatusNotImplemented, gin.H{"error": "功能尚未實作"})
+	var req authModel.ResetPasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "無效的輸入資料"))
+		return
+	}
+
+	if err := authUsecase.ResetPassword(req.Token, req.NewPassword); err != nil {
+		ctx.JSON(http.StatusUnauthorized, model.NewErrorResponse(ctx, http.StatusUnauthorized, utilsErr.ErrResetTokenInvalid, "無效或已過期的重設密碼權杖"))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "密碼重設成功"})
 }

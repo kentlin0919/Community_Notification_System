@@ -14,11 +14,12 @@ const (
 	ErrDatabase      = 1006
 
 	// User Related (2000-2999)
-	ErrUserNotFound  = 2001
-	ErrPasswordWrong = 2002
-	ErrTokenInvalid  = 2003
-	ErrOtpInvalid    = 2004
-	ErrOtpLocked     = 2005
+	ErrUserNotFound     = 2001
+	ErrPasswordWrong    = 2002
+	ErrTokenInvalid     = 2003
+	ErrOtpInvalid       = 2004
+	ErrOtpLocked        = 2005
+	ErrResetTokenInvalid = 2006
 
 	// Community Related (3000-3999)
 	ErrCommunityNotFound = 3001
@@ -44,9 +45,10 @@ var ErrorMsg = map[int]string{
 	ErrDatabase:            "資料庫操作失敗",
 	ErrUserNotFound:        "查無此使用者",
 	ErrPasswordWrong:       "密碼錯誤",
-	ErrTokenInvalid:        "無效的授權 token",
-	ErrOtpInvalid:          "驗證碼錯誤或已過期",
-	ErrOtpLocked:           "嘗試次數過多，請重新申請驗證碼",
+	ErrTokenInvalid:         "無效的授權 token",
+	ErrOtpInvalid:           "驗證碼錯誤或已過期",
+	ErrOtpLocked:            "嘗試次數過多，請重新申請驗證碼",
+	ErrResetTokenInvalid:    "無效或已過期的重設密碼權杖",
 	ErrCommunityNotFound:   "查無此社區",
 	ErrNoPermission:        "權限不足",
 	ErrIoTDeviceOffline:    "物聯網設備離線",
