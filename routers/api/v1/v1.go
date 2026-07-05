@@ -2,6 +2,7 @@ package v1
 
 import (
 	v1 "Community_Notification_System/app/controller/v1"
+	"Community_Notification_System/app/controller/v1/auth"
 	"Community_Notification_System/middlewares"
 
 	"github.com/gin-gonic/gin"
@@ -12,6 +13,13 @@ func V1PublicRoutes(rg *gin.RouterGroup) {
 	rg.POST("/login", v1.User().UserLogin)
 	rg.POST("/register", v1.User().UserRegister)
 	rg.GET("/platform/getlist", v1.Platform().Platform_GetList)
+
+	// 認證相關 (Public)
+	authCtrl := auth.NewAuthController()
+	rg.POST("/auth/refresh", authCtrl.RefreshToken)
+	rg.POST("/auth/forgot-password", authCtrl.ForgotPassword)
+	rg.POST("/auth/verify-otp", authCtrl.VerifyOTP)
+	rg.POST("/auth/reset-password", authCtrl.ResetPassword)
 }
 
 func V1PrivateRoutes(rg *gin.RouterGroup) {
@@ -19,6 +27,10 @@ func V1PrivateRoutes(rg *gin.RouterGroup) {
 	rg.POST("/deleteUser", v1.User().UserDelete)
 	rg.POST("/community/register", v1.CommunityManager().CommunityManager_Register)
 	rg.GET("/home", v1.Home().GetDashboard)
+
+	// 認證相關 (Private)
+	authCtrl := auth.NewAuthController()
+	rg.POST("/auth/switch-community", authCtrl.SwitchCommunity)
 
 	// ── 超級管理員專屬 (Super Admin Only, Level 1) ──
 	superAdmin := rg.Group("")
