@@ -147,6 +147,7 @@ func CreateTable() {
 
 	/// 創建Platform_DB
 	platform_db.NewPlatformInfoController().PlatformInfoTable(DB)
+	platform_db.NewPlatformInfoController().PlatformVersionConfigTable(DB)
 
 	/// 創建Community_DB
 	communitydb.NewCommunityInfoController().CommunityInfoTable(DB)
