@@ -4,6 +4,7 @@ import (
 	authModel "Community_Notification_System/app/models/auth"
 	"Community_Notification_System/app/models/model"
 	authUsecase "Community_Notification_System/app/usecase/auth"
+	"Community_Notification_System/pkg/email"
 	"net/http"
 
 	utilsErr "Community_Notification_System/utils/errors"
@@ -69,7 +70,18 @@ func (a *AuthController) SwitchCommunity(ctx *gin.Context) {
 // @Success 200 "發送成功"
 // @Router /api/v1/auth/forgot-password [post]
 func (a *AuthController) ForgotPassword(ctx *gin.Context) {
-	ctx.JSON(http.StatusNotImplemented, gin.H{"error": "功能尚未實作"})
+	var req authModel.ForgotPasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, model.NewErrorResponse(ctx, http.StatusBadRequest, utilsErr.ErrInvalidParams, "無效的輸入資料"))
+		return
+	}
+
+	if err := authUsecase.ForgotPassword(req.Email, email.NewLogEmailSender()); err != nil {
+		ctx.JSON(http.StatusInternalServerError, model.NewErrorResponse(ctx, http.StatusInternalServerError, utilsErr.ErrInternal, "系統錯誤"))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "如該 Email 存在，驗證碼已寄出"})
 }
 
 // VerifyOTP 驗證密碼重設 OTP
