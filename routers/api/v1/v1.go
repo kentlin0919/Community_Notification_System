@@ -13,6 +13,7 @@ func V1PublicRoutes(rg *gin.RouterGroup) {
 	rg.POST("/login", v1.User().UserLogin)
 	rg.POST("/register", v1.User().UserRegister)
 	rg.GET("/platform/getlist", v1.Platform().Platform_GetList)
+	rg.GET("/system/config", v1.Platform().SystemConfig)
 
 	// 認證相關 (Public)
 	authCtrl := auth.NewAuthController()

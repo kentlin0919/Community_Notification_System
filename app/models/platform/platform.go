@@ -10,3 +10,10 @@ type PlatformListResponse struct {
 	Total     int64             `json:"total"`
 	Platforms []PlatformSummary `json:"platforms"`
 }
+
+// SystemConfigResponse 定義版本檢查回應格式
+type SystemConfigResponse struct {
+	MinVersion    string `json:"min_version"`
+	LatestVersion string `json:"latest_version"`
+	ForceUpdate   bool   `json:"force_update"`
+}
