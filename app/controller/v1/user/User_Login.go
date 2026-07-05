@@ -73,9 +73,10 @@ func (u *UserController) UserLogin(ctx *gin.Context) {
 
 	// 返回登入成功響應
 	request := accountModel.UserRequest{
-		Message:  "登入成功",
-		Token:    loginResult.Token,
-		UserInfo: loginResult.UserInfo,
+		Message:      "登入成功",
+		Token:        loginResult.Token,
+		RefreshToken: loginResult.RefreshToken,
+		UserInfo:     loginResult.UserInfo,
 	}
 	ctx.JSON(http.StatusOK, request)
 }

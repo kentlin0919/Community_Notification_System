@@ -30,7 +30,7 @@ func setupTestJWT(t *testing.T) {
 
 	previousPassword, hasPrevious := os.LookupEnv("JWTPASSWORD")
 
-	if err := os.Setenv("JWTPASSWORD", "testsecret"); err != nil {
+	if err := os.Setenv("JWTPASSWORD", "testsecret1234567890"); err != nil {
 		t.Fatalf("設定 JWTPASSWORD 環境變數失敗: %v", err)
 	}
 
@@ -57,7 +57,7 @@ func setupTestDB(t *testing.T) {
 		t.Fatalf("建立測試資料庫失敗: %v", err)
 	}
 
-	if err := db.AutoMigrate(&user_db.UserInfo{}, &userlog_db.UserLog{}); err != nil {
+	if err := db.AutoMigrate(&user_db.UserInfo{}, &userlog_db.UserLog{}, &user_db.UserSession{}); err != nil {
 		t.Fatalf("自動遷移資料表失敗: %v", err)
 	}
 

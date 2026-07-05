@@ -21,9 +21,10 @@ type Register struct {
 }
 
 type UserRequest struct {
-	Message  string   `json:"message" example:"Login successful"`
-	Token    string   `json:"token" example:"example-jwt-token"`
-	UserInfo UserInfo `json:"user_info"`
+	Message      string   `json:"message" example:"Login successful"`
+	Token        string   `json:"token" example:"example-jwt-token"`
+	RefreshToken string   `json:"refresh_token" example:"example-refresh-token"`
+	UserInfo     UserInfo `json:"user_info"`
 }
 
 type UserInfo struct {
