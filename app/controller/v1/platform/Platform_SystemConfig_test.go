@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	platformModel "Community_Notification_System/app/models/platform"
 	"Community_Notification_System/database"
 	platform_db "Community_Notification_System/database/Platform_DB"
-	platformModel "Community_Notification_System/app/models/platform"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
