@@ -20,8 +20,14 @@ func NewUserDBController() *UserTablesController {
 
 func (u *UserTablesController) UserTable(DB *gorm.DB) {
 	// 檢查是否存在 UserInfo 表
-
 	common.NewCreateTableController().Base_Create_Table(DB, &UserInfo{}, "user_info")
+
+	// 檢查是否存在 UserSession 表
+	common.NewCreateTableController().Base_Create_Table(DB, &UserSession{}, "user_session")
+
+	// 檢查是否存在 PasswordResetToken 表
+	common.NewCreateTableController().Base_Create_Table(DB, &PasswordResetToken{}, "password_reset_token")
+
 	if err := seedDefaultUsers(DB); err != nil {
 		log.Printf("初始化 UserInfo 預設資料失敗: %v", err)
 	}
