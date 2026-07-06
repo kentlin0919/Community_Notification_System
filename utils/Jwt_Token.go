@@ -22,7 +22,7 @@ func GenerateJWT(email string, userID string, permissionID int, communityID uint
 		"username":      email,
 		"user_id":       userID,
 		"permission_id": permissionID,
-		"community_id":  fmt.Sprintf("%d", communityID), // 轉為字串避免精度流失
+		"community_id":  communityID,
 		"exp":           time.Now().Add(30 * time.Minute).Unix(),
 		"nbf":           time.Now().Unix(),
 		"iat":           time.Now().Unix(),

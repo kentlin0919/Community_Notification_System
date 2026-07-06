@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-		"net/http"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -11,12 +11,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
-
 )
 
 func TestJWTAuthMiddleware(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	secret := "test-secret"
+	secret := "testsecret1234567890"
 	os.Setenv("JWTPASSWORD", secret)
 	defer os.Unsetenv("JWTPASSWORD")
 
@@ -84,7 +83,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 
 func TestJWTAuthMiddlewareExpiredToken(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	secret := "test-secret"
+	secret := "testsecret1234567890"
 	os.Setenv("JWTPASSWORD", secret)
 	defer os.Unsetenv("JWTPASSWORD")
 
@@ -118,4 +117,3 @@ func TestJWTAuthMiddlewareExpiredToken(t *testing.T) {
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code, "過期 Token 應回傳 401")
 }
-
