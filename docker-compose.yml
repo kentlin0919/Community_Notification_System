@@ -34,7 +34,7 @@ services:
       - DB_NAME=db_Community
       - DB_PORT=5432
       - DB_TIMEZONE=Asia/Shanghai
-      - JWTPASSWORD=your_jwt_secret
+      - JWTPASSWORD=${JWTPASSWORD:-community_dev_jwt_secret_2026}
     depends_on:
       - db
     # 預設啟動熱重載與 Delve 遠端偵錯服務

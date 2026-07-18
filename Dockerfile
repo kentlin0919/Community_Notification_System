@@ -1,7 +1,7 @@
 FROM golang:1.26.1-alpine
 
 ARG AIR_VERSION=v1.61.7
-ARG DLV_VERSION=v1.24.2
+ARG DLV_VERSION=v1.27.0
 
 # 安裝必要套件與工具
 RUN apk add --no-cache git build-base libc6-compat

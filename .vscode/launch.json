@@ -22,7 +22,7 @@
       ],
       "serverReadyAction": {
         "action": "openExternally",
-        "pattern": "listening on",
+        "pattern": "Listening and serving HTTP on",
         "uriFormat": "http://localhost:9080/swagger/index.html"
       }
     }

@@ -522,7 +522,7 @@ sequenceDiagram
    DB_NAME=db_community
    DB_PORT=5432
    DB_TIMEZONE=Asia/Taipei
-   JWTPASSWORD=your_jwt_secret
+   JWTPASSWORD=community_dev_jwt_secret_2026
    ENV
    ```
 6. 啟動服務：
@@ -545,9 +545,10 @@ sequenceDiagram
    ```text
    127.0.0.1:40000
    ```
-4. VS Code 請使用 `Docker: Remote Debug` 設定 attach。
-5. 若 Docker build 失敗，先確認映像內 Air 版本不是 `latest`；本專案已固定 `v1.61.7` 以避免 Go 1.24 相容性問題。
-6. 若未提供 `serviceAccountKey.json` 或 Firebase Project 設定，API 仍可啟動，但推播相關端點會回傳 `503 Service Unavailable`。
+4. VS Code 請使用 `Docker: Remote Debug` 設定 attach，服務輸出 `Listening and serving HTTP on` 後會自動開啟 Swagger 網頁。
+5. 偵錯中斷或 attach 失敗時不會自動刪除容器，避免反覆重建。需要停止並移除容器時，請執行 VS Code Task `docker-compose: down`。
+6. 若 Docker build 失敗，先確認映像內 Air 版本不是 `latest`；本專案已固定 `v1.61.7`。Delve 已固定 `v1.27.0`，避免 Go 1.26.1 遠端偵錯時因版本過舊造成 attach 後連線中斷。
+7. 若未提供 `serviceAccountKey.json` 或 Firebase Project 設定，API 仍可啟動，但推播相關端點會回傳 `503 Service Unavailable`。
 
 ### Ubuntu / Debian Linux
 1. 安裝 Go 1.23（官方壓縮包）：
@@ -586,7 +587,7 @@ sequenceDiagram
    DB_NAME=db_community
    DB_PORT=5432
    DB_TIMEZONE=Asia/Taipei
-   JWTPASSWORD=your_jwt_secret
+   JWTPASSWORD=community_dev_jwt_secret_2026
    ENV
 
    go run main.go
@@ -621,7 +622,7 @@ sequenceDiagram
    DB_NAME=db_community
    DB_PORT=5432
    DB_TIMEZONE=Asia/Taipei
-   JWTPASSWORD=your_jwt_secret
+   JWTPASSWORD=community_dev_jwt_secret_2026
    '@ | Out-File -Encoding utf8 .env
    ```
 5. 啟動服務：
