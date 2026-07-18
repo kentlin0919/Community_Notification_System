@@ -1,8 +1,8 @@
 package iot_db
 
 import (
-	"log"
 	"gorm.io/gorm"
+	"log"
 )
 
 type IoTDBController struct{}

@@ -35,12 +35,12 @@ type VisitorPass struct {
 
 // AccessLog 通行紀錄
 type AccessLog struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
-	CommunityID uint      `gorm:"not null;index" json:"community_id"`
-	DeviceID    uint      `gorm:"not null;index" json:"device_id"`
-	UserID      *uint     `json:"user_id"`         // 可為空 (若為訪客通行證)
-	PassID      *uint     `json:"pass_id"`         // 可為空 (若為住戶感應)
-	AccessMethod string   `gorm:"type:varchar(20)" json:"access_method"` // qrcode, card, app, remote
-	AccessTime  time.Time `gorm:"index" json:"access_time"`
-	Result      string    `gorm:"type:varchar(20)" json:"result"` // success, denied
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	CommunityID  uint      `gorm:"not null;index" json:"community_id"`
+	DeviceID     uint      `gorm:"not null;index" json:"device_id"`
+	UserID       *uint     `json:"user_id"`                               // 可為空 (若為訪客通行證)
+	PassID       *uint     `json:"pass_id"`                               // 可為空 (若為住戶感應)
+	AccessMethod string    `gorm:"type:varchar(20)" json:"access_method"` // qrcode, card, app, remote
+	AccessTime   time.Time `gorm:"index" json:"access_time"`
+	Result       string    `gorm:"type:varchar(20)" json:"result"` // success, denied
 }

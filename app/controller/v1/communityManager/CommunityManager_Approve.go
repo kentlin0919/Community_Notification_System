@@ -15,7 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-
 	utilsErr "Community_Notification_System/utils/errors"
 )
 
@@ -118,4 +117,3 @@ func (c *CommunityManagerController) CommunityManager_Approve(ctx *gin.Context) 
 		},
 	})
 }
-

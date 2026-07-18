@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 
-
 	utilsErr "Community_Notification_System/utils/errors"
 )
 
@@ -85,4 +84,3 @@ func (c *CommunityManagerController) CommunityManager_Register(ctx *gin.Context)
 		},
 	})
 }
-

@@ -73,11 +73,76 @@ definitions:
       message:
         example: Login successful
         type: string
+      refresh_token:
+        example: example-refresh-token
+        type: string
       token:
         example: example-jwt-token
         type: string
       user_info:
         $ref: '#/definitions/account.UserInfo'
+    type: object
+  auth.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  auth.LogoutRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  auth.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  auth.ResetPasswordRequest:
+    properties:
+      new_password:
+        minLength: 8
+        type: string
+      token:
+        description: The ResetToken received from verify-otp
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+  auth.ResetTokenResponse:
+    properties:
+      reset_token:
+        type: string
+    type: object
+  auth.SwitchCommunityRequest:
+    properties:
+      community_id:
+        type: integer
+    required:
+    - community_id
+    type: object
+  auth.TokenResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  auth.VerifyOTPRequest:
+    properties:
+      email:
+        type: string
+      otp:
+        type: string
+    required:
+    - email
+    - otp
     type: object
   community.CommunityListResponse:
     properties:
@@ -660,6 +725,15 @@ definitions:
       name:
         type: string
     type: object
+  platform.SystemConfigResponse:
+    properties:
+      force_update:
+        type: boolean
+      latest_version:
+        type: string
+      min_version:
+        type: string
+    type: object
   reservation.ApproveRescheduleRequest:
     properties:
       admin_comment:
@@ -781,6 +855,7 @@ paths:
       description: 社區管理員軟刪除設施，既有預約歷史保留。
       parameters:
       - description: 設施 ID
+        format: int64
         in: path
         name: id
         required: true
@@ -819,6 +894,7 @@ paths:
       description: 社區管理員更新設施基本資訊與預約規則。
       parameters:
       - description: 設施 ID
+        format: int64
         in: path
         name: id
         required: true
@@ -913,6 +989,7 @@ paths:
       description: 管理員針對住戶提出的改期申請進行核准或拒絕。
       parameters:
       - description: 改期申請紀錄 ID
+        format: int64
         in: path
         name: id
         required: true
@@ -948,6 +1025,7 @@ paths:
       description: 管理員軟刪除同社區預約，住戶列表將不再顯示該預約。
       parameters:
       - description: 預約 ID
+        format: int64
         in: path
         name: id
         required: true
@@ -980,6 +1058,152 @@ paths:
       summary: 管理員強制取消預約
       tags:
       - Reservation
+  /api/v1/auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: 產生 6 位數 OTP，存入 Redis (TTL 10m)，並模擬 Email 發送
+      parameters:
+      - description: 使用者 Email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 發送成功
+      summary: 忘記密碼發送 OTP
+      tags:
+      - Auth
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: 撤銷目前這支 Refresh Token 對應的 session
+      parameters:
+      - description: Refresh Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LogoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登出成功
+      security:
+      - BearerAuth: []
+      summary: 登出
+      tags:
+      - Auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: 接收 Refresh Token，驗證有效性後核發新 Access Token
+      parameters:
+      - description: Refresh Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回新的 Token
+          schema:
+            $ref: '#/definitions/auth.TokenResponse'
+        "401":
+          description: 無效或過期的 Token
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+      summary: 刷新 Access Token
+      tags:
+      - Auth
+  /api/v1/auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: 驗證 ResetToken，更新密碼，並撤銷舊的 Refresh Token
+      parameters:
+      - description: ResetToken 與 新密碼
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 重設密碼成功
+        "401":
+          description: ResetToken 無效
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+      summary: 重設密碼
+      tags:
+      - Auth
+  /api/v1/auth/switch-community:
+    post:
+      consumes:
+      - application/json
+      description: 驗證使用者對目標社區的權限，重新核發帶有新 community_id 的 Access Token
+      parameters:
+      - description: 目標社區 ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.SwitchCommunityRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回新的 Token
+          schema:
+            $ref: '#/definitions/auth.TokenResponse'
+        "401":
+          description: 無權限存取該社區
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+      security:
+      - BearerAuth: []
+      summary: 切換社區權限
+      tags:
+      - Auth
+  /api/v1/auth/verify-otp:
+    post:
+      consumes:
+      - application/json
+      description: 驗證 OTP，成功後核發限重設密碼用的 ResetToken
+      parameters:
+      - description: Email 與 6 位數 OTP
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.VerifyOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 驗證成功，返回 ResetToken
+          schema:
+            $ref: '#/definitions/auth.ResetTokenResponse'
+        "401":
+          description: OTP 錯誤或過期
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+      summary: 驗證密碼重設 OTP
+      tags:
+      - Auth
   /api/v1/community/getlist:
     get:
       consumes:
@@ -1188,6 +1412,7 @@ paths:
         設施；管理員可看到同社區全部未刪除設施。
       parameters:
       - description: 社區 ID
+        format: int64
         in: query
         name: community_id
         type: integer
@@ -1231,6 +1456,7 @@ paths:
         required: true
         type: string
       - description: 設施 ID
+        format: int64
         in: path
         name: facility_id
         required: true
@@ -1274,6 +1500,7 @@ paths:
       description: 依 JWT 社區取得單一設施詳情。
       parameters:
       - description: 設施 ID
+        format: int64
         in: path
         name: id
         required: true
@@ -1727,6 +1954,7 @@ paths:
       description: 依 JWT 社區與角色範圍取得單一預約詳情。
       parameters:
       - description: 預約 ID
+        format: int64
         in: path
         name: id
         required: true
@@ -1763,6 +1991,7 @@ paths:
       description: 住戶主動取消已建立的設施預約。需提供取消原因。
       parameters:
       - description: 預約紀錄 ID
+        format: int64
         in: path
         name: id
         required: true
@@ -1796,6 +2025,7 @@ paths:
       description: 住戶針對現有的預約申請變更日期或時段。申請後需經由管理員審核。
       parameters:
       - description: 預約紀錄 ID
+        format: int64
         in: path
         name: id
         required: true
@@ -1871,6 +2101,65 @@ paths:
       summary: 傳送訊息
       tags:
       - Message
+  /api/v1/super-admin/community-applications:
+    get:
+      description: 僅允許 Super admin 操作，可依狀態篩選。
+      parameters:
+      - description: Status filter (pending, approved, rejected)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回申請列表
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 未授權
+          schema:
+            $ref: '#/definitions/model.Response401Error'
+        "500":
+          description: 伺服器錯誤
+          schema:
+            $ref: '#/definitions/model.Response500Error'
+      security:
+      - BearerAuth: []
+      summary: 取得社區申請列表
+      tags:
+      - CommunityManager
+  /api/v1/system/config:
+    get:
+      consumes:
+      - application/json
+      description: 依據 os 與目前版本，回傳最低版本、最新版本與是否需強制更新
+      parameters:
+      - description: 作業系統 (ios/android)
+        in: query
+        name: os
+        required: true
+        type: string
+      - description: 目前 App 版本
+        in: query
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 版本檢查結果
+          schema:
+            $ref: '#/definitions/platform.SystemConfigResponse'
+        "404":
+          description: 查無該平台版本設定
+          schema:
+            $ref: '#/definitions/model.Response404Error'
+      summary: 檢查 App 版本
+      tags:
+      - Platform
 securityDefinitions:
   BearerAuth:
     in: header

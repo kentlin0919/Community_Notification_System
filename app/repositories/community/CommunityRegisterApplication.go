@@ -43,7 +43,7 @@ func GetApplicationByIDRepository(id uint64) repositoryModels.RepositoryModel[co
 // UpdateApplicationStatusRepository 更新申請單狀態 (Reject用)
 func UpdateApplicationStatusRepository(id uint64, status string, by string, reason string) repositoryModels.RepositoryModel[communitydb.CommunityRegisterApplication] {
 	var result repositoryModels.RepositoryModel[communitydb.CommunityRegisterApplication]
-	
+
 	now := time.Now()
 	updateResult := database.DB.Model(&communitydb.CommunityRegisterApplication{}).Where("id = ?", id).Updates(map[string]interface{}{
 		"status":        status,
@@ -51,12 +51,12 @@ func UpdateApplicationStatusRepository(id uint64, status string, by string, reas
 		"reviewed_at":   now,
 		"reject_reason": reason,
 	})
-	
+
 	result.Statue = *updateResult
 	if updateResult.Error != nil {
 		return result
 	}
-	
+
 	return GetApplicationByIDRepository(id)
 }
 
@@ -88,4 +88,24 @@ func ApproveApplicationTransactionRepository(application *communitydb.CommunityR
 
 		return nil
 	})
+}
+
+// GetApplicationsRepository 取得申請列表
+func GetApplicationsRepository(status string) repositoryModels.RepositoryModel[[]communitydb.CommunityRegisterApplication] {
+	var result repositoryModels.RepositoryModel[[]communitydb.CommunityRegisterApplication]
+	var applications []communitydb.CommunityRegisterApplication
+
+	query := database.DB
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	findResult := query.Find(&applications)
+	result.Statue = *findResult
+	if findResult.Error != nil {
+		return result
+	}
+
+	result.Result = applications
+	return result
 }

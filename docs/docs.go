@@ -105,6 +105,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "設施 ID",
                         "name": "id",
                         "in": "path",
@@ -176,6 +177,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "設施 ID",
                         "name": "id",
                         "in": "path",
@@ -307,6 +309,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "改期申請紀錄 ID",
                         "name": "id",
                         "in": "path",
@@ -362,6 +365,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "預約 ID",
                         "name": "id",
                         "in": "path",
@@ -397,6 +401,235 @@ const docTemplate = `{
                         "description": "找不到預約",
                         "schema": {
                             "$ref": "#/definitions/model.Response404Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/forgot-password": {
+            "post": {
+                "description": "產生 6 位數 OTP，存入 Redis (TTL 10m)，並模擬 Email 發送",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "忘記密碼發送 OTP",
+                "parameters": [
+                    {
+                        "description": "使用者 Email",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.ForgotPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "發送成功"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "撤銷目前這支 Refresh Token 對應的 session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "登出",
+                "parameters": [
+                    {
+                        "description": "Refresh Token",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.LogoutRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登出成功"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/refresh": {
+            "post": {
+                "description": "接收 Refresh Token，驗證有效性後核發新 Access Token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "刷新 Access Token",
+                "parameters": [
+                    {
+                        "description": "Refresh Token",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回新的 Token",
+                        "schema": {
+                            "$ref": "#/definitions/auth.TokenResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "無效或過期的 Token",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/reset-password": {
+            "post": {
+                "description": "驗證 ResetToken，更新密碼，並撤銷舊的 Refresh Token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "重設密碼",
+                "parameters": [
+                    {
+                        "description": "ResetToken 與 新密碼",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.ResetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "重設密碼成功"
+                    },
+                    "401": {
+                        "description": "ResetToken 無效",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/switch-community": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "驗證使用者對目標社區的權限，重新核發帶有新 community_id 的 Access Token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "切換社區權限",
+                "parameters": [
+                    {
+                        "description": "目標社區 ID",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.SwitchCommunityRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回新的 Token",
+                        "schema": {
+                            "$ref": "#/definitions/auth.TokenResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "無權限存取該社區",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/verify-otp": {
+            "post": {
+                "description": "驗證 OTP，成功後核發限重設密碼用的 ResetToken",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "驗證密碼重設 OTP",
+                "parameters": [
+                    {
+                        "description": "Email 與 6 位數 OTP",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.VerifyOTPRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "驗證成功，返回 ResetToken",
+                        "schema": {
+                            "$ref": "#/definitions/auth.ResetTokenResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "OTP 錯誤或過期",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
                         }
                     }
                 }
@@ -734,6 +967,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "社區 ID",
                         "name": "community_id",
                         "in": "query"
@@ -801,6 +1035,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "設施 ID",
                         "name": "facility_id",
                         "in": "path",
@@ -868,6 +1103,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "設施 ID",
                         "name": "id",
                         "in": "path",
@@ -1576,6 +1812,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "預約 ID",
                         "name": "id",
                         "in": "path",
@@ -1632,6 +1869,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "預約紀錄 ID",
                         "name": "id",
                         "in": "path",
@@ -1684,6 +1922,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "format": "int64",
                         "description": "預約紀錄 ID",
                         "name": "id",
                         "in": "path",
@@ -1785,6 +2024,97 @@ const docTemplate = `{
                         "description": "伺服器內部錯誤",
                         "schema": {
                             "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/super-admin/community-applications": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "僅允許 Super admin 操作，可依狀態篩選。",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CommunityManager"
+                ],
+                "summary": "取得社區申請列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Status filter (pending, approved, rejected)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回申請列表",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "未授權",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response401Error"
+                        }
+                    },
+                    "500": {
+                        "description": "伺服器錯誤",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response500Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/system/config": {
+            "get": {
+                "description": "依據 os 與目前版本，回傳最低版本、最新版本與是否需強制更新",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Platform"
+                ],
+                "summary": "檢查 App 版本",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "作業系統 (ios/android)",
+                        "name": "os",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "目前 App 版本",
+                        "name": "version",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "版本檢查結果",
+                        "schema": {
+                            "$ref": "#/definitions/platform.SystemConfigResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "查無該平台版本設定",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response404Error"
                         }
                     }
                 }
@@ -1894,12 +2224,111 @@ const docTemplate = `{
                     "type": "string",
                     "example": "Login successful"
                 },
+                "refresh_token": {
+                    "type": "string",
+                    "example": "example-refresh-token"
+                },
                 "token": {
                     "type": "string",
                     "example": "example-jwt-token"
                 },
                 "user_info": {
                     "$ref": "#/definitions/account.UserInfo"
+                }
+            }
+        },
+        "auth.ForgotPasswordRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.LogoutRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.RefreshTokenRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.ResetPasswordRequest": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "token"
+            ],
+            "properties": {
+                "new_password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "token": {
+                    "description": "The ResetToken received from verify-otp",
+                    "type": "string"
+                }
+            }
+        },
+        "auth.ResetTokenResponse": {
+            "type": "object",
+            "properties": {
+                "reset_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.SwitchCommunityRequest": {
+            "type": "object",
+            "required": [
+                "community_id"
+            ],
+            "properties": {
+                "community_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "auth.TokenResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.VerifyOTPRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "otp"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "otp": {
+                    "type": "string"
                 }
             }
         },
@@ -2712,6 +3141,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "platform.SystemConfigResponse": {
+            "type": "object",
+            "properties": {
+                "force_update": {
+                    "type": "boolean"
+                },
+                "latest_version": {
+                    "type": "string"
+                },
+                "min_version": {
                     "type": "string"
                 }
             }

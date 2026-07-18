@@ -1,5 +1,29 @@
 # Commit Summary 2025-07
 
+## 2026-07-18 14:10 - `feat(community): 新增社區申請列表與更新文件路徑`
+
+### 變更原因
+
+- 前端 Super Admin 需要以 `/api/v1/super-admin/community-applications` 取得社區申請列表，並依申請狀態篩選。
+- 專案文件路徑已搬到 iCloud Obsidian 目錄，需要同步更新 AGENTS、CLAUDE、GEMINI 與 README 中的文件中心位置。
+- CORS 需要允許前端常用的 `PUT`、`PATCH`、`DELETE` 與 `Authorization` header。
+- Swagger 文件需要反映目前 Auth、Platform 與 Super Admin 相關 API。
+
+### 逐行分析
+
+- `app/controller/v1/communityManager/CommunityManager_GetApplicationList.go`：新增社區申請列表 controller，讀取 query `status` 作為篩選條件，回傳前端需要的申請摘要欄位。
+- `app/repositories/community/CommunityRegisterApplication.go`：新增 `GetApplicationsRepository`，可依狀態查詢社區註冊申請資料。
+- `routers/api/v1/v1.go`：新增 Super Admin 對齊前端命名的社區與社區申請路由，包含列表、核准與拒絕。
+- `middlewares/cors_middleware.go`：允許 `GET, POST, PUT, PATCH, DELETE, OPTIONS`，並允許 `Authorization` header。
+- `docs/docs.go`、`docs/swagger.json`、`docs/swagger.yaml`：同步 Swagger 產物，補上 Auth、Platform 與 Super Admin community applications API 文件。
+- `AGENTS.md`、`CLAUDE.md`、`GEMINI.md`、`README.md`：將開發文件中心位置更新為 `/Users/kent/Library/Mobile Documents/iCloud~md~obsidian/Documents/Community_Notification_System_docs`。
+- 其他 Go 檔案：套用 gofmt/import 排序與空白整理，不改變既有業務邏輯。
+
+### 驗證
+
+- 已執行 `gofmt` 套用 Go 格式化。
+- 已執行 `go test ./...` 驗證全部 Go 測試。
+
 ## 2026-07-18 13:55 - `fix(debug): 修正 Docker 遠端偵錯設定`
 
 ### 變更原因

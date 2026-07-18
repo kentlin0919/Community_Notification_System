@@ -1,8 +1,8 @@
 package maintenance_db
 
 import (
-	"log"
 	"gorm.io/gorm"
+	"log"
 )
 
 type MaintenanceDBController struct{}

@@ -18,7 +18,7 @@ func NewCommunityInfoController() *CommunityInfoController {
 func (c *CommunityInfoController) CommunityInfoTable(DB *gorm.DB) {
 	// 檢查是否存在 CommunityInfo 表
 	common.NewCreateTableController().Base_Create_Table(DB, &CommunityInfo{}, "community_info")
-	
+
 	// 檢查是否存在 CommunityRegisterApplication 表
 	common.NewCreateTableController().Base_Create_Table(DB, &CommunityRegisterApplication{}, "community_register_application")
 

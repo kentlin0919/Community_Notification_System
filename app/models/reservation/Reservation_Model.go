@@ -1,10 +1,10 @@
 package reservation
 
 type CreateReservationRequest struct {
-	HomeID          uint64 `json:"home_id" example:"1"` // 可選，看業務邏輯
+	HomeID          uint64 `json:"home_id" example:"1"`                                      // 可選，看業務邏輯
 	ReservationDate string `json:"reservation_date" binding:"required" example:"2025-05-20"` // YYYY-MM-DD
-	StartTime       string `json:"start_time" binding:"required" example:"14:00"`       // HH:mm
-	EndTime         string `json:"end_time" binding:"required" example:"15:00"`         // HH:mm
+	StartTime       string `json:"start_time" binding:"required" example:"14:00"`            // HH:mm
+	EndTime         string `json:"end_time" binding:"required" example:"15:00"`              // HH:mm
 	PeopleCount     int    `json:"people_count" binding:"required,min=1" example:"2"`
 	Remark          string `json:"remark" example:"使用跑步機"`
 }

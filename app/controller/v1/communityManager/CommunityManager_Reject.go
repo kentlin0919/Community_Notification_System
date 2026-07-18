@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-
 	utilsErr "Community_Notification_System/utils/errors"
 )
 
@@ -77,4 +76,3 @@ func (c *CommunityManagerController) CommunityManager_Reject(ctx *gin.Context) {
 		},
 	})
 }
-

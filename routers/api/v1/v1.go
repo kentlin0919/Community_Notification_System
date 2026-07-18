@@ -41,6 +41,12 @@ func V1PrivateRoutes(rg *gin.RouterGroup) {
 		superAdmin.GET("/community/getlist", v1.CommunityManager().CommunityManager_GetList)
 		superAdmin.PATCH("/community/register/:id/approve", v1.CommunityManager().CommunityManager_Approve)
 		superAdmin.PATCH("/community/register/:id/reject", v1.CommunityManager().CommunityManager_Reject)
+
+		// ── 與前端對齊的 Super Admin 專屬路由 ──
+		superAdmin.GET("/super-admin/communities", v1.CommunityManager().CommunityManager_GetList)
+		superAdmin.GET("/super-admin/community-applications", v1.CommunityManager().CommunityManager_GetApplicationList)
+		superAdmin.PATCH("/super-admin/community-applications/:id/approve", v1.CommunityManager().CommunityManager_Approve)
+		superAdmin.PATCH("/super-admin/community-applications/:id/reject", v1.CommunityManager().CommunityManager_Reject)
 	}
 
 	// ── 社區住戶級（Resident+, Level 8，有社區資料隔離） ──

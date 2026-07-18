@@ -37,4 +37,3 @@ type FacilityListResponse struct {
 type FacilityDetailResponse struct {
 	Data facility_db.FacilityInfo `json:"data"`
 }
-

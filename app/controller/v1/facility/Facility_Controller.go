@@ -13,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
-
 	utilsErr "Community_Notification_System/utils/errors"
 )
 

@@ -8,7 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-
 	utilsErr "Community_Notification_System/utils/errors"
 )
 
@@ -100,8 +99,8 @@ func (h *HomeController) getResidentDashboard(ctx *gin.Context, userID string, c
 	ctx.JSON(http.StatusOK, homeModel.HomeResponse{
 		Role: "resident",
 		Data: homeModel.ResidentDashboard{
-			Counts:              counts,
-			RecentMessages:      messages,
+			Counts:               counts,
+			RecentMessages:       messages,
 			UpcomingReservations: reservations,
 		},
 	})

@@ -24,4 +24,3 @@ func V2PrivateRoutes(rg *gin.RouterGroup) {
 		staffScope.POST("/messages/send", v1.Message().SendMessage)
 	}
 }
-

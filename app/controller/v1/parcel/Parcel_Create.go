@@ -14,7 +14,6 @@ import (
 	"firebase.google.com/go/v4/messaging"
 	"github.com/gin-gonic/gin"
 
-
 	utilsErr "Community_Notification_System/utils/errors"
 )
 

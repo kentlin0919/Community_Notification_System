@@ -8,7 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-
 	utilsErr "Community_Notification_System/utils/errors"
 )
 

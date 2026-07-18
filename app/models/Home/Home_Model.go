@@ -37,8 +37,8 @@ type ReservationSummary struct {
 
 // ResidentDashboard 住戶首頁資料
 type ResidentDashboard struct {
-	Counts              ResidentCounts       `json:"counts"`
-	RecentMessages      []MessageSummary     `json:"recent_messages"`
+	Counts               ResidentCounts       `json:"counts"`
+	RecentMessages       []MessageSummary     `json:"recent_messages"`
 	UpcomingReservations []ReservationSummary `json:"upcoming_reservations"`
 }
 
@@ -79,5 +79,5 @@ type PendingCommunitySummary struct {
 // SuperAdminDashboard 超級管理員首頁資料
 type SuperAdminDashboard struct {
 	PlatformStats      PlatformStats             `json:"platform_stats"`
-	PendingCommunities []PendingCommunitySummary  `json:"pending_communities"`
+	PendingCommunities []PendingCommunitySummary `json:"pending_communities"`
 }

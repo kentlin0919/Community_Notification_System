@@ -10,7 +10,7 @@ func RequestIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 從 Request Header 嘗試獲取 X-Request-ID (用於微服務之間的傳遞)
 		requestID := c.GetHeader("X-Request-ID")
-		
+
 		// 如果沒有，則生成一組新的 UUID 作為 Request ID
 		if requestID == "" {
 			requestID = uuid.New().String()

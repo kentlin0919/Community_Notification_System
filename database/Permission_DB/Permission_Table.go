@@ -18,10 +18,10 @@ func NewPermissionInfoController() *PermissionInfoController {
 func (u *PermissionInfoController) PermissionInfoTable(DB *gorm.DB) {
 	// 檢查是否存在 UserInfo 表
 	common.NewCreateTableController().Base_Create_Table(DB, &PermissionInfo{}, "permission_info")
-	
+
 	// 建立社區自訂權限表
 	common.NewCreateTableController().Base_Create_Table(DB, &CommunityPermissionProfile{}, "community_permission_profile")
-	
+
 	if err := seedDefaultPermissions(DB); err != nil {
 		log.Printf("初始化 permission_info 預設資料失敗: %v", err)
 	}

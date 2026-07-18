@@ -121,7 +121,7 @@ Community_Notification_System/
 ├─ docs/
 │  ├─ docs.go / swagger.json / swagger.yaml # swag init 產生之 Swagger 文件
 │  └─ api/                         # Swagger 輔助模型與 API 相關文件
-├─ ../Community_Notification_System_docs/
+├─ /Users/kent/Library/Mobile Documents/iCloud~md~obsidian/Documents/Community_Notification_System_docs/
 │  ├─ README.md                    # 文件中心總索引
 │  ├─ facility/                    # 設施 CRUD、預約設計，含 [facility_get_list_update.md]
 │  ├─ message/                     # 訊息、FCM 與已讀狀態文件
@@ -654,9 +654,9 @@ docker run --name postgres \
 - `go test ./...`：執行全部測試套件。
 
 ## 文件資源
-- **文件中心總索引**：`../Community_Notification_System_docs/README.md` 提供所有子目錄分類與新增文件指引。
-- **設施模組開發文件**：`../Community_Notification_System_docs/facility/facility_get_list_update.md` 詳細分析了設施列表的動態社區 ID 查詢與強型別 DTO 設計。
-- **Commit 摘要**：`../Community_Notification_System_docs/commit_summaries/commit_summary_2026_05.md` 維護逐月變更紀錄（按時間新到舊排序），記錄了最新的 `feat(facility)` 逐行分析。
+- **文件中心總索引**：`/Users/kent/Library/Mobile Documents/iCloud~md~obsidian/Documents/Community_Notification_System_docs/README.md` 提供所有子目錄分類與新增文件指引。
+- **設施模組開發文件**：`/Users/kent/Library/Mobile Documents/iCloud~md~obsidian/Documents/Community_Notification_System_docs/facility/facility_get_list_update.md` 詳細分析了設施列表的動態社區 ID 查詢與強型別 DTO 設計。
+- **Commit 摘要**：`/Users/kent/Library/Mobile Documents/iCloud~md~obsidian/Documents/Community_Notification_System_docs/commit_summaries/commit_summary_2026_05.md` 維護逐月變更紀錄（按時間新到舊排序），記錄了最新的 `feat(facility)` 逐行分析。
 
 ## 測試與品質保證
 - `app/controller/v1/user/User_Login_test.go` 展示使用 Gin 測試環境、SQLite in-memory 與 JWT mock 進行整合測試。

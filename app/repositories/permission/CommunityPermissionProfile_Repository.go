@@ -2,8 +2,8 @@ package permission
 
 import (
 	repositoryModels "Community_Notification_System/app/models/repository"
-	permissiondb "Community_Notification_System/database/Permission_DB"
 	"Community_Notification_System/database"
+	permissiondb "Community_Notification_System/database/Permission_DB"
 	"gorm.io/gorm/clause"
 )
 
@@ -29,7 +29,7 @@ func GetCommunityPermissionProfilesRepository(communityID uint64) repositoryMode
 	var profiles []permissiondb.CommunityPermissionProfile
 
 	dbResult := database.DB.Where("community_id = ?", communityID).Order("permission_id asc").Find(&profiles)
-	
+
 	result.Statue.Error = dbResult.Error
 	result.Statue.RowsAffected = dbResult.RowsAffected
 	result.Result = profiles

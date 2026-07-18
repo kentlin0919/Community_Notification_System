@@ -7,8 +7,8 @@ import (
 	"Community_Notification_System/app/controller/v1/message"
 	"Community_Notification_System/app/controller/v1/parcel"
 	"Community_Notification_System/app/controller/v1/permission"
-	"Community_Notification_System/app/controller/v1/reservation"
 	platform "Community_Notification_System/app/controller/v1/platform"
+	"Community_Notification_System/app/controller/v1/reservation"
 	"Community_Notification_System/app/controller/v1/user"
 )
 
@@ -55,4 +55,3 @@ func Parcel() *parcel.ParcelController {
 func Home() *home.HomeController {
 	return home.NewHomeController()
 }
-
